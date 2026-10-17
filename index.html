@@ -16,6 +16,52 @@
       .page-break { page-break-after: always; break-after: page; }
       body { font-size: 10px; }
     }
+
+    /* 限制 10 行可视高度及带箭头的自定义滚动条样式 */
+    .table-scroll-container {
+      max-height: 420px;
+      overflow-y: scroll;
+      scroll-behavior: smooth;
+    }
+    
+    /* 自定义滚动条外观 */
+    .table-scroll-container::-webkit-scrollbar {
+      width: 14px;
+    }
+    .table-scroll-container::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+    .table-scroll-container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 8px;
+      border: 2px solid #f1f5f9;
+    }
+    .table-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    /* 滚动条上下点击微调箭头按钮 */
+    .table-scroll-container::-webkit-scrollbar-button:single-button {
+      background-color: #e2e8f0;
+      display: block;
+      border-style: solid;
+      height: 12px;
+      width: 14px;
+    }
+    .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:decrement {
+      border-width: 0 4px 6px 4px;
+      border-color: transparent transparent #475569 transparent;
+    }
+    .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:decrement:hover {
+      border-color: transparent transparent #0f172a transparent;
+    }
+    .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:increment {
+      border-width: 6px 4px 0 4px;
+      border-color: #475569 transparent transparent transparent;
+    }
+    .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:increment:hover {
+      border-color: #0f172a transparent transparent transparent;
+    }
   </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen p-4 md:p-6">
@@ -49,7 +95,7 @@
           <label class="block text-xs font-semibold text-slate-600 mb-1">操作员密码 Password</label>
           <input id="loginPasswordInput" type="password" placeholder="请输入操作密码" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-indigo-500 font-semibold" onkeydown="if(event.key==='Enter') checkLogin()">
         </div>
-        <button onclick="checkLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl py-2.5 text-sm transition shadow-sm">
+        <button onclick="checkLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl py-2.5 text-sm transition shadow-sm cursor-pointer">
           安全登入系统
         </button>
         
@@ -72,7 +118,7 @@
         <h3 class="text-base font-bold text-slate-950 flex items-center gap-2">
           <i class="fa-solid fa-user-pen text-indigo-600"></i> 修改操作员权限与密码
         </h3>
-        <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <input type="hidden" id="editUserNameHidden">
       <div class="space-y-4">
@@ -85,14 +131,21 @@
           <input id="editUserPassInput" type="text" placeholder="输入新密码" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-indigo-600">
         </div>
         <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">账号权限类型</label>
+          <select id="editUserRoleSelect" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold bg-white text-indigo-700">
+            <option value="normal">完整权限 (可录入、编辑、删除)</option>
+            <option value="readonly">仅查看 (禁止录入、编辑与删除)</option>
+          </select>
+        </div>
+        <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">分派管理工厂/权限单位</label>
           <input id="editUserFtyInput" list="globalFtyDatalist" type="text" placeholder="输入或选择工厂名称" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-emerald-600 bg-white fty-input-target">
         </div>
         <div class="flex gap-2 pt-2">
-          <button onclick="saveEditUser()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm">
+          <button onclick="saveEditUser()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm cursor-pointer">
             确认保存修改
           </button>
-          <button onclick="closeEditUserModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition">
+          <button onclick="closeEditUserModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition cursor-pointer">
             取消
           </button>
         </div>
@@ -107,7 +160,7 @@
         <h3 id="editRecordTitle" class="text-base font-bold text-slate-950 flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-indigo-600"></i> 修改记录
         </h3>
-        <button onclick="closeEditRecordModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeEditRecordModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <input type="hidden" id="editRecordId">
       <input type="hidden" id="editRecordType">
@@ -151,10 +204,10 @@
           </div>
         </div>
         <div class="flex gap-2 pt-3">
-          <button onclick="saveEditRecord()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm">
+          <button onclick="saveEditRecord()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm cursor-pointer">
             确认保存修改
           </button>
-          <button onclick="closeEditRecordModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition">
+          <button onclick="closeEditRecordModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition cursor-pointer">
             取消
           </button>
         </div>
@@ -169,7 +222,7 @@
         <h3 class="text-base font-bold text-slate-950 flex items-center gap-2">
           <i class="fa-solid fa-location-arrow text-indigo-600"></i> 按实际移动数量/卷数进行移架
         </h3>
-        <button onclick="closeMoveRackModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeMoveRackModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <input type="hidden" id="moveRackBatchNo">
       <input type="hidden" id="moveRackFty">
@@ -200,10 +253,10 @@
         </div>
         <p class="text-[11px] text-slate-400">💡 提示：系统将按您填写的实际数量拆分移至新货架，原货架自动保留剩余部分。</p>
         <div class="flex gap-2 pt-2">
-          <button onclick="saveMoveRack()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm">
+          <button onclick="saveMoveRack()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm cursor-pointer">
             确认按数量移架
           </button>
-          <button onclick="closeMoveRackModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition">
+          <button onclick="closeMoveRackModal()" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2.5 rounded-xl text-sm transition cursor-pointer">
             取消
           </button>
         </div>
@@ -227,15 +280,16 @@
       <div class="flex items-center gap-3">
         <div class="bg-indigo-50 px-3 py-2 rounded-xl text-indigo-700 text-xs font-bold flex items-center gap-2">
           <i class="fa-solid fa-user-check"></i> 操作员: <span id="currentUserNameDisplay" class="underline">--</span>
+          <span id="currentUserRoleBadge" class="ml-1 text-[10px] px-2 py-0.5 rounded bg-indigo-200 text-indigo-900 font-extrabold hidden">仅查看</span>
         </div>
         <div class="flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-xl border">
           <span class="text-xs font-bold text-slate-500">查看单位:</span>
-          <input id="globalFtyFilter" list="globalFtyDatalist" onchange="changeGlobalFty()" value="全部单位" class="bg-transparent text-xs font-bold text-indigo-600 focus:outline-none w-32 fty-input-target">
+          <input id="globalFtyFilter" list="globalFtyDatalist" onchange="changeGlobalFty()" value="全部单位" class="bg-transparent text-xs font-bold text-indigo-600 focus:outline-none w-32 fty-input-target" onfocus="this.select()">
         </div>
-        <button onclick="manualSync()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
+        <button onclick="manualSync()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
           <i class="fa-solid fa-rotate" id="syncIcon"></i> 同步
         </button>
-        <button onclick="logout()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition" title="退出">
+        <button onclick="logout()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition cursor-pointer" title="退出">
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
@@ -243,30 +297,33 @@
 
     <!-- 标签页切换栏 -->
     <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-2 no-print">
-      <button onclick="switchTab('tabAux')" id="btn_tabAux" class="tab-btn px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm transition flex items-center gap-2">
+      <button onclick="switchTab('tabAux')" id="btn_tabAux" class="tab-btn px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-database"></i> 1. 辅助资料表
       </button>
-      <button onclick="switchTab('tabIn')" id="btn_tabIn" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2">
+      <button onclick="switchTab('tabIn')" id="btn_tabIn" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-cart-flatbed"></i> 2. 面料入库
       </button>
-      <button onclick="switchTab('tabOut')" id="btn_tabOut" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2">
+      <button onclick="switchTab('tabOut')" id="btn_tabOut" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-truck-ramp-box"></i> 3. 面料出库
       </button>
-      <button onclick="switchTab('tabBalance')" id="btn_tabBalance" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2">
+      <button onclick="switchTab('tabBalance')" id="btn_tabBalance" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-chart-bar"></i> 4. 仓库库存明细汇总
       </button>
-      <!-- 新增：进销存汇总表 (不区分缸号/货架) -->
-      <button onclick="switchTab('tabSummary')" id="btn_tabSummary" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2">
+      <button onclick="switchTab('tabSummary')" id="btn_tabSummary" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-calculator text-emerald-600"></i> 5. 进销存汇总表
       </button>
-      <button onclick="switchTab('tabTransfer')" id="btn_tabTransfer" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2">
+      <button onclick="switchTab('tabTransfer')" id="btn_tabTransfer" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-right-left text-indigo-600"></i> 6. 厂际物料调拨中心
       </button>
-      <button onclick="switchTab('tabPrint')" id="btn_tabPrint" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2">
+      <button onclick="switchTab('tabPrint')" id="btn_tabPrint" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-print"></i> 7. 三联单打印中心
       </button>
-      <button onclick="switchTab('tabAdmin')" id="btn_tabAdmin" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2" style="display: none;">
+      <button onclick="switchTab('tabAdmin')" id="btn_tabAdmin" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2 cursor-pointer" style="display: none;">
         <i class="fa-solid fa-user-gear"></i> 8. 管理人后台
+      </button>
+      <!-- 新增：系统日志管理中心 (仅最高管理者可见) -->
+      <button onclick="switchTab('tabLogs')" id="btn_tabLogs" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2 cursor-pointer" style="display: none;">
+        <i class="fa-solid fa-shield-halved text-amber-600"></i> 9. 日志管理中心
       </button>
     </div>
 
@@ -278,19 +335,19 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-database text-indigo-600"></i> 面料规格与款号辅助库
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">所有操作员均可添加与删除。</p>
+            <p class="text-xs text-slate-400 mt-0.5">所有操作员均可添加与删除（“仅查看”账号除外）。</p>
           </div>
-          <button onclick="exportTableToExcel('auxTableBody', '面料辅助资料表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
+          <button onclick="exportTableToExcel('auxTableBody', '面料辅助资料表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
           </button>
         </div>
         
-        <div class="mb-4">
+        <div class="mb-4 normal-role-only">
           <label class="block text-xs font-bold text-slate-700 mb-1">统一款号 Style No (输入一次，批量关联下方所有类别与颜色)</label>
           <input id="auxStyleNo" type="text" placeholder="输入款号 (例: 894MB)" class="w-full sm:w-80 px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-indigo-600 bg-slate-50">
         </div>
 
-        <div class="mb-4 bg-indigo-50/40 p-4 rounded-xl border border-indigo-100">
+        <div class="mb-4 bg-indigo-50/40 p-4 rounded-xl border border-indigo-100 normal-role-only">
           <label class="block text-xs font-bold text-indigo-900 mb-2">
             <i class="fa-solid fa-list-ol"></i> 面料类别、订单颜色与面料颜色批量录入区
           </label>
@@ -309,21 +366,22 @@
           </div>
         </div>
 
-        <button onclick="submitBatchAuxItems()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition shadow-sm mb-6 flex items-center gap-2">
+        <button onclick="submitBatchAuxItems()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition shadow-sm mb-6 flex items-center gap-2 cursor-pointer normal-role-only">
           <i class="fa-solid fa-cloud-arrow-up"></i> 确认批量添加该款号的多种规格
         </button>
 
-        <div class="overflow-x-auto">
+        <!-- 限制展现 10 条高度，右侧带滚动条及上下按钮 -->
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-                <th class="py-2 px-3">款号 Style No</th>
-                <th class="py-2 px-3">面料类别 Item</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">订单颜色</th>
-                <th class="py-2 px-3 font-bold text-amber-600">面料颜色 Col</th>
-                <th class="py-2 px-3">操作者</th>
-                <th class="py-2 px-3">操作日期+时间</th>
-                <th class="py-2 px-3 no-print">操作</th>
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">款号 Style No</th>
+                <th class="py-2.5 px-3">面料类别 Item</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">订单颜色</th>
+                <th class="py-2.5 px-3 font-bold text-amber-600">面料颜色 Col</th>
+                <th class="py-2.5 px-3">操作者</th>
+                <th class="py-2.5 px-3">操作日期+时间</th>
+                <th class="py-2.5 px-3 no-print normal-role-only">操作</th>
               </tr>
             </thead>
             <tbody id="auxTableBody"></tbody>
@@ -339,30 +397,30 @@
             </h2>
             <p class="text-xs text-slate-400 mt-0.5">所有操作员均可添加与删除。</p>
           </div>
-          <button onclick="exportTableToExcel('ftyTableBody', '工厂名称列表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
+          <button onclick="exportTableToExcel('ftyTableBody', '工厂名称列表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
           </button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 normal-role-only">
           <input id="newFtyNameInput" type="text" placeholder="输入工厂名称 (例: 四厂 / 顺丰外发厂)" class="px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-emerald-700">
           <input id="newFtyRemarkInput" type="text" placeholder="备注说明" class="px-3 py-2 border border-slate-200 rounded-lg text-sm">
           <div class="flex items-center">
-            <button onclick="addNewFactoryName()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm py-2 transition shadow-sm flex items-center justify-center gap-2">
+            <button onclick="addNewFactoryName()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm py-2 transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
               <i class="fa-solid fa-plus"></i> 确认增加工厂名称
             </button>
           </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-                <th class="py-2 px-3">工厂名称 / 单位</th>
-                <th class="py-2 px-3">备注说明</th>
-                <th class="py-2 px-3">操作者</th>
-                <th class="py-2 px-3">操作日期+时间</th>
-                <th class="py-2 px-3 no-print">操作</th>
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">工厂名称 / 单位</th>
+                <th class="py-2.5 px-3">备注说明</th>
+                <th class="py-2.5 px-3">操作者</th>
+                <th class="py-2.5 px-3">操作日期+时间</th>
+                <th class="py-2.5 px-3 no-print normal-role-only">操作</th>
               </tr>
             </thead>
             <tbody id="ftyTableBody"></tbody>
@@ -373,7 +431,7 @@
 
     <!-- TAB 2: 面料入库登记 -->
     <div id="tabIn" class="sheet-content hidden space-y-6">
-      <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 normal-role-only">
         <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
           <i class="fa-solid fa-cart-flatbed text-emerald-600"></i> 面料入库登记 (多缸号一次性批量录入)
         </h2>
@@ -382,7 +440,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">所属工厂/单位 (必须选具体工厂)</label>
-            <input id="inFty" list="globalFtyDatalist" type="text" placeholder="输入或选择工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600 fty-input-target">
+            <input id="inFty" list="globalFtyDatalist" type="text" placeholder="输入或选择工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600 fty-input-target" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">收货日期</label>
@@ -390,22 +448,22 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">款号 Style No</label>
-            <input id="inStyle" list="auxStyleList" oninput="onInStyleChange()" type="text" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold">
+            <input id="inStyle" list="auxStyleList" oninput="onInStyleChange()" type="text" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold" onfocus="this.select()">
             <datalist id="auxStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">类别 Item</label>
-            <input id="inItem" list="auxItemList" oninput="onInItemChange()" type="text" placeholder="面料类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white">
+            <input id="inItem" list="auxItemList" oninput="onInItemChange()" type="text" placeholder="面料类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white" onfocus="this.select()">
             <datalist id="auxItemList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">订单颜色</label>
-            <input id="inOrderColor" list="auxOrderColorList" oninput="onInOrderColorChange()" type="text" placeholder="订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+            <input id="inOrderColor" list="auxOrderColorList" oninput="onInOrderColorChange()" type="text" placeholder="订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
             <datalist id="auxOrderColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">面料颜色 Col</label>
-            <input id="inColor" list="auxColorList" type="text" placeholder="面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
+            <input id="inColor" list="auxColorList" type="text" placeholder="面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600" onfocus="this.select()">
             <datalist id="auxColorList"></datalist>
           </div>
         </div>
@@ -445,7 +503,7 @@
           </div>
         </div>
 
-        <button onclick="submitBatchInStock()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm py-3 transition flex items-center justify-center gap-2 shadow-sm">
+        <button onclick="submitBatchInStock()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm py-3 transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
           <i class="fa-solid fa-cloud-arrow-up"></i> 确认批量提交入库数据到云端
         </button>
       </div>
@@ -455,30 +513,30 @@
           <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-table text-emerald-600"></i> 面料入库流水明细</h2>
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <input id="searchInInput" type="text" placeholder="🔍 快速搜索..." oninput="renderInTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-64">
-            <button onclick="exportTableToExcel('inTableBody', '面料入库流水明细.xls')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs">
+            <button onclick="exportTableToExcel('inTableBody', '面料入库流水明细.xls')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
             </button>
           </div>
         </div>
-        <div class="overflow-x-auto">
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-                <th class="py-2 px-3">工厂 FTY</th>
-                <th class="py-2 px-3">日期</th>
-                <th class="py-2 px-3">款号</th>
-                <th class="py-2 px-3">类别</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">缸号</th>
-                <th class="py-2 px-3 font-bold text-indigo-700">订单颜色</th>
-                <th class="py-2 px-3 font-bold text-amber-600">面料颜色 Col</th>
-                <th class="py-2 px-3 font-bold text-amber-700">货架号</th>
-                <th class="py-2 px-3">数量</th>
-                <th class="py-2 px-3">单位</th>
-                <th class="py-2 px-3">卷数</th>
-                <th class="py-2 px-3">进仓方式</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">操作者</th>
-                <th class="py-2 px-3">操作时间</th>
-                <th class="py-2 px-3 no-print">操作</th>
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">工厂 FTY</th>
+                <th class="py-2.5 px-3">日期</th>
+                <th class="py-2.5 px-3">款号</th>
+                <th class="py-2.5 px-3">类别</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">缸号</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-700">订单颜色</th>
+                <th class="py-2.5 px-3 font-bold text-amber-600">面料颜色 Col</th>
+                <th class="py-2.5 px-3 font-bold text-amber-700">货架号</th>
+                <th class="py-2.5 px-3">数量</th>
+                <th class="py-2.5 px-3">单位</th>
+                <th class="py-2.5 px-3">卷数</th>
+                <th class="py-2.5 px-3">进仓方式</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">操作者</th>
+                <th class="py-2.5 px-3">操作时间</th>
+                <th class="py-2.5 px-3 no-print normal-role-only">操作</th>
               </tr>
             </thead>
             <tbody id="inTableBody"></tbody>
@@ -489,7 +547,7 @@
 
     <!-- TAB 3: 面料出库登记 -->
     <div id="tabOut" class="sheet-content hidden space-y-6">
-      <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 normal-role-only">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
             <i class="fa-solid fa-truck-ramp-box text-amber-600"></i> 面料出库登记
@@ -503,30 +561,30 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">领料出库单位 FTY</label>
-            <input id="outFty" list="globalFtyDatalist" onchange="onOutFtyChange()" type="text" placeholder="领料单位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target">
+            <input id="outFty" list="globalFtyDatalist" onchange="onOutFtyChange()" type="text" placeholder="领料单位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">领用人名称</label>
-            <input id="outReceiver" list="receiverFactoryList" type="text" placeholder="输入或选择领用人/部门" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+            <input id="outReceiver" list="receiverFactoryList" type="text" placeholder="输入或选择领用人/部门" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">① 款号 Style</label>
-            <input id="outFilterStyle" list="outStyleList" oninput="onOutFilterStyleChange()" type="text" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+            <input id="outFilterStyle" list="outStyleList" oninput="onOutFilterStyleChange()" type="text" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
             <datalist id="outStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">② 面料类别 Item</label>
-            <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white">
+            <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white" onfocus="this.select()">
             <datalist id="outItemList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">③ 订单颜色</label>
-            <input id="outFilterOrderColor" list="outOrderColorList" oninput="onOutFilterOrderColorChange()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700">
+            <input id="outFilterOrderColor" list="outOrderColorList" oninput="onOutFilterOrderColorChange()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700" onfocus="this.select()">
             <datalist id="outOrderColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">④ 面料颜色 Col</label>
-            <input id="outFilterColor" list="outColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
+            <input id="outFilterColor" list="outColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600" onfocus="this.select()">
             <datalist id="outColorList"></datalist>
           </div>
           <div>
@@ -574,7 +632,7 @@
 
         <div id="activeStockBatchListContainer"></div>
 
-        <button onclick="submitBatchOutStock()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg text-sm py-3 transition flex items-center justify-center gap-2 shadow-sm">
+        <button onclick="submitBatchOutStock()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg text-sm py-3 transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
           <i class="fa-solid fa-cloud-arrow-up"></i> 确认提交出库数据并生成领料单
         </button>
       </div>
@@ -584,31 +642,31 @@
           <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-table text-amber-600"></i> 面料出库流水明细</h2>
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <input id="searchOutInput" type="text" placeholder="🔍 快速搜索..." oninput="renderOutTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-64">
-            <button onclick="exportTableToExcel('outTableBody', '面料出库流水明细.xls')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs">
+            <button onclick="exportTableToExcel('outTableBody', '面料出库流水明细.xls')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
             </button>
           </div>
         </div>
-        <div class="overflow-x-auto">
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-                <th class="py-2 px-3">领料单位 FTY</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">领用人</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">开票批次 (Invoice)</th>
-                <th class="py-2 px-3">日期</th>
-                <th class="py-2 px-3">款号</th>
-                <th class="py-2 px-3">类别</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">缸号</th>
-                <th class="py-2 px-3 font-bold text-indigo-700">订单颜色</th>
-                <th class="py-2 px-3 font-bold text-amber-600">面料颜色 Col</th>
-                <th class="py-2 px-3 font-bold text-amber-700">货架号</th>
-                <th class="py-2 px-3">数量</th>
-                <th class="py-2 px-3">单位</th>
-                <th class="py-2 px-3">卷数</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">操作者</th>
-                <th class="py-2 px-3">操作时间</th>
-                <th class="py-2 px-3 no-print">操作</th>
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">领料单位 FTY</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">领用人</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">开票批次 (Invoice)</th>
+                <th class="py-2.5 px-3">日期</th>
+                <th class="py-2.5 px-3">款号</th>
+                <th class="py-2.5 px-3">类别</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">缸号</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-700">订单颜色</th>
+                <th class="py-2.5 px-3 font-bold text-amber-600">面料颜色 Col</th>
+                <th class="py-2.5 px-3 font-bold text-amber-700">货架号</th>
+                <th class="py-2.5 px-3">数量</th>
+                <th class="py-2.5 px-3">单位</th>
+                <th class="py-2.5 px-3">卷数</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">操作者</th>
+                <th class="py-2.5 px-3">操作时间</th>
+                <th class="py-2.5 px-3 no-print normal-role-only">操作</th>
               </tr>
             </thead>
             <tbody id="outTableBody"></tbody>
@@ -617,7 +675,7 @@
       </div>
     </div>
 
-    <!-- TAB 4: 库存明细汇总表 (保留原有缸号与移架) -->
+    <!-- TAB 4: 库存明细汇总表 -->
     <div id="tabBalance" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
@@ -628,10 +686,10 @@
             <p class="text-xs text-slate-400 mt-0.5">支持按实际搬迁的数值与卷数进行移架拆分，未移动的部分保留在原货架。</p>
           </div>
           <div class="flex items-center gap-2">
-            <button id="toggleInStockBtn" onclick="toggleInStockOnly()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0">
+            <button id="toggleInStockBtn" onclick="toggleInStockOnly()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
               <i class="fa-solid fa-toggle-off" id="toggleIcon"></i> <span id="toggleText">只看有库存的信息</span>
             </button>
-            <button onclick="exportTableToExcel('balanceTableBody', '仓库库存结余总表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0">
+            <button onclick="exportTableToExcel('balanceTableBody', '仓库库存结余总表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
             </button>
           </div>
@@ -640,55 +698,55 @@
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-filter text-indigo-600"></i> 按款号筛选 Style</label>
-            <input id="filterStyle" list="filterStyleList" oninput="onFilterStyleChange()" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
+            <input id="filterStyle" list="filterStyleList" oninput="onFilterStyleChange()" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600" onfocus="this.select()">
             <datalist id="filterStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按类别筛选 Item</label>
-            <input id="filterItem" list="filterItemList" oninput="onFilterItemChange()" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+            <input id="filterItem" list="filterItemList" oninput="onFilterItemChange()" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white" onfocus="this.select()">
             <datalist id="filterItemList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按订单颜色筛选</label>
-            <input id="filterOrderColor" list="filterOrderColorList" oninput="onFilterOrderColorChange()" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-700">
+            <input id="filterOrderColor" list="filterOrderColorList" oninput="onFilterOrderColorChange()" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-700" onfocus="this.select()">
             <datalist id="filterOrderColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按面料颜色筛选 Col</label>
-            <input id="filterColor" list="filterColorList" oninput="renderBalanceSheet()" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
+            <input id="filterColor" list="filterColorList" oninput="renderBalanceSheet()" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600" onfocus="this.select()">
             <datalist id="filterColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按货架筛选 Rack</label>
-            <input id="filterRack" list="filterRackList" oninput="renderBalanceSheet()" placeholder="选择货架" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
+            <input id="filterRack" list="filterRackList" oninput="renderBalanceSheet()" placeholder="选择货架" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600" onfocus="this.select()">
             <datalist id="filterRackList"></datalist>
           </div>
           <div class="flex gap-2">
             <input id="searchBalanceInput" type="text" placeholder="🔍 自由搜索缸号..." oninput="renderBalanceSheet()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white">
-            <button onclick="resetBalanceFilters()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition shrink-0" title="重置">
+            <button onclick="resetBalanceFilters()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer" title="重置">
               <i class="fa-solid fa-rotate-right"></i>
             </button>
           </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-                <th class="py-2 px-3">工厂 FTY</th>
-                <th class="py-2 px-3">款号 Style No</th>
-                <th class="py-2 px-3">面料类别 Item</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">缸号 (Batch)</th>
-                <th class="py-2 px-3 font-bold text-indigo-700">订单颜色</th>
-                <th class="py-2 px-3 font-bold text-amber-600">面料颜色 Col</th>
-                <th class="py-2 px-3 font-bold text-amber-700">货架号</th>
-                <th class="py-2 px-3 text-emerald-600">入库总量</th>
-                <th class="py-2 px-3 text-emerald-600">入库卷数</th>
-                <th class="py-2 px-3 text-amber-600">出库总量</th>
-                <th class="py-2 px-3 text-amber-600">出库卷数</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">剩余库存</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">剩余卷数</th>
-                <th class="py-2 px-3 text-center no-print">操作 (移架)</th>
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">工厂 FTY</th>
+                <th class="py-2.5 px-3">款号 Style No</th>
+                <th class="py-2.5 px-3">面料类别 Item</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">缸号 (Batch)</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-700">订单颜色</th>
+                <th class="py-2.5 px-3 font-bold text-amber-600">面料颜色 Col</th>
+                <th class="py-2.5 px-3 font-bold text-amber-700">货架号</th>
+                <th class="py-2.5 px-3 text-emerald-600">入库总量</th>
+                <th class="py-2.5 px-3 text-emerald-600">入库卷数</th>
+                <th class="py-2.5 px-3 text-amber-600">出库总量</th>
+                <th class="py-2.5 px-3 text-amber-600">出库卷数</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">剩余库存</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">剩余卷数</th>
+                <th class="py-2.5 px-3 text-center no-print normal-role-only">操作 (移架)</th>
               </tr>
             </thead>
             <tbody id="balanceTableBody"></tbody>
@@ -697,7 +755,7 @@
       </div>
     </div>
 
-    <!-- TAB 5: 进销存汇总表 (新增：不区分缸号与货架号，只看款号/类别/颜色的累计进销存) -->
+    <!-- TAB 5: 进销存汇总表 -->
     <div id="tabSummary" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
@@ -708,44 +766,53 @@
             <p class="text-xs text-slate-400 mt-0.5">不区分缸号与货架号，直接汇总该款号、该类别、该颜色的总入库、总出库与总剩余。</p>
           </div>
           <div class="flex items-center gap-2">
-            <button id="toggleInStockSummaryBtn" onclick="toggleInStockSummaryOnly()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0">
+            <!-- 修改：增加“不分工厂查看汇总”切换按钮 -->
+            <button id="toggleAllFtySummaryBtn" onclick="toggleAllFtySummary()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
+              <i class="fa-solid fa-globe" id="toggleAllFtyIcon"></i> <span id="toggleAllFtyText">不分工厂查看汇总</span>
+            </button>
+            <button id="toggleInStockSummaryBtn" onclick="toggleInStockSummaryOnly()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
               <i class="fa-solid fa-toggle-off" id="toggleSummaryIcon"></i> <span id="toggleSummaryText">只看有库存的信息</span>
             </button>
-            <button onclick="exportTableToExcel('summaryTableBody', '面料进销存汇总表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0">
+            <button onclick="exportTableToExcel('summaryTableBody', '面料进销存汇总表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
             </button>
           </div>
         </div>
 
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+        <!-- 增加工厂筛选框（智能下拉 + 打字匹配） -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-indigo-700 mb-1"><i class="fa-solid fa-industry"></i> 工厂 FTY</label>
+            <input id="sumFilterFty" list="globalFtyDatalist" oninput="renderSummarySheet()" placeholder="选择或打字匹配工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-bold bg-white text-indigo-600 fty-input-target" onfocus="this.select()">
+          </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-filter text-indigo-600"></i> 按款号筛选 Style</label>
-            <input id="sumFilterStyle" list="filterStyleList" oninput="renderSummarySheet()" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
+            <input id="sumFilterStyle" list="filterStyleList" oninput="renderSummarySheet()" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按类别筛选 Item</label>
-            <input id="sumFilterItem" list="filterItemList" oninput="renderSummarySheet()" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+            <input id="sumFilterItem" list="filterItemList" oninput="renderSummarySheet()" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按订单颜色筛选</label>
-            <input id="sumFilterOrderColor" list="filterOrderColorList" oninput="renderSummarySheet()" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-700">
+            <input id="sumFilterOrderColor" list="filterOrderColorList" oninput="renderSummarySheet()" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-700" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按面料颜色筛选 Col</label>
-            <input id="sumFilterColor" list="filterColorList" oninput="renderSummarySheet()" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
+            <input id="sumFilterColor" list="filterColorList" oninput="renderSummarySheet()" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600" onfocus="this.select()">
           </div>
           <div class="flex gap-2">
             <input id="searchSummaryInput" type="text" placeholder="🔍 自由搜索款号/颜色..." oninput="renderSummarySheet()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white">
-            <button onclick="resetSummaryFilters()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition shrink-0" title="重置">
+            <button onclick="resetSummaryFilters()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer" title="重置">
               <i class="fa-solid fa-rotate-right"></i>
             </button>
           </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-indigo-50/60 text-slate-700 text-xs border-b border-indigo-200">
+            <thead class="sticky top-0 bg-indigo-50/90 backdrop-blur-xs z-10 shadow-xs">
+              <tr class="text-slate-700 text-xs border-b border-indigo-200">
                 <th class="py-2.5 px-3">工厂 FTY</th>
                 <th class="py-2.5 px-3 font-bold text-indigo-900">款号 Style No</th>
                 <th class="py-2.5 px-3">面料类别 Item</th>
@@ -773,42 +840,42 @@
         </h2>
         <p class="text-xs text-slate-400 mb-4">接收工厂点击「确认收货」后自动完成调出与入库。若删除调拨单，将自动联动撤销两端出入库记录。</p>
         
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4 normal-role-only">
           <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-indigo-600"></i> 1. 发起新的面料调拨单</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">调出工厂 (发货方)</label>
-              <input id="transFromFty" list="globalFtyDatalist" onchange="updateTransferStyleList()" type="text" placeholder="调出工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600 fty-input-target">
+              <input id="transFromFty" list="globalFtyDatalist" onchange="updateTransferStyleList()" type="text" placeholder="调出工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600 fty-input-target" onfocus="this.select()">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">接收工厂 (收货方)</label>
-              <input id="transToFty" list="globalFtyDatalist" type="text" placeholder="接收工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target">
+              <input id="transToFty" list="globalFtyDatalist" type="text" placeholder="接收工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target" onfocus="this.select()">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">款号 Style No (可打字匹配)</label>
-              <input id="transStyle" list="transferStyleList" oninput="updateTransferItemList()" type="text" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+              <input id="transStyle" list="transferStyleList" oninput="updateTransferItemList()" type="text" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
               <datalist id="transferStyleList"></datalist>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">面料类别 Item (可打字匹配)</label>
-              <input id="transItem" list="transferItemList" oninput="updateTransferColorList()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold">
+              <input id="transItem" list="transferItemList" oninput="updateTransferColorList()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold" onfocus="this.select()">
               <datalist id="transferItemList"></datalist>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">订单颜色</label>
-              <input id="transOrderColor" list="transferOrderColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700">
+              <input id="transOrderColor" list="transferOrderColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700" onfocus="this.select()">
               <datalist id="transferOrderColorList"></datalist>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">面料颜色 Col</label>
-              <input id="transColor" list="transferColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
+              <input id="transColor" list="transferColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600" onfocus="this.select()">
               <datalist id="transferColorList"></datalist>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">调拨缸号 Batch (自动联动剩余量)</label>
-              <input id="transBatchNo" list="transferBatchList" oninput="onTransferBatchChange()" type="text" placeholder="选择缸号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+              <input id="transBatchNo" list="transferBatchList" oninput="onTransferBatchChange()" type="text" placeholder="选择缸号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
               <datalist id="transferBatchList"></datalist>
             </div>
             <div>
@@ -821,26 +888,26 @@
             </div>
           </div>
           <div class="flex justify-end pt-2">
-            <button onclick="submitTransferRequest()" class="w-full sm:w-64 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-sm">
+            <button onclick="submitTransferRequest()" class="w-full sm:w-64 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-sm cursor-pointer">
               <i class="fa-solid fa-paper-plane"></i> 发起调拨单
             </button>
           </div>
         </div>
 
         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2"><i class="fa-solid fa-list text-amber-600"></i> 2. 厂际调拨流水与待确认收货列表</h3>
-        <div class="overflow-x-auto">
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-                <th class="py-2 px-3">单号/日期</th>
-                <th class="py-2 px-3">调出工厂</th>
-                <th class="py-2 px-3">接收工厂</th>
-                <th class="py-2 px-3">款号</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">缸号</th>
-                <th class="py-2 px-3">数量 / 卷数</th>
-                <th class="py-2 px-3">发起人</th>
-                <th class="py-2 px-3 font-bold">当前状态</th>
-                <th class="py-2 px-3">操作</th>
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">单号/日期</th>
+                <th class="py-2.5 px-3">调出工厂</th>
+                <th class="py-2.5 px-3">接收工厂</th>
+                <th class="py-2.5 px-3">款号</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">缸号</th>
+                <th class="py-2.5 px-3">数量 / 卷数</th>
+                <th class="py-2.5 px-3">发起人</th>
+                <th class="py-2.5 px-3 font-bold">当前状态</th>
+                <th class="py-2.5 px-3 no-print normal-role-only">操作</th>
               </tr>
             </thead>
             <tbody id="transferTableBody"></tbody>
@@ -865,7 +932,7 @@
             <datalist id="printInvoiceList"></datalist>
           </div>
         </div>
-        <button onclick="window.print()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2 shrink-0">
+        <button onclick="window.print()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2 shrink-0 cursor-pointer">
           <i class="fa-solid fa-print"></i> 立即列印当前三联单 (Print)
         </button>
       </div>
@@ -883,14 +950,14 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-user-gear text-indigo-600"></i> 系统管理人后台 (人员增设与权限分派)
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">新增操作员、设置专属密码并分派对应权限单位。此页仅最高管理者可访问。</p>
+            <p class="text-xs text-slate-400 mt-0.5">新增操作员、设置专属密码并分派对应权限单位及账号类型。此页仅最高管理者可访问。</p>
           </div>
-          <button onclick="exportTableToExcel('userTableBody', '系统操作员名单.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
+          <button onclick="exportTableToExcel('userTableBody', '系统操作员名单.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
           </button>
         </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">人员姓名/代号</label>
             <input id="newUserName" type="text" placeholder="例: 张三" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold">
@@ -900,22 +967,30 @@
             <input id="newUserPass" type="text" placeholder="例: 666888" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
           </div>
           <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">账号权限类型</label>
+            <select id="newUserRole" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700">
+              <option value="normal">完整权限 (可录入、编辑、删除)</option>
+              <option value="readonly">仅查看 (禁止录入、编辑与删除)</option>
+            </select>
+          </div>
+          <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">分派权限单位 / 工厂</label>
-            <input id="newUserFty" list="globalFtyDatalist" type="text" placeholder="选择或输入分派权限单位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-emerald-600 fty-input-target">
+            <input id="newUserFty" list="globalFtyDatalist" type="text" placeholder="选择或输入分派权限单位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-emerald-600 fty-input-target" onfocus="this.select()">
           </div>
         </div>
-        <button onclick="addNewUser()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition shadow-sm mb-6">
+        <button onclick="addNewUser()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition shadow-sm mb-6 cursor-pointer">
           <i class="fa-solid fa-user-plus"></i> 確認新增操作人員
         </button>
 
-        <div class="overflow-x-auto">
+        <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
-                <th class="py-2 px-3">人员姓名</th>
-                <th class="py-2 px-3">登录密码</th>
-                <th class="py-2 px-3 font-bold text-indigo-600">权限 / 分派单位</th>
-                <th class="py-2 px-3 no-print">操作 (仅最高管理者可修改/删除)</th>
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">人员姓名</th>
+                <th class="py-2.5 px-3">登录密码</th>
+                <th class="py-2.5 px-3 font-bold text-indigo-600">权限类型</th>
+                <th class="py-2.5 px-3 font-bold text-emerald-600">分派单位</th>
+                <th class="py-2.5 px-3 no-print">操作 (仅最高管理者可修改/删除)</th>
               </tr>
             </thead>
             <tbody id="userTableBody"></tbody>
@@ -924,28 +999,84 @@
       </div>
     </div>
 
+    <!-- TAB 9: 日志管理中心 (仅最高管理者可见) -->
+    <div id="tabLogs" class="sheet-content hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-amber-600"></i> 系统安全日志审计中心 (仅最高管理者)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">自动追踪并记录所有人员的系统登录以及详细的新增、修改、删除等操作历史。</p>
+          </div>
+          <button onclick="exportTableToExcel('logsTableBody', '系统审计日志记录.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
+            <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
+          </button>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-filter text-indigo-600"></i> 筛选日志类型</label>
+            <select id="logTypeFilter" onchange="renderLogsTable()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-bold bg-white text-indigo-600">
+              <option value="ALL">全部日志 (登录 + 操作)</option>
+              <option value="LOGIN">仅看登录日志 (Login)</option>
+              <option value="ACTION">仅看详细操作日志 (Action)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">按操作人筛选</label>
+            <input id="logUserFilter" type="text" placeholder="输入操作人姓名" oninput="renderLogsTable()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white font-semibold">
+          </div>
+          <div class="flex gap-2">
+            <input id="logSearchInput" type="text" placeholder="🔍 自由搜索日志内容..." oninput="renderLogsTable()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white">
+            <button onclick="clearSystemLogs()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition shrink-0 cursor-pointer" title="清空历史日志">
+              <i class="fa-solid fa-trash-can"></i> 清空
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll-container rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3 w-40">日期+时间</th>
+                <th class="py-2.5 px-3 w-32">操作人</th>
+                <th class="py-2.5 px-3 w-28 font-bold text-indigo-600">日志类别</th>
+                <th class="py-2.5 px-3 font-bold">动作类型</th>
+                <th class="py-2.5 px-3">详细记录信息</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
+
   <script>
     // ================= 云端配置 =================
     const BIN_ID = '6ad3251cffd5d1605372fa4a'; 
     const API_KEY = '$2a$10$4BG8r6gdqcF63Xv19dzd/OpvCTrfmblPUWGknBtarAdc.2SkbzSZ.';
 
     let initialDefaultUsers = [
-      { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位' },
-      { name: 'KO KO NAING', pass: '1714', fty: '全部单位' },
-      { name: 'MYO THAT PAING', pass: '1864', fty: '二厂 (DA MEI)' },
-      { name: 'MYAT MIN', pass: '1234', fty: '一厂 (JUN TAI)' }
+      { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位', role: 'normal' },
+      { name: 'KO KO NAING', pass: '1714', fty: '全部单位', role: 'normal' },
+      { name: 'MYO THAT PAING', pass: '1864', fty: '二厂 (DA MEI)', role: 'normal' },
+      { name: 'MYAT MIN', pass: '1234', fty: '一厂 (JUN TAI)', role: 'normal' }
     ];
     let warehouseUsers = [...initialDefaultUsers];
     let currentUser = null;
     let currentGlobalFty = '全部单位';
     let onlyInStock = false;
     let onlyInStockSummary = false;
+    let isAllFtySummary = false;
 
     let fabricAux = [];
     let fabricIn = [];
     let fabricOut = [];
     let fabricTransfers = [];
+    let systemLogs = [];
     
     let factoryList = [
       { id: '1', name: '一厂 (JUN TAI)', remark: '-', operator: '系统', timeStr: '2026-01-01 00:00' },
@@ -964,15 +1095,15 @@
         let localTrans = JSON.parse(localStorage.getItem('wh_trans'));
         let localFty = JSON.parse(localStorage.getItem('wh_fty_list'));
         let localUsers = JSON.parse(localStorage.getItem('wh_users'));
+        let localLogs = JSON.parse(localStorage.getItem('wh_logs'));
 
         if(localAux && localAux.length > 0) fabricAux = localAux;
         if(localIn && localIn.length > 0) fabricIn = localIn;
         if(localOut && localOut.length > 0) fabricOut = localOut;
         if(localTrans && localTrans.length > 0) fabricTransfers = localTrans;
         if(localFty && localFty.length > 0) factoryList = localFty;
-        if(localUsers && Array.isArray(localUsers)) {
-          warehouseUsers = localUsers;
-        }
+        if(localUsers && Array.isArray(localUsers)) warehouseUsers = localUsers;
+        if(localLogs && Array.isArray(localLogs)) systemLogs = localLogs;
       } catch(e) {
         console.warn("读取本地缓存异常", e);
       }
@@ -982,34 +1113,21 @@
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
           method: 'GET',
-          headers: { 
-            'X-Master-Key': API_KEY,
-            'X-Bin-Meta': 'false'
-          }
+          headers: { 'X-Master-Key': API_KEY, 'X-Bin-Meta': 'false' }
         });
 
         if (res.ok) {
           let data = await res.json();
           let cloudRecord = data.record || data;
-          let cloudUsers = cloudRecord.warehouseUsers;
-          let cloudAux = cloudRecord.fabricAux;
-          let cloudIn = cloudRecord.fabricIn;
-          let cloudOut = cloudRecord.fabricOut;
-          let cloudTrans = cloudRecord.fabricTransfers;
-          let cloudFtyList = cloudRecord.factoryList;
+          if (cloudRecord.warehouseUsers) warehouseUsers = cloudRecord.warehouseUsers;
+          if (cloudRecord.fabricAux) fabricAux = cloudRecord.fabricAux;
+          if (cloudRecord.fabricIn) fabricIn = cloudRecord.fabricIn;
+          if (cloudRecord.fabricOut) fabricOut = cloudRecord.fabricOut;
+          if (cloudRecord.fabricTransfers) fabricTransfers = cloudRecord.fabricTransfers;
+          if (cloudRecord.factoryList) factoryList = cloudRecord.factoryList;
+          if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
 
-          if (cloudUsers && Array.isArray(cloudUsers)) {
-            warehouseUsers = cloudUsers;
-            localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
-            renderLoginHints();
-          }
-
-          if (cloudAux && Array.isArray(cloudAux)) fabricAux = cloudAux;
-          if (cloudIn && Array.isArray(cloudIn)) fabricIn = cloudIn;
-          if (cloudOut && Array.isArray(cloudOut)) fabricOut = cloudOut;
-          if (cloudTrans && Array.isArray(cloudTrans)) fabricTransfers = cloudTrans;
-          if (cloudFtyList && Array.isArray(cloudFtyList)) factoryList = cloudFtyList;
-
+          renderLoginHints();
           renderAll();
         }
       } catch(e) {
@@ -1017,11 +1135,24 @@
       }
     }
 
+    function recordLog(type, action, detail) {
+      let logItem = {
+        id: Date.now().toString(),
+        timeStr: getNowTimeString(),
+        operator: currentUser ? currentUser.name : '系统',
+        type: type, // 'LOGIN' 或 'ACTION'
+        action: action,
+        detail: detail
+      };
+      systemLogs.unshift(logItem);
+      saveToCloud();
+    }
+
     function checkLogin() {
       const pwd = document.getElementById('loginPasswordInput').value.trim();
       
       if (pwd === '199779') {
-        currentUser = { name: '最高管理者 (ZAW AUNG)', fty: '全部单位' };
+        currentUser = { name: '最高管理者 (ZAW AUNG)', fty: '全部单位', role: 'normal' };
       } else {
         let matched = warehouseUsers.find(u => u.pass === pwd);
         if (matched) {
@@ -1032,9 +1163,11 @@
       if (currentUser) {
         sessionStorage.setItem('wh_user', currentUser.name);
         sessionStorage.setItem('wh_fty', currentUser.fty || '全部单位');
+        sessionStorage.setItem('wh_role', currentUser.role || 'normal');
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('currentUserNameDisplay').innerText = currentUser.name;
         
+        recordLog('LOGIN', '登录系统', `成功登录系统，分配工厂权限：${currentUser.fty || '全部单位'}`);
         applyUserPermissions();
         initSystem();
       } else {
@@ -1045,91 +1178,41 @@
     function applyUserPermissions() {
       let ftyInput = document.getElementById('globalFtyFilter');
       let adminBtn = document.getElementById('btn_tabAdmin');
-      let inFtyInput = document.getElementById('inFty');
-      let transFromFty = document.getElementById('transFromFty');
+      let logsBtn = document.getElementById('btn_tabLogs');
+      let roleBadge = document.getElementById('currentUserRoleBadge');
 
       let userName = currentUser ? currentUser.name : '';
       let userFty = currentUser ? (currentUser.fty || '全部单位') : '全部单位';
-      
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
+      let isReadonly = currentUser && currentUser.role === 'readonly';
+
+      if(roleBadge) {
+        roleBadge.style.display = isReadonly ? 'inline-block' : 'none';
+      }
 
       if (!isMaster) {
         currentGlobalFty = userFty;
         ftyInput.value = userFty;
         ftyInput.disabled = true;
         ftyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
-
-        if(inFtyInput) { 
-          inFtyInput.value = userFty; 
-          inFtyInput.disabled = true; 
-          inFtyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
-        }
-        if(transFromFty) { 
-          transFromFty.value = userFty; 
-          transFromFty.disabled = true; 
-          transFromFty.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
-        }
       } else {
         ftyInput.disabled = false;
         ftyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
-        if(inFtyInput) { 
-          inFtyInput.disabled = false; 
-          inFtyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
-          if(!inFtyInput.value || inFtyInput.value === '全部单位') {
-            inFtyInput.value = '二厂 (DA MEI)';
-          }
-        }
-        if(transFromFty) { 
-          transFromFty.disabled = false; 
-          transFromFty.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
-        }
       }
 
-      let outFtyInput = document.getElementById('outFty');
-      if(outFtyInput) {
-        outFtyInput.disabled = false;
-        outFtyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
-        if(!outFtyInput.value || outFtyInput.value === '全部单位') {
-          outFtyInput.value = userFty !== '全部单位' ? userFty : '二厂 (DA MEI)';
-        }
-      }
-      onOutFtyChange();
-
-      if(adminBtn) {
-        adminBtn.style.display = isMaster ? 'flex' : 'none';
-      }
-    }
-
-    function onOutFtyChange() {
-      let ftyVal = document.getElementById('outFty')?.value.trim() || '';
-      let invoiceInput = document.getElementById('outInvoice');
-      if(!invoiceInput) return;
-
-      let match = ftyVal.match(/\(([^)]+)\)/);
-      let prefix = "BATCH";
-      if (match && match[1]) {
-        prefix = match[1].replace(/\s+/g, '').toUpperCase();
-      } else if (ftyVal) {
-        prefix = ftyVal.substring(0, 4).toUpperCase();
-      }
-
-      let existingInvoices = new Set(fabricOut.map(o => o.invoice).filter(Boolean));
-      let maxNum = 0;
-      existingInvoices.forEach(inv => {
-        if (inv.startsWith(prefix + '-')) {
-          let numPart = parseInt(inv.split('-')[1]);
-          if (!isNaN(numPart) && numPart > maxNum) {
-            maxNum = numPart;
-          }
-        }
+      // 控制“仅查看”只读账号禁用一切增删改UI
+      document.querySelectorAll('.normal-role-only').forEach(el => {
+        el.style.display = isReadonly ? 'none' : '';
       });
 
-      let nextNum = String(maxNum + 1).padStart(3, '0');
-      invoiceInput.value = `${prefix}-${nextNum}`;
-      updateOutFilterDropdowns();
+      if(adminBtn) adminBtn.style.display = isMaster ? 'flex' : 'none';
+      if(logsBtn) logsBtn.style.display = isMaster ? 'flex' : 'none';
     }
 
     function logout() {
+      if(currentUser) {
+        recordLog('LOGIN', '退出系统', '安全退出系统登录');
+      }
       sessionStorage.clear();
       location.reload();
     }
@@ -1151,7 +1234,8 @@
       if (saved) {
         currentUser = { 
           name: saved, 
-          fty: sessionStorage.getItem('wh_fty') || '全部单位' 
+          fty: sessionStorage.getItem('wh_fty') || '全部单位',
+          role: sessionStorage.getItem('wh_role') || 'normal'
         };
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('currentUserNameDisplay').innerText = currentUser.name;
@@ -1168,7 +1252,7 @@
       if(!hintContainer) return;
       hintContainer.innerHTML = warehouseUsers.map(u => `
         <div class="flex justify-between items-center py-1 px-1.5 border-b border-slate-100">
-          <span class="font-bold text-slate-700"><i class="fa-solid fa-user text-indigo-500 mr-1.5"></i>${u.name}</span>
+          <span class="font-bold text-slate-700"><i class="fa-solid fa-user text-indigo-500 mr-1.5"></i>${u.name} ${u.role === 'readonly' ? '<span class="text-[9px] bg-amber-100 text-amber-700 px-1 rounded">仅查看</span>' : ''}</span>
           <span class="text-slate-400 text-[10px]">授权: ${u.fty || '全部'}</span>
         </div>
       `).join('');
@@ -1324,15 +1408,6 @@
           map[i.batchNo].qty += (i.qty || 0);
           map[i.batchNo].roll += (i.roll || 0);
           if(i.styleNo) styleSet.add(i.styleNo);
-          if(!filterStyle || i.styleNo === filterStyle) {
-            if(i.item) itemSet.add(i.item);
-            if(!filterItem || i.item === filterItem) {
-              if(i.orderColor) orderColorSet.add(i.orderColor);
-              if(!filterOrderColor || i.orderColor === filterOrderColor) {
-                if(i.color) colorSet.add(i.color);
-              }
-            }
-          }
         }
       });
       fabricOut.forEach(o => {
@@ -1559,17 +1634,17 @@
       let userName = currentUser ? currentUser.name : '';
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
 
-      if (tabId === 'tabAdmin' && !isMaster) {
-        alert("您没有权限访问管理人后台！");
+      if ((tabId === 'tabAdmin' || tabId === 'tabLogs') && !isMaster) {
+        alert("您没有权限访问该后台！");
         return;
       }
 
       document.querySelectorAll('.sheet-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(el => {
-        el.className = "tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2";
+        el.className = "tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 cursor-pointer";
       });
       document.getElementById(tabId).classList.remove('hidden');
-      document.getElementById('btn_' + tabId).className = "tab-btn px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm transition flex items-center gap-2";
+      document.getElementById('btn_' + tabId).className = "tab-btn px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm transition flex items-center gap-2 cursor-pointer";
       
       if(tabId === 'tabOut') updateOutFilterDropdowns();
       if(tabId === 'tabBalance') { updateBalanceFilterDropdowns(); renderBalanceSheet(); }
@@ -1577,6 +1652,7 @@
       if(tabId === 'tabTransfer') { updateTransferStyleList(); renderTransferTable(); }
       if(tabId === 'tabPrint') updatePrintInvoiceDropdown();
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
+      if(tabId === 'tabLogs' && isMaster) renderLogsTable();
     }
 
     async function manualSync() {
@@ -1594,16 +1670,14 @@
       localStorage.setItem('wh_trans', JSON.stringify(fabricTransfers));
       localStorage.setItem('wh_fty_list', JSON.stringify(factoryList));
       localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
+      localStorage.setItem('wh_logs', JSON.stringify(systemLogs));
       renderLoginHints();
 
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json', 
-            'X-Master-Key': API_KEY 
-          },
-          body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, warehouseUsers })
+          headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+          body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, warehouseUsers, systemLogs })
         });
         if(!res.ok) console.error("云端保存返回状态码: ", res.status);
       } catch(e) { 
@@ -1627,7 +1701,10 @@
       updatePrintInvoiceDropdown();
       let userName = currentUser ? currentUser.name : '';
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
-      if(isMaster) renderUserTable();
+      if(isMaster) {
+        renderUserTable();
+        renderLogsTable();
+      }
       updateAuxDatalists();
       updateGlobalFtyDatalist();
       updateReceiverFactoryDatalist();
@@ -1640,7 +1717,6 @@
 
       let ftySet = new Set(["一厂 (JUN TAI)", "二厂 (DA MEI)", "三厂 (DA LI)", "总厂 (FU YUAN)", "外发厂-A", "外发厂-B"]);
       factoryList.forEach(f => { if(f.name) ftySet.add(f.name); });
-      
       receiverDl.innerHTML = [...ftySet].map(name => `<option value="${name}">`).join('');
     }
 
@@ -1652,11 +1728,8 @@
       fabricTransfers.forEach(t => { if(t.fromFty) ftySet.add(t.fromFty); if(t.toFty) ftySet.add(t.toFty); });
       warehouseUsers.forEach(u => { if(u.fty) ftySet.add(u.fty); });
 
-      let ftyArray = [...ftySet];
       let dl = document.getElementById('globalFtyDatalist');
-      if(dl) {
-        dl.innerHTML = ftyArray.map(f => `<option value="${f}">`).join('');
-      }
+      if(dl) dl.innerHTML = [...ftySet].map(f => `<option value="${f}">`).join('');
     }
 
     function updateAuxDatalists() {
@@ -1664,7 +1737,6 @@
       let itemList = [...new Set([...fabricAux.map(i => i.item), ...fabricIn.map(i => i.item)])].filter(Boolean);
       let orderColorList = [...new Set([...fabricAux.map(i => i.orderColor), ...fabricIn.map(i => i.orderColor)])].filter(Boolean);
       let colorList = [...new Set([...fabricAux.map(i => i.color), ...fabricIn.map(i => i.color)])].filter(Boolean);
-      let rackList = [...new Set([...fabricAux.map(i => i.rack), ...fabricIn.map(i => i.rack)])].filter(Boolean);
 
       let auxStyleList = document.getElementById('auxStyleList');
       if(auxStyleList) auxStyleList.innerHTML = styleList.map(s => `<option value="${s}">`).join('');
@@ -1677,9 +1749,6 @@
 
       let auxColorList = document.getElementById('auxColorList');
       if(auxColorList) auxColorList.innerHTML = colorList.map(c => `<option value="${c}">`).join('');
-
-      let auxRackList = document.getElementById('auxRackList');
-      if(auxRackList) auxRackList.innerHTML = rackList.map(r => `<option value="${r}">`).join('');
 
       updateGlobalFtyDatalist();
       updateReceiverFactoryDatalist();
@@ -1723,11 +1792,11 @@
       let text = document.getElementById('toggleText');
 
       if(onlyInStock) {
-        btn.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0";
+        btn.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
         icon.className = "fa-solid fa-toggle-on";
         text.innerText = "已开启：仅看有库存";
       } else {
-        btn.className = "px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0";
+        btn.className = "px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
         icon.className = "fa-solid fa-toggle-off";
         text.innerText = "只看有库存的信息";
       }
@@ -1741,13 +1810,29 @@
       let text = document.getElementById('toggleSummaryText');
 
       if(onlyInStockSummary) {
-        btn.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0";
+        btn.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
         icon.className = "fa-solid fa-toggle-on";
         text.innerText = "已开启：仅看有库存";
       } else {
-        btn.className = "px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0";
+        btn.className = "px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
         icon.className = "fa-solid fa-toggle-off";
         text.innerText = "只看有库存的信息";
+      }
+      renderSummarySheet();
+    }
+
+    // 增加：不分工厂查看汇总功能
+    function toggleAllFtySummary() {
+      isAllFtySummary = !isAllFtySummary;
+      let btn = document.getElementById('toggleAllFtySummaryBtn');
+      let text = document.getElementById('toggleAllFtyText');
+
+      if(isAllFtySummary) {
+        btn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
+        text.innerText = "已开启：跨厂大汇总";
+      } else {
+        btn.className = "px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
+        text.innerText = "不分工厂查看汇总";
       }
       renderSummarySheet();
     }
@@ -1776,20 +1861,6 @@
           }
         }
         if(i.rack) rackSet.add(i.rack);
-      });
-      fabricOut.forEach(o => {
-        if (currentGlobalFty !== '全部单位' && o.fty !== currentGlobalFty) return;
-        if(o.styleNo) styleSet.add(o.styleNo);
-        if(!fStyle || o.styleNo === fStyle) {
-          if(o.item) itemSet.add(o.item);
-          if((!fStyle || o.styleNo === fStyle) && (!fItem || o.item === fItem)) {
-            if(o.orderColor) orderColorSet.add(o.orderColor);
-            if((!fOrderColor || o.orderColor === fOrderColor)) {
-              if(o.color) colorSet.add(o.color);
-            }
-          }
-        }
-        if(o.rack) rackSet.add(o.rack);
       });
 
       let sDl = document.getElementById('filterStyleList');
@@ -1873,6 +1944,7 @@
         map[key].outRoll += (o.roll || 0);
       });
 
+      let isReadonly = currentUser && currentUser.role === 'readonly';
       let html = '';
       for(let k in map) {
         let d = map[k];
@@ -1891,9 +1963,9 @@
         if(query && !searchStr.includes(query)) continue;
 
         let hasStock = balQty > 0 || balRoll > 0;
-        let moveBtnHtml = hasStock 
-          ? `<button onclick="openMoveRackModal('${d.fty}', '${d.batchNo}', '${d.styleNo}', '${d.item}', '${d.orderColor||''}', '${d.color||''}', '${d.rack||''}', ${balQty}, ${balRoll})" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded text-xs font-bold transition shadow-xs"><i class="fa-solid fa-location-arrow"></i> 移架</button>`
-          : `<span class="text-slate-300 text-xs">已清仓无库存</span>`;
+        let moveBtnHtml = (hasStock && !isReadonly)
+          ? `<button onclick="openMoveRackModal('${d.fty}', '${d.batchNo}', '${d.styleNo}', '${d.item}', '${d.orderColor||''}', '${d.color||''}', '${d.rack||''}', ${balQty}, ${balRoll})" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded text-xs font-bold transition shadow-xs cursor-pointer"><i class="fa-solid fa-location-arrow"></i> 移架</button>`
+          : `<span class="text-slate-300 text-xs">只读/无库存</span>`;
 
         html += `
           <tr class="border-b border-slate-100 hover:bg-slate-50">
@@ -1910,7 +1982,7 @@
             <td class="py-2.5 px-3 font-semibold">${d.outRoll}</td>
             <td class="py-2.5 px-3 font-bold ${balQty<0?'text-red-500':'text-indigo-600'}">${balQty}</td>
             <td class="py-2.5 px-3 font-bold ${balRoll<0?'text-red-500':'text-indigo-600'}">${balRoll}</td>
-            <td class="py-2.5 px-3 text-center no-print">
+            <td class="py-2.5 px-3 text-center no-print normal-role-only">
               ${moveBtnHtml}
             </td>
           </tr>
@@ -1919,11 +1991,12 @@
       tbody.innerHTML = html || `<tr><td colspan="14" class="py-6 text-center text-slate-400 font-semibold">没有找到相符的库存记录</td></tr>`;
     }
 
-    // ================= 进销存汇总表渲染函数 (新增：不区分缸号与货架号) =================
+    // ================= 进销存汇总表 (支持工厂筛选框 + 不分工厂跨厂大汇总) =================
     function renderSummarySheet() {
       let tbody = document.getElementById('summaryTableBody');
       if(!tbody) return;
 
+      let fFty = document.getElementById('sumFilterFty')?.value.trim() || '';
       let fStyle = document.getElementById('sumFilterStyle')?.value.trim() || '';
       let fItem = document.getElementById('sumFilterItem')?.value.trim() || '';
       let fOrderColor = document.getElementById('sumFilterOrderColor')?.value.trim() || '';
@@ -1932,23 +2005,23 @@
 
       let map = {};
 
-      // 汇总入库 (主键：工厂 + 款号 + 类别 + 订单颜色 + 面料颜色)
       fabricIn.forEach(i => {
-        if (currentGlobalFty !== '全部单位' && i.fty !== currentGlobalFty) return;
-        let key = `${i.fty}_${i.styleNo}_${i.item}_${i.orderColor||''}_${i.color||''}`;
+        if (!isAllFtySummary && currentGlobalFty !== '全部单位' && i.fty !== currentGlobalFty) return;
+        let ftyKey = isAllFtySummary ? '跨厂汇总' : i.fty;
+        let key = `${ftyKey}_${i.styleNo}_${i.item}_${i.orderColor||''}_${i.color||''}`;
         if(!map[key]) {
-          map[key] = { fty: i.fty, styleNo: i.styleNo, item: i.item, orderColor: i.orderColor||'', color: i.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
+          map[key] = { fty: ftyKey, styleNo: i.styleNo, item: i.item, orderColor: i.orderColor||'', color: i.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
         }
         map[key].inQty += (i.qty || 0);
         map[key].inRoll += (i.roll || 0);
       });
 
-      // 汇总出库
       fabricOut.forEach(o => {
-        if (currentGlobalFty !== '全部单位' && o.fty !== currentGlobalFty) return;
-        let key = `${o.fty}_${o.styleNo}_${o.item}_${o.orderColor||''}_${o.color||''}`;
+        if (!isAllFtySummary && currentGlobalFty !== '全部单位' && o.fty !== currentGlobalFty) return;
+        let ftyKey = isAllFtySummary ? '跨厂汇总' : o.fty;
+        let key = `${ftyKey}_${o.styleNo}_${o.item}_${o.orderColor||''}_${o.color||''}`;
         if(!map[key]) {
-          map[key] = { fty: o.fty, styleNo: o.styleNo, item: o.item, orderColor: o.orderColor||'', color: o.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
+          map[key] = { fty: ftyKey, styleNo: o.styleNo, item: o.item, orderColor: o.orderColor||'', color: o.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
         }
         map[key].outQty += (o.qty || 0);
         map[key].outRoll += (o.roll || 0);
@@ -1962,6 +2035,7 @@
 
         if(onlyInStockSummary && balQty <= 0 && balRoll <= 0) continue;
 
+        if(!isAllFtySummary && fFty && fFty !== '全部单位' && d.fty !== fFty) continue;
         if(fStyle && d.styleNo !== fStyle) continue;
         if(fItem && d.item !== fItem) continue;
         if(fOrderColor && d.orderColor !== fOrderColor) continue;
@@ -1991,6 +2065,8 @@
     }
 
     function resetSummaryFilters() {
+      let sumFty = document.getElementById('sumFilterFty');
+      if(sumFty) sumFty.value = '';
       document.getElementById('sumFilterStyle').value = '';
       document.getElementById('sumFilterItem').value = '';
       document.getElementById('sumFilterOrderColor').value = '';
@@ -2000,6 +2076,8 @@
     }
 
     function openMoveRackModal(fty, batchNo, styleNo, item, orderColor, color, oldRack, maxQty, maxRoll) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法进行移架操作！"); return; }
+
       document.getElementById('moveRackFty').value = fty;
       document.getElementById('moveRackBatchNo').value = batchNo;
       document.getElementById('moveRackStyleNo').value = styleNo;
@@ -2022,10 +2100,6 @@
     function saveMoveRack() {
       let fty = document.getElementById('moveRackFty').value;
       let batchNo = document.getElementById('moveRackBatchNo').value;
-      let styleNo = document.getElementById('moveRackStyleNo').value;
-      let item = document.getElementById('moveRackItem').value;
-      let orderColor = document.getElementById('moveRackOrderColor').value;
-      let color = document.getElementById('moveRackColor').value;
       let oldRack = document.getElementById('moveRackOldRack').value;
 
       let moveQty = parseFloat(document.getElementById('moveQtyInput').value) || 0;
@@ -2035,15 +2109,9 @@
       if(!newRack) { alert("请输入目标新货架号！"); return; }
       if(moveQty <= 0) { alert("请输入有效的移动数量！"); return; }
 
-      let targetIn = fabricIn.find(i => i.fty === fty && i.batchNo === batchNo && (i.rack || '') === oldRack);
-      if(!targetIn) {
-        targetIn = fabricIn.find(i => i.fty === fty && i.batchNo === batchNo);
-      }
+      let targetIn = fabricIn.find(i => i.fty === fty && i.batchNo === batchNo && (i.rack || '') === oldRack) || fabricIn.find(i => i.fty === fty && i.batchNo === batchNo);
 
-      if(!targetIn) {
-        alert("未找到该缸号的入库记录！");
-        return;
-      }
+      if(!targetIn) { alert("未找到该缸号的入库记录！"); return; }
 
       if(moveQty > targetIn.qty) {
         alert(`输入的移动数量 (${moveQty}) 不能大于该记录的当前数量 (${targetIn.qty})！`);
@@ -2076,6 +2144,7 @@
         fabricIn.unshift(newInRecord);
       }
 
+      recordLog('ACTION', '按数量移架', `将工厂 [${fty}] 缸号 [${batchNo}] 数量 ${moveQty} 从货架 [${oldRack||'-'}] 移至 [${newRack}]`);
       saveToCloud();
       alert(`成功将缸号 [${batchNo}] 的数量 ${moveQty}（${moveRoll}卷）移动至新货架 [${newRack}]！`);
       closeMoveRackModal();
@@ -2229,6 +2298,8 @@
     }
 
     function submitTransferRequest() {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法发起调拨！"); return; }
+
       let fromFty = document.getElementById('transFromFty').value.trim();
       let toFty = document.getElementById('transToFty').value.trim();
       let batchNo = document.getElementById('transBatchNo').value.trim();
@@ -2242,23 +2313,22 @@
       let transObj = {
         id: Date.now().toString(),
         date: new Date().toISOString().split('T')[0],
-        fromFty,
-        toFty,
-        batchNo,
+        fromFty, toFty, batchNo,
         styleNo: meta.styleNo || '未知款号',
         item: meta.item || '面料',
         orderColor: meta.orderColor || '',
         color: meta.color || '',
         rack: meta.rack || '',
-        qty,
-        roll,
+        qty, roll,
         operator: currentUser ? currentUser.name : '系统',
         status: '待接收确认'
       };
 
       fabricTransfers.unshift(transObj);
+      recordLog('ACTION', '发起厂际调拨', `从 [${fromFty}] 发起调拨给 [${toFty}]，款号:${transObj.styleNo} 缸号:${batchNo} 数量:${qty}`);
       saveToCloud();
       alert(`成功发起调拨申请！待接收方确认后将自动入库。`);
+      
       document.getElementById('transBatchNo').value = '';
       document.getElementById('transQty').value = '';
       document.getElementById('transRoll').value = '';
@@ -2271,6 +2341,8 @@
     }
 
     function confirmReceiveTransfer(id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法确认收货！"); return; }
+
       let trans = fabricTransfers.find(t => t.id === id);
       if(!trans || trans.status === '已完成') return;
 
@@ -2317,12 +2389,15 @@
         });
 
         trans.status = '已完成';
+        recordLog('ACTION', '确认调拨收货', `工厂 [${trans.toFty}] 成功接收来自 [${trans.fromFty}] 的物料，缸号:${trans.batchNo} 数量:${trans.qty}`);
         saveToCloud();
         alert("物料接收确认成功！系统已自动完成调出厂出库与接收厂入库！");
       }
     }
 
     function deleteTransfer(id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法删除调拨单！"); return; }
+
       let trans = fabricTransfers.find(t => t.id === id);
       if(!trans) return;
 
@@ -2336,6 +2411,7 @@
           fabricIn = fabricIn.filter(i => i.transferId !== id && i.come !== `调拨自 ${trans.fromFty}`);
         }
         fabricTransfers = fabricTransfers.filter(t => t.id !== id);
+        recordLog('ACTION', '删除调拨单', `删除了调拨单 [ID:${id.slice(-6)}]，联动撤销其出入库关联`);
         saveToCloud();
         alert("调拨记录及两端同步数据已成功删除！");
       }
@@ -2344,6 +2420,8 @@
     function renderTransferTable() {
       let tbody = document.getElementById('transferTableBody');
       if(!tbody) return;
+
+      let isReadonly = currentUser && currentUser.role === 'readonly';
 
       tbody.innerHTML = fabricTransfers.map(t => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
@@ -2357,15 +2435,17 @@
           <td class="py-2.5 px-3 font-bold">
             ${t.status === '已完成' ? '<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-xs">✅ 已完成</span>' : '<span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs animate-pulse">⏳ 待确认</span>'}
           </td>
-          <td class="py-2.5 px-3 flex items-center gap-2">
-            ${t.status !== '已完成' ? `<button onclick="confirmReceiveTransfer('${t.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition shadow-xs"><i class="fa-solid fa-check"></i> 确认收货</button>` : ''}
-            <button onclick="deleteTransfer('${t.id}')" class="text-slate-300 hover:text-red-500 text-xs" title="删除调拨单及联动出入库"><i class="fa-solid fa-trash-can"></i> 删除</button>
+          <td class="py-2.5 px-3 flex items-center gap-2 no-print normal-role-only">
+            ${(t.status !== '已完成' && !isReadonly) ? `<button onclick="confirmReceiveTransfer('${t.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition shadow-xs cursor-pointer"><i class="fa-solid fa-check"></i> 确认收货</button>` : ''}
+            ${!isReadonly ? `<button onclick="deleteTransfer('${t.id}')" class="text-slate-300 hover:text-red-500 text-xs cursor-pointer" title="删除调拨单及联动出入库"><i class="fa-solid fa-trash-can"></i> 删除</button>` : ''}
           </td>
         </tr>
       `).join('') || `<tr><td colspan="9" class="py-6 text-center text-slate-400">暂无厂际调拨记录</td></tr>`;
     }
 
     function openEditRecord(type, id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法进行修改！"); return; }
+
       let record = type === 'in' ? fabricIn.find(i => i.id === id) : fabricOut.find(i => i.id === id);
       if(!record) return;
 
@@ -2401,9 +2481,6 @@
 
       if(!styleNo || !batchNo) { alert("款号与缸号不能为空！"); return; }
 
-      let operator = currentUser ? currentUser.name : '系统';
-      let timeStr = getNowTimeString();
-
       let target = type === 'in' ? fabricIn.find(i => i.id === id) : fabricOut.find(i => i.id === id);
       if(target) {
         target.styleNo = styleNo;
@@ -2414,10 +2491,11 @@
         target.rack = rack;
         target.qty = qty;
         target.roll = roll;
-        target.operator = operator;
-        target.timeStr = timeStr;
+        target.operator = currentUser ? currentUser.name : '系统';
+        target.timeStr = getNowTimeString();
       }
 
+      recordLog('ACTION', `修改${type==='in'?'入库':'出库'}记录`, `修改记录 ID:${id.slice(-6)} 款号:${styleNo} 缸号:${batchNo} 数量:${qty}`);
       saveToCloud();
       closeEditRecordModal();
       alert("记录修改成功！");
@@ -2427,13 +2505,16 @@
       let name = document.getElementById('newUserName').value.trim();
       let pass = document.getElementById('newUserPass').value.trim();
       let fty = document.getElementById('newUserFty').value.trim();
+      let role = document.getElementById('newUserRole').value;
 
       if(!name || !pass) { alert("请填写人员姓名与密码！"); return; }
       if(warehouseUsers.some(u => u.name === name)) { alert("该人员姓名已存在！"); return; }
 
-      warehouseUsers.push({ name, pass, fty: fty || '全部单位' });
+      warehouseUsers.push({ name, pass, fty: fty || '全部单位', role: role || 'normal' });
+      recordLog('ACTION', '新增操作员', `新增操作员 [${name}] 权限:${role==='readonly'?'仅查看':'完整'} 授权工厂:${fty||'全部'}`);
       saveToCloud();
       alert(`成功新增操作人员：${name}！`);
+      
       document.getElementById('newUserName').value = '';
       document.getElementById('newUserPass').value = '';
       document.getElementById('newUserFty').value = '';
@@ -2446,6 +2527,7 @@
       document.getElementById('editUserNameHidden').value = u.name;
       document.getElementById('editUserNameDisplay').value = u.name;
       document.getElementById('editUserPassInput').value = u.pass;
+      document.getElementById('editUserRoleSelect').value = u.role || 'normal';
       document.getElementById('editUserFtyInput').value = u.fty || '全部单位';
       document.getElementById('editUserModal').classList.remove('hidden');
     }
@@ -2458,13 +2540,17 @@
       let name = document.getElementById('editUserNameHidden').value;
       let newPass = document.getElementById('editUserPassInput').value.trim();
       let newFty = document.getElementById('editUserFtyInput').value.trim();
+      let newRole = document.getElementById('editUserRoleSelect').value;
+
       if(!newPass) { alert("登录密码不能为空！"); return; }
       let u = warehouseUsers.find(x => x.name === name);
       if(u) {
         u.pass = newPass;
         u.fty = newFty || '全部单位';
+        u.role = newRole || 'normal';
+        recordLog('ACTION', '修改人员权限', `更新人员 [${name}] 权限与密码：${newRole==='readonly'?'仅查看':'完整'} 授权单位:${newFty}`);
         saveToCloud();
-        alert(`操作员 [${name}] 的密码与权限单位已成功更新！`);
+        alert(`操作员 [${name}] 的密码与权限已被成功更新！`);
         closeEditUserModal();
         renderUserTable();
       }
@@ -2474,6 +2560,7 @@
       if(name.includes('最高管理者')) { alert("最高管理者账号不可删除！"); return; }
       if(confirm(`确定要删除人员 ${name} 吗？`)) {
         warehouseUsers = warehouseUsers.filter(u => u.name !== name);
+        recordLog('ACTION', '删除人员账号', `删除了操作人员账号 [${name}]`);
         saveToCloud();
       }
     }
@@ -2485,18 +2572,21 @@
         <tr class="border-b border-slate-100 hover:bg-slate-50">
           <td class="py-2.5 px-3 font-bold text-indigo-600">${u.name}</td>
           <td class="py-2.5 px-3 font-semibold text-slate-600"><code class="bg-slate-100 px-2 py-1 rounded">${u.pass}</code></td>
+          <td class="py-2.5 px-3 font-bold">${u.role === 'readonly' ? '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs">🔒 仅查看</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs">✏️ 完整权限</span>'}</td>
           <td class="py-2.5 px-3 font-bold text-emerald-600">${u.fty || '全部单位'}</td>
           <td class="py-2.5 px-3 flex items-center gap-3 no-print">
-            <button onclick="openEditModal('${u.name}')" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-xs font-bold transition flex items-center gap-1">
+            <button onclick="openEditModal('${u.name}')" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
               <i class="fa-solid fa-pen-to-square"></i> 修改
             </button>
-            ${u.name.includes('最高管理者') ? '' : `<button onclick="deleteUser('${u.name}')" class="text-slate-300 hover:text-red-500 text-sm" title="删除"><i class="fa-solid fa-trash-can"></i></button>`}
+            ${u.name.includes('最高管理者') ? '' : `<button onclick="deleteUser('${u.name}')" class="text-slate-300 hover:text-red-500 text-sm cursor-pointer" title="删除"><i class="fa-solid fa-trash-can"></i></button>`}
           </td>
         </tr>
       `).join('');
     }
 
     function submitBatchAuxItems() {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法添加规格！"); return; }
+
       let styleNo = document.getElementById('auxStyleNo').value.trim();
       let operator = currentUser ? currentUser.name : '系统';
       let timeStr = getNowTimeString();
@@ -2511,20 +2601,18 @@
 
         if(item || orderColor || color) {
           addedCount++;
-          fabricAux.push({
+          fabricAux.unshift({
             id: Date.now().toString() + '_' + i,
             styleNo,
             item: item || '大身面料',
-            orderColor,
-            color,
-            operator,
-            timeStr
+            orderColor, color, operator, timeStr
           });
         }
       }
 
       if(addedCount === 0) { alert("请至少在下方表格中填写一行的面料类别或颜色！"); return; }
 
+      recordLog('ACTION', '新增面料规格', `为款号 [${styleNo}] 批量添加了 ${addedCount} 条面料规格`);
       saveToCloud();
       alert(`成功为款号 [${styleNo}] 批量添加了 ${addedCount} 条规格记录！`);
       
@@ -2538,14 +2626,24 @@
     }
 
     function deleteAux(id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法进行删除！"); return; }
+
+      let matched = fabricAux.find(i => i.id === id);
+      if(matched) {
+        recordLog('ACTION', '删除辅助规格', `删除了款号 [${matched.styleNo}] 类别 [${matched.item}] 颜色 [${matched.color||'-'}]`);
+      }
       fabricAux = fabricAux.filter(i => i.id !== id);
       saveToCloud();
     }
 
+    // 修改：从新到旧排序渲染辅助表
     function renderAuxTable() {
       let tbody = document.getElementById('auxTableBody');
       if(!tbody) return;
-      tbody.innerHTML = fabricAux.map(i => `
+
+      let sortedAux = [...fabricAux].sort((a, b) => (b.timeStr || '').localeCompare(a.timeStr || ''));
+
+      tbody.innerHTML = sortedAux.map(i => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
           <td class="py-2.5 px-3 font-bold text-indigo-600">${i.styleNo}</td>
           <td class="py-2.5 px-3 font-semibold">${i.item}</td>
@@ -2553,21 +2651,22 @@
           <td class="py-2.5 px-3 font-bold text-amber-600">${i.color || '-'}</td>
           <td class="py-2.5 px-3 text-xs font-bold text-indigo-600">${i.operator}</td>
           <td class="py-2.5 px-3 text-xs text-slate-500">${i.timeStr || '-'}</td>
-          <td class="py-2.5 px-3 no-print"><button onclick="deleteAux('${i.id}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></td>
+          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteAux('${i.id}')" class="text-slate-300 hover:text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
         </tr>
       `).join('');
     }
 
     function addNewFactoryName() {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法增加工厂！"); return; }
+
       let name = document.getElementById('newFtyNameInput').value.trim();
       let remark = document.getElementById('newFtyRemarkInput').value.trim();
-      let operator = currentUser ? currentUser.name : '系统';
-      let timeStr = getNowTimeString();
 
       if(!name) { alert("请输入工厂名称！"); return; }
       if(factoryList.some(f => f.name === name)) { alert("该工厂名称已存在！"); return; }
 
-      factoryList.push({ id: Date.now().toString(), name, remark: remark || '-', operator, timeStr });
+      factoryList.push({ id: Date.now().toString(), name, remark: remark || '-', operator: currentUser ? currentUser.name : '系统', timeStr: getNowTimeString() });
+      recordLog('ACTION', '新增工厂名称', `新增工厂节点：${name} (${remark})`);
       saveToCloud();
       alert(`成功增加工厂名称：${name}！`);
       document.getElementById('newFtyNameInput').value = '';
@@ -2575,7 +2674,11 @@
     }
 
     function deleteFactoryName(id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法删除工厂！"); return; }
+
       if(confirm("确定要删除这个工厂名称吗？")) {
+        let fty = factoryList.find(f => f.id === id);
+        if(fty) recordLog('ACTION', '删除工厂节点', `删除了工厂节点：${fty.name}`);
         factoryList = factoryList.filter(f => f.id !== id);
         saveToCloud();
       }
@@ -2590,7 +2693,7 @@
           <td class="py-2.5 px-3 text-slate-600">${f.remark || '-'}</td>
           <td class="py-2.5 px-3 text-xs font-bold text-indigo-600">${f.operator}</td>
           <td class="py-2.5 px-3 text-xs text-slate-500">${f.timeStr || '-'}</td>
-          <td class="py-2.5 px-3 no-print"><button onclick="deleteFactoryName('${f.id}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></td>
+          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteFactoryName('${f.id}')" class="text-slate-300 hover:text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
         </tr>
       `).join('');
       updateGlobalFtyDatalist();
@@ -2598,6 +2701,8 @@
     }
 
     function submitBatchInStock() {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法录入入库！"); return; }
+
       let fty = document.getElementById('inFty').value.trim();
       if (!fty || fty === '全部单位') {
         alert("[防呆拦截] 错误：入库工厂必须选择具体的工厂单位（如一厂、二厂等），不能选择“全部单位”！");
@@ -2634,6 +2739,7 @@
 
       if (addedCount === 0) { alert("请至少在下方表格中填写一行的缸号及数量！"); return; }
 
+      recordLog('ACTION', '批量面料入库', `工厂 [${fty}] 录入款号 [${styleNo}] 类别 [${item}] 共 ${addedCount} 组缸号数据`);
       saveToCloud();
       alert(`成功批量入库 ${addedCount} 个缸号的数据到 [${fty}]！`);
       
@@ -2646,6 +2752,12 @@
     }
 
     function deleteIn(id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法删除数据！"); return; }
+
+      let matched = fabricIn.find(i => i.id === id);
+      if(matched) {
+        recordLog('ACTION', '删除入库记录', `删除了入库记录 工厂:[${matched.fty}] 款号:[${matched.styleNo}] 缸号:[${matched.batchNo}] 数量:${matched.qty}`);
+      }
       fabricIn = fabricIn.filter(i => i.id !== id);
       saveToCloud();
     }
@@ -2676,15 +2788,17 @@
           <td class="py-2 px-3 text-xs">${i.come || '-'}</td>
           <td class="py-2 px-3 text-xs font-bold text-indigo-600">${i.operator}</td>
           <td class="py-2 px-3 text-xs text-slate-500">${i.timeStr || '-'}</td>
-          <td class="py-2 px-3 flex items-center gap-2 no-print">
-            <button onclick="openEditRecord('in', '${i.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-xs font-bold transition" title="修改"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteIn('${i.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded text-xs transition" title="删除"><i class="fa-solid fa-trash-can"></i></button>
+          <td class="py-2 px-3 flex items-center gap-2 no-print normal-role-only">
+            <button onclick="openEditRecord('in', '${i.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-xs font-bold transition cursor-pointer" title="修改"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="deleteIn('${i.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded text-xs transition cursor-pointer" title="删除"><i class="fa-solid fa-trash-can"></i></button>
           </td>
         </tr>
       `).join('');
     }
 
     function submitBatchOutStock() {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法进行出库操作！"); return; }
+
       let fty = document.getElementById('outFty').value.trim();
       let receiver = document.getElementById('outReceiver').value.trim();
       let invoice = document.getElementById('outInvoice').value.trim();
@@ -2718,26 +2832,20 @@
           addedCount++;
           fabricOut.unshift({
             id: Date.now().toString() + '_' + i,
-            fty,
-            receiver,
-            invoice,
-            date,
+            fty, receiver, invoice, date,
             styleNo: stockInfo.styleNo,
             item: stockInfo.item,
             orderColor: stockInfo.orderColor,
             color: stockInfo.color,
             rack: stockInfo.rack,
-            qty,
-            unit,
-            roll,
-            operator,
-            timeStr
+            qty, unit, roll, operator, timeStr
           });
         }
       }
 
       if (addedCount === 0) { alert("请至少在下方表格中填写一行的缸号及数量！"); return; }
 
+      recordLog('ACTION', '批量面料出库', `领料单位 [${fty}] 领用人 [${receiver}] 开票批次 [${invoice}] 共出库 ${addedCount} 组物料`);
       saveToCloud();
       alert(`成功批量出库 ${addedCount} 个缸号的数据！`);
       renderOutSmartRows();
@@ -2745,6 +2853,12 @@
     }
 
     function deleteOut(id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法删除出库数据！"); return; }
+
+      let matched = fabricOut.find(i => i.id === id);
+      if(matched) {
+        recordLog('ACTION', '删除出库记录', `删除了出库记录 批次:[${matched.invoice}] 领料单位:[${matched.fty}] 缸号:[${matched.batchNo}] 数量:${matched.qty}`);
+      }
       fabricOut = fabricOut.filter(i => i.id !== id);
       saveToCloud();
     }
@@ -2776,9 +2890,9 @@
           <td class="py-2 px-3 font-semibold">${i.roll}</td>
           <td class="py-2 px-3 text-xs font-bold text-indigo-600">${i.operator}</td>
           <td class="py-2 px-3 text-xs text-slate-500">${i.timeStr || '-'}</td>
-          <td class="py-2 px-3 flex items-center gap-2 no-print">
-            <button onclick="openEditRecord('out', '${i.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-xs font-bold transition" title="修改"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteOut('${i.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded text-xs transition" title="删除"><i class="fa-solid fa-trash-can"></i></button>
+          <td class="py-2 px-3 flex items-center gap-2 no-print normal-role-only">
+            <button onclick="openEditRecord('out', '${i.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-xs font-bold transition cursor-pointer" title="修改"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="deleteOut('${i.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded text-xs transition cursor-pointer" title="删除"><i class="fa-solid fa-trash-can"></i></button>
           </td>
         </tr>
       `).join('');
@@ -2924,6 +3038,43 @@
       }
 
       container.innerHTML = allPagesHtml;
+    }
+
+    // ================= 日志管理表格渲染函数 (仅最高管理者) =================
+    function renderLogsTable() {
+      let tbody = document.getElementById('logsTableBody');
+      if(!tbody) return;
+
+      let logType = document.getElementById('logTypeFilter')?.value || 'ALL';
+      let userQuery = (document.getElementById('logUserFilter')?.value || '').trim().toLowerCase();
+      let searchQuery = (document.getElementById('logSearchInput')?.value || '').trim().toLowerCase();
+
+      let filteredLogs = systemLogs.filter(log => {
+        if(logType !== 'ALL' && log.type !== logType) return false;
+        if(userQuery && !log.operator.toLowerCase().includes(userQuery)) return false;
+        if(searchQuery && !(log.action + log.detail + log.timeStr).toLowerCase().includes(searchQuery)) return false;
+        return true;
+      });
+
+      tbody.innerHTML = filteredLogs.map(log => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50">
+          <td class="py-2.5 px-3 text-xs text-slate-500 font-semibold">${log.timeStr}</td>
+          <td class="py-2.5 px-3 font-bold text-indigo-600">${log.operator}</td>
+          <td class="py-2.5 px-3 font-bold">
+            ${log.type === 'LOGIN' ? '<span class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-xs"><i class="fa-solid fa-right-to-bracket mr-1"></i>登录日志</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs"><i class="fa-solid fa-pen-clip mr-1"></i>操作日志</span>'}
+          </td>
+          <td class="py-2.5 px-3 font-bold text-slate-800">${log.action}</td>
+          <td class="py-2.5 px-3 text-slate-600 text-xs">${log.detail}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-400 font-semibold">暂无审计日志记录</td></tr>`;
+    }
+
+    function clearSystemLogs() {
+      if(confirm("确定要彻底清空所有的历史日志审计记录吗？（不可恢复）")) {
+        systemLogs = [];
+        saveToCloud();
+        renderLogsTable();
+      }
     }
   </script>
 </body>
