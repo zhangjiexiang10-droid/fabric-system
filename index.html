@@ -387,7 +387,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">订单颜色</label>
-            <input id="inOrderColor" list="auxOrderColorList" type="text" placeholder="订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+            <input id="inOrderColor" list="auxOrderColorList" oninput="onInOrderColorChange()" type="text" placeholder="订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
             <datalist id="auxOrderColorList"></datalist>
           </div>
           <div>
@@ -878,7 +878,6 @@
       let userName = currentUser ? currentUser.name : '';
       let userFty = currentUser ? (currentUser.fty || '全部单位') : '全部单位';
       
-      // 判断是否为最高管理者
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
 
       if (!isMaster) {
@@ -903,7 +902,6 @@
         if(!outFtyInput.value) outFtyInput.value = userFty !== '全部单位' ? userFty : '二厂 (DA MEI)';
       }
 
-      // 🎯 核心：只有最高管理者才能看到管理人后台按钮，其他操作员绝对隐藏
       if(adminBtn) {
         adminBtn.style.display = isMaster ? 'flex' : 'none';
       }
@@ -1092,6 +1090,26 @@
         if(m.color) colorSet.add(m.color);
       });
       document.getElementById('auxOrderColorList').innerHTML = [...orderColorSet].map(c => `<option value="${c}">`).join('');
+      document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
+    }
+
+    // 🎯 新增：当订单颜色改变时，面料颜色自动联动匹配对应规格
+    function onInOrderColorChange() {
+      let styleVal = document.getElementById('inStyle').value.trim();
+      let itemVal = document.getElementById('inItem').value.trim();
+      let orderColorVal = document.getElementById('inOrderColor').value.trim();
+
+      let matchedAux = fabricAux.filter(a => 
+        (!styleVal || a.styleNo === styleVal) && 
+        (!itemVal || a.item === itemVal) && 
+        (!orderColorVal || a.orderColor === orderColorVal)
+      );
+
+      let colorSet = new Set();
+      matchedAux.forEach(m => {
+        if(m.color) colorSet.add(m.color);
+      });
+
       document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
     }
 
