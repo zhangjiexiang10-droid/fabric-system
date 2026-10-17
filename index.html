@@ -423,7 +423,7 @@
 
         <div class="mb-4 bg-emerald-50/40 p-4 rounded-xl border border-emerald-100">
           <label class="block text-xs font-bold text-emerald-900 mb-2">
-            <i class="fa-solid fa-list-ol"></i> 缸号、货架号、卷数与数量批量录入区
+            <i class="fa-solid fa-list-ol"></i> 缸号、货架号、卷数与数量批量录入区 (上下左右键控制光标移动)
           </label>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-sm bg-white rounded-lg overflow-hidden shadow-xs">
@@ -535,7 +535,7 @@
 
         <div class="mb-4 bg-amber-50/40 p-4 rounded-xl border border-amber-100">
           <label class="block text-xs font-bold text-amber-900 mb-2">
-            <i class="fa-solid fa-list-ol"></i> 缸号智能关联出库区
+            <i class="fa-solid fa-list-ol"></i> 缸号智能关联出库区 (上下左右键控制光标移动)
           </label>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-sm bg-white rounded-lg overflow-hidden shadow-xs">
@@ -621,30 +621,27 @@
           </div>
         </div>
 
+        <!-- 💡 汇总页面筛选框改造：全部支持智能列表与打字匹配 -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-filter text-indigo-600"></i> 按款号筛选 Style</label>
-            <select id="filterStyle" onchange="renderBalanceSheet()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
-              <option value="">-- 全部款号 --</option>
-            </select>
+            <input id="filterStyle" list="filterStyleList" oninput="renderBalanceSheet()" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
+            <datalist id="filterStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按类别筛选 Item</label>
-            <select id="filterItem" onchange="renderBalanceSheet()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
-              <option value="">-- 全部类别 --</option>
-            </select>
+            <input id="filterItem" list="filterItemList" oninput="renderBalanceSheet()" placeholder="输入或选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+            <datalist id="filterItemList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按颜色筛选 Color</label>
-            <select id="filterColor" onchange="renderBalanceSheet()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
-              <option value="">-- 全部颜色 --</option>
-            </select>
+            <input id="filterColor" list="filterColorList" oninput="renderBalanceSheet()" placeholder="输入或选择颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+            <datalist id="filterColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按货架筛选 Rack</label>
-            <select id="filterRack" onchange="renderBalanceSheet()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
-              <option value="">-- 全部货架 --</option>
-            </select>
+            <input id="filterRack" list="filterRackList" oninput="renderBalanceSheet()" placeholder="输入或选择货架" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
+            <datalist id="filterRackList"></datalist>
           </div>
           <div class="flex gap-2">
             <input id="searchBalanceInput" type="text" placeholder="🔍 自由搜索缸号..." oninput="renderBalanceSheet()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white">
@@ -688,39 +685,42 @@
         </h2>
         <p class="text-xs text-slate-400 mb-4">接收工厂点击「确认收货」后自动完成调出与入库。</p>
         
+        <!-- 💡 调拨中心改造：款号、面料类别/颜色、调拨缸号全联动与打字匹配 -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
           <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-indigo-600"></i> 1. 发起新的面料调拨单</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">调出工厂 (发货方)</label>
-              <input id="transFromFty" list="globalFtyDatalist" onchange="updateTransferBatchList()" type="text" placeholder="调出工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600 fty-input-target">
+              <input id="transFromFty" list="globalFtyDatalist" onchange="updateTransferStyleList()" type="text" placeholder="调出工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600 fty-input-target">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">接收工厂 (收货方)</label>
               <input id="transToFty" list="globalFtyDatalist" type="text" placeholder="接收工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">调拨缸号</label>
-              <input id="transBatchNo" list="transferBatchList" oninput="onTransferBatchChange()" type="text" placeholder="选择缸号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold">
-              <datalist id="transferBatchList"></datalist>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">款号 Style No (可打字匹配)</label>
+              <input id="transStyle" list="transferStyleList" oninput="updateTransferItemList()" type="text" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+              <datalist id="transferStyleList"></datalist>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">调拨数量 QTY</label>
-              <input id="transQty" type="number" step="0.1" placeholder="数量" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-emerald-600 bg-white">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">面料类别 / 颜色 (可打字匹配)</label>
+              <input id="transItemColor" list="transferItemColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择类别与颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold">
+              <datalist id="transferItemColorList"></datalist>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">调拨卷数 Roll</label>
-              <input id="transRoll" type="number" placeholder="卷数" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">调拨缸号 Batch (自动联动剩余量)</label>
+              <input id="transBatchNo" list="transferBatchList" oninput="onTransferBatchChange()" type="text" placeholder="选择缸号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+              <datalist id="transferBatchList"></datalist>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">款号 Style No</label>
-              <input id="transStyle" type="text" disabled class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100 font-bold">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">调拨数量 QTY (显示实际剩余)</label>
+              <input id="transQty" type="number" step="0.1" placeholder="数量" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-emerald-600 bg-white">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">面料类别 / 颜色</label>
-              <input id="transItemColor" type="text" disabled class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">调拨卷数 Roll (显示实际剩余)</label>
+              <input id="transRoll" type="number" placeholder="卷数" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold">
             </div>
             <div class="flex items-end">
               <button onclick="submitTransferRequest()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm transition shadow-sm">
@@ -985,19 +985,25 @@
           inFtyInput.disabled = true; 
           inFtyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
         }
-        if(transFromFty) { transFromFty.value = userFty; transFromFty.disabled = true; transFromFty.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); }
+        if(transFromFty) { 
+          transFromFty.value = userFty; 
+          transFromFty.disabled = true; 
+          transFromFty.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
+        }
       } else {
         ftyInput.disabled = false;
         ftyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
         if(inFtyInput) { 
           inFtyInput.disabled = false; 
           inFtyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
-          // 💡 优化逻辑：即使是最高管理者，入库工厂默认也指向具体工厂，禁止默认是“全部单位”
           if(!inFtyInput.value || inFtyInput.value === '全部单位') {
             inFtyInput.value = '二厂 (DA MEI)';
           }
         }
-        if(transFromFty) { transFromFty.disabled = false; transFromFty.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); }
+        if(transFromFty) { 
+          transFromFty.disabled = false; 
+          transFromFty.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
+        }
       }
 
       let outFtyInput = document.getElementById('outFty');
@@ -1059,9 +1065,9 @@
         document.getElementById('currentUserNameDisplay').innerText = currentUser.name;
         
         applyUserPermissions();
-        renderAll();
+        initSystem();
       } else {
-        renderAll();
+        initSystem();
       }
     };
 
@@ -1074,6 +1080,38 @@
           <span class="text-slate-400 text-[10px]">授权: ${u.fty || '全部'}</span>
         </div>
       `).join('');
+    }
+
+    // 💡 键盘上下左右光标导航控制逻辑 (适用于入库与出库表格)
+    function setupTableKeyNavigation(tbodyId, rowCount, colCount) {
+      let tbody = document.getElementById(tbodyId);
+      if(!tbody) return;
+
+      let inputs = tbody.querySelectorAll('input');
+      inputs.forEach((input, index) => {
+        input.addEventListener('keydown', function(e) {
+          let keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+          if(keys.includes(e.key)) {
+            e.preventDefault(); // 阻止数字框默认上下加减数值的行为
+
+            let currentRow = Math.floor(index / colCount);
+            let currentCol = index % colCount;
+            let targetRow = currentRow;
+            let targetCol = currentCol;
+
+            if(e.key === 'ArrowUp') targetRow = Math.max(0, currentRow - 1);
+            if(e.key === 'ArrowDown') targetRow = Math.min(rowCount - 1, currentRow + 1);
+            if(e.key === 'ArrowLeft') targetCol = Math.max(0, currentCol - 1);
+            if(e.key === 'ArrowRight') targetCol = Math.min(colCount - 1, currentCol + 1);
+
+            let targetIndex = targetRow * colCount + targetCol;
+            if(inputs[targetIndex]) {
+              inputs[targetIndex].focus();
+              inputs[targetIndex].select();
+            }
+          }
+        });
+      });
     }
 
     function renderBatchRows(containerId, noPrefix, rackPrefix, rollPrefix, qtyPrefix) {
@@ -1092,6 +1130,7 @@
         `;
       }
       tbody.innerHTML = html;
+      setupTableKeyNavigation(containerId, 10, 4);
     }
 
     function renderBatchAuxRows() {
@@ -1109,6 +1148,7 @@
         `;
       }
       tbody.innerHTML = html;
+      setupTableKeyNavigation('batchAuxRowsContainer', 5, 3);
     }
 
     function renderOutSmartRows() {
@@ -1153,6 +1193,7 @@
 
       updateOutFilterDropdowns();
       updateOutBatchDatalists();
+      setupTableKeyNavigation('batchOutRowsContainer', 10, 3); // 缸号, 卷数, 数量可编辑列
     }
 
     function updateOutFilterDropdowns() {
@@ -1380,7 +1421,7 @@
       
       if(tabId === 'tabOut') updateOutFilterDropdowns();
       if(tabId === 'tabBalance') { updateBalanceFilterDropdowns(); renderBalanceSheet(); }
-      if(tabId === 'tabTransfer') { updateTransferBatchList(); renderTransferTable(); }
+      if(tabId === 'tabTransfer') { updateTransferStyleList(); renderTransferTable(); }
       if(tabId === 'tabPrint') updatePrintInvoiceDropdown();
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
     }
@@ -1505,6 +1546,7 @@
       updateOutFilterDropdowns();
       updateBalanceFilterDropdowns();
       renderBalanceSheet();
+      renderTransferStyleList();
       renderTransferTable();
       updatePrintInvoiceDropdown();
       let userName = currentUser ? currentUser.name : '';
@@ -1637,27 +1679,15 @@
         if(o.rack) rackSet.add(o.rack);
       });
 
-      let sSel = document.getElementById('filterStyle');
-      let iSel = document.getElementById('filterItem');
-      let cSel = document.getElementById('filterColor');
-      let rSel = document.getElementById('filterRack');
+      let sDl = document.getElementById('filterStyleList');
+      let iDl = document.getElementById('filterItemList');
+      let cDl = document.getElementById('filterColorList');
+      let rDl = document.getElementById('filterRackList');
 
-      if(!sSel) return;
-
-      let curS = sSel.value;
-      let curI = iSel.value;
-      let curC = cSel.value;
-      let curR = rSel.value;
-
-      sSel.innerHTML = '<option value="">-- 全部款号 --</option>' + [...styleSet].map(s=>`<option value="${s}">${s}</option>`).join('');
-      iSel.innerHTML = '<option value="">-- 全部类别 --</option>' + [...itemSet].map(i=>`<option value="${i}">${i}</option>`).join('');
-      cSel.innerHTML = '<option value="">-- 全部颜色 --</option>' + [...colorSet].map(c=>`<option value="${c}">${c}</option>`).join('');
-      rSel.innerHTML = '<option value="">-- 全部货架 --</option>' + [...rackSet].map(r=>`<option value="${r}">${r}</option>`).join('');
-
-      sSel.value = curS;
-      iSel.value = curI;
-      cSel.value = curC;
-      rSel.value = curR;
+      if(sDl) sDl.innerHTML = [...styleSet].map(s=>`<option value="${s}">`).join('');
+      if(iDl) iDl.innerHTML = [...itemSet].map(i=>`<option value="${i}">`).join('');
+      if(cDl) cDl.innerHTML = [...colorSet].map(c=>`<option value="${c}">`).join('');
+      if(rDl) rDl.innerHTML = [...rackSet].map(r=>`<option value="${r}">`).join('');
     }
 
     function resetBalanceFilters() {
@@ -1673,10 +1703,10 @@
       let tbody = document.getElementById('balanceTableBody');
       if(!tbody) return;
 
-      let fStyle = document.getElementById('filterStyle')?.value || '';
-      let fItem = document.getElementById('filterItem')?.value || '';
-      let fColor = document.getElementById('filterColor')?.value || '';
-      let fRack = document.getElementById('filterRack')?.value || '';
+      let fStyle = document.getElementById('filterStyle')?.value.trim() || '';
+      let fItem = document.getElementById('filterItem')?.value.trim() || '';
+      let fColor = document.getElementById('filterColor')?.value.trim() || '';
+      let fRack = document.getElementById('filterRack')?.value.trim() || '';
       let query = (document.getElementById('searchBalanceInput')?.value || '').toLowerCase();
 
       let map = {};
@@ -1826,10 +1856,11 @@
       renderBalanceSheet();
     }
 
-    function updateTransferBatchList() {
+    // 💡 调拨中心智能化联动函数
+    function updateTransferStyleList() {
       let fromFty = document.getElementById('transFromFty').value.trim();
-      let datalist = document.getElementById('transferBatchList');
-      if(!datalist) return;
+      let styleDl = document.getElementById('transferStyleList');
+      if(!styleDl) return;
 
       let map = {};
       fabricIn.forEach(i => {
@@ -1847,13 +1878,64 @@
       });
 
       window.transferCache = map;
-      let optionsHtml = '';
+
+      let styleSet = new Set();
       for(let b in map) {
-        if(map[b].qty > 0) {
-          optionsHtml += `<option value="${b}">[库存:${map[b].qty}] 款号:${map[b].styleNo}</option>`;
+        if(map[b].qty > 0 && map[b].styleNo) {
+          styleSet.add(map[b].styleNo);
         }
       }
-      datalist.innerHTML = optionsHtml;
+
+      styleDl.innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
+      updateTransferItemList();
+    }
+
+    function updateTransferItemList() {
+      let fromFty = document.getElementById('transFromFty').value.trim();
+      let styleVal = document.getElementById('transStyle').value.trim();
+      let itemColorDl = document.getElementById('transferItemColorList');
+      if(!itemColorDl) return;
+
+      let cache = window.transferCache || {};
+      let itemColorSet = new Set();
+
+      for(let b in cache) {
+        let m = cache[b];
+        if(m.qty > 0) {
+          if(styleVal && m.styleNo !== styleVal) continue;
+          let str = `${m.item} / 订单色:${m.orderColor||'-'} / 面料色:${m.color||'-'}`;
+          itemColorSet.add(str);
+        }
+      }
+
+      itemColorDl.innerHTML = [...itemColorSet].map(ic => `<option value="${ic}">`).join('');
+      updateTransferBatchList();
+    }
+
+    function updateTransferBatchList() {
+      let fromFty = document.getElementById('transFromFty').value.trim();
+      let styleVal = document.getElementById('transStyle').value.trim();
+      let itemColorVal = document.getElementById('transItemColor').value.trim();
+      let batchDl = document.getElementById('transferBatchList');
+      if(!batchDl) return;
+
+      let cache = window.transferCache || {};
+      let optionsHtml = '';
+
+      for(let b in cache) {
+        let m = cache[b];
+        if(m.qty > 0) {
+          if(styleVal && m.styleNo !== styleVal) continue;
+          if(itemColorVal) {
+            let str = `${m.item} / 订单色:${m.orderColor||'-'} / 面料色:${m.color||'-'}`;
+            if(str !== itemColorVal) continue;
+          }
+
+          optionsHtml += `<option value="${b}">[剩余库存:${m.qty} | 卷:${m.roll}] 货架:${m.rack||'-'}</option>`;
+        }
+      }
+
+      batchDl.innerHTML = optionsHtml;
     }
 
     function onTransferBatchChange() {
@@ -2220,8 +2302,6 @@
 
     function submitBatchInStock() {
       let fty = document.getElementById('inFty').value.trim();
-      
-      // 💡 防呆校验：禁止入库工厂选择“全部单位”
       if (!fty || fty === '全部单位') {
         alert("[防呆拦截] 错误：入库工厂必须选择具体的工厂单位（如一厂、二厂等），不能选择“全部单位”！");
         return;
