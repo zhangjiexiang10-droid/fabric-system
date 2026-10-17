@@ -494,9 +494,9 @@
             💡 提示：所有操作员均可出库、修改与删除。
           </span>
         </div>
-        <p class="text-xs text-slate-400 mb-4">款號與類別支援打字匹配与即時剩餘檢測，批次號随单位智能联动。</p>
+        <p class="text-xs text-slate-400 mb-4">款號、類別與顏色支援打字匹配与即時剩餘檢測，批次號随单位智能联动。</p>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">领料出库单位 FTY</label>
             <input id="outFty" list="globalFtyDatalist" onchange="onOutFtyChange()" type="text" placeholder="领料单位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target">
@@ -506,14 +506,19 @@
             <input id="outReceiver" list="receiverFactoryList" type="text" placeholder="输入或选择领用人/部门" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">① 筛选领料款号 Style</label>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">① 款号 Style</label>
             <input id="outFilterStyle" list="outStyleList" oninput="onOutFilterStyleChange()" type="text" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
             <datalist id="outStyleList"></datalist>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">② 筛选面料类别 Item</label>
-            <input id="outFilterItem" list="outItemList" oninput="updateOutBatchDatalists()" type="text" placeholder="输入或选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">② 面料类别 Item</label>
+            <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="输入或选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white">
             <datalist id="outItemList"></datalist>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">③ 颜色 Color (筛选)</label>
+            <input id="outFilterColor" list="outColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="输入或选择颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
+            <datalist id="outColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">开票编号/批次 (Invoice)</label>
@@ -544,7 +549,8 @@
                   <th class="py-2 px-3 w-12">序号</th>
                   <th class="py-2 px-3 w-40">缸号 (Batch No.)</th>
                   <th class="py-2 px-3 w-36">关联款号 / 类别</th>
-                  <th class="py-2 px-3 w-36">货架 / 颜色</th>
+                  <th class="py-2 px-3 w-32 font-bold text-amber-600">颜色 (Color)</th>
+                  <th class="py-2 px-3 w-28">货架号 (Rack)</th>
                   <th class="py-2 px-3 w-28">出库卷数 (Roll)</th>
                   <th class="py-2 px-3 w-24 text-indigo-600 font-bold">剩余卷数</th>
                   <th class="py-2 px-3 w-32">出库数量 (QTY)</th>
@@ -621,7 +627,6 @@
           </div>
         </div>
 
-        <!-- 💡 汇总页面筛选框改造：全部支持智能列表与打字匹配 -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-filter text-indigo-600"></i> 按款号筛选 Style</label>
@@ -685,7 +690,7 @@
         </h2>
         <p class="text-xs text-slate-400 mb-4">接收工厂点击「确认收货」后自动完成调出与入库。</p>
         
-        <!-- 💡 调拨中心改造：款号、面料类别/颜色、调拨缸号全联动与打字匹配 -->
+        <!-- 💡 调拨中心按最新截图拆分：款号、类别、颜色分别独立且支持打字匹配与智能联动 -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
           <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-indigo-600"></i> 1. 发起新的面料调拨单</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -703,12 +708,17 @@
               <datalist id="transferStyleList"></datalist>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">面料类别 / 颜色 (可打字匹配)</label>
-              <input id="transItemColor" list="transferItemColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择类别与颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold">
-              <datalist id="transferItemColorList"></datalist>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">面料类别 Item (可打字匹配)</label>
+              <input id="transItem" list="transferItemList" oninput="updateTransferColorList()" type="text" placeholder="输入或选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold">
+              <datalist id="transferItemList"></datalist>
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">颜色 Color (可打字匹配)</label>
+              <input id="transColor" list="transferColorList" oninput="updateTransferBatchList()" type="text" placeholder="输入或选择颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
+              <datalist id="transferColorList"></datalist>
+            </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">调拨缸号 Batch (自动联动剩余量)</label>
               <input id="transBatchNo" list="transferBatchList" oninput="onTransferBatchChange()" type="text" placeholder="选择缸号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
@@ -722,11 +732,11 @@
               <label class="block text-xs font-semibold text-slate-600 mb-1">调拨卷数 Roll (显示实际剩余)</label>
               <input id="transRoll" type="number" placeholder="卷数" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold">
             </div>
-            <div class="flex items-end">
-              <button onclick="submitTransferRequest()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm transition shadow-sm">
-                <i class="fa-solid fa-paper-plane"></i> 发起调拨单
-              </button>
-            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button onclick="submitTransferRequest()" class="w-full sm:w-64 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow-sm">
+              <i class="fa-solid fa-paper-plane"></i> 发起调拨单
+            </button>
           </div>
         </div>
 
@@ -1092,7 +1102,7 @@
         input.addEventListener('keydown', function(e) {
           let keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
           if(keys.includes(e.key)) {
-            e.preventDefault(); // 阻止数字框默认上下加减数值的行为
+            e.preventDefault();
 
             let currentRow = Math.floor(index / colCount);
             let currentCol = index % colCount;
@@ -1170,7 +1180,10 @@
               <input type="text" id="outStyleItem_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 font-bold text-slate-600">
             </td>
             <td class="py-1.5 px-3">
-              <input type="text" id="outRackColor_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-amber-600 font-semibold">
+              <input type="text" id="outColor_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-amber-600 font-bold">
+            </td>
+            <td class="py-1.5 px-3">
+              <input type="text" id="outRack_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-slate-600">
             </td>
             <td class="py-1.5 px-3">
               <input type="number" id="outRoll_${i}" placeholder="卷数" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white">
@@ -1200,10 +1213,12 @@
       let fty = document.getElementById('outFty')?.value || '';
       let styleSet = new Set();
       let itemSet = new Set();
+      let colorSet = new Set();
 
       fabricAux.forEach(a => {
         if(a.styleNo) styleSet.add(a.styleNo);
         if(a.item) itemSet.add(a.item);
+        if(a.color) colorSet.add(a.color);
       });
 
       let map = {};
@@ -1214,6 +1229,7 @@
           map[i.batchNo].roll += (i.roll || 0);
           if(i.styleNo) styleSet.add(i.styleNo);
           if(i.item) itemSet.add(i.item);
+          if(i.color) colorSet.add(i.color);
         }
       });
       fabricOut.forEach(o => {
@@ -1229,16 +1245,113 @@
       if(outStyleList) outStyleList.innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
       
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
+      let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+
       let activeItems = new Set();
+      let activeColors = new Set();
+
       fabricAux.forEach(a => {
         if(!filterStyle || a.styleNo === filterStyle) {
           if(a.item) activeItems.add(a.item);
         }
       });
+      for(let b in map) {
+        let m = map[b];
+        if(m.qty > 0) {
+          if(!filterStyle || m.styleNo === filterStyle) {
+            if(m.item) activeItems.add(m.item);
+            if(!filterItem || m.item === filterItem) {
+              if(m.color) activeColors.add(m.color);
+            }
+          }
+        }
+      }
+
       let outItemList = document.getElementById('outItemList');
       if(outItemList) outItemList.innerHTML = [...activeItems].map(i => `<option value="${i}">`).join('');
 
+      let outColorList = document.getElementById('outColorList');
+      if(outColorList) outColorList.innerHTML = [...activeColors].map(c => `<option value="${c}">`).join('');
+
       updateOutBatchDatalists();
+    }
+
+    function onOutFilterStyleChange() {
+      let styleVal = document.getElementById('outFilterStyle').value.trim();
+      let matchedAux = fabricAux.filter(a => a.styleNo === styleVal);
+      
+      let itemSet = new Set();
+      matchedAux.forEach(m => {
+        if(m.item) itemSet.add(m.item);
+      });
+
+      let cache = window.stockBatchCache || {};
+      for(let b in cache) {
+        if(cache[b].styleNo === styleVal && cache[b].item) {
+          itemSet.add(cache[b].item);
+        }
+      }
+
+      document.getElementById('outItemList').innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
+      updateOutFilterDropdowns();
+    }
+
+    function onOutFilterItemChange() {
+      updateOutFilterDropdowns();
+    }
+
+    function updateOutBatchDatalists() {
+      let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
+      let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+      let filterColor = document.getElementById('outFilterColor')?.value.trim() || '';
+      let cache = window.stockBatchCache || {};
+
+      let optionsHtml = '';
+      for(let batchNo in cache) {
+        let m = cache[batchNo];
+        if(m.qty > 0) {
+          if(filterStyle && m.styleNo !== filterStyle) continue;
+          if(filterItem && m.item !== filterItem) continue;
+          if(filterColor && m.color !== filterColor) continue;
+
+          optionsHtml += `<option value="${batchNo}">[剩余:${m.qty}] 款号:${m.styleNo} 类别:${m.item} 颜色:${m.color||'-'} 货架:${m.rack||'-'}</option>`;
+        }
+      }
+
+      for(let i = 1; i <= 10; i++) {
+        let dl = document.getElementById(`activeStockBatchList_${i}`);
+        if(dl) dl.innerHTML = optionsHtml;
+      }
+    }
+
+    function onOutBatchInput(idx) {
+      let batchVal = document.getElementById(`outBatch_${idx}`).value.trim();
+      let cache = window.stockBatchCache || {};
+      let match = cache[batchVal];
+
+      let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
+      let colorInput = document.getElementById(`outColor_${idx}`);
+      let rackInput = document.getElementById(`outRack_${idx}`);
+      let remainRollInput = document.getElementById(`outRemainRoll_${idx}`);
+      let remainQtyInput = document.getElementById(`outRemainQty_${idx}`);
+      let qtyInput = document.getElementById(`outQty_${idx}`);
+      let rollInput = document.getElementById(`outRoll_${idx}`);
+
+      if(match) {
+        styleItemInput.value = `${match.styleNo} | ${match.item}`;
+        colorInput.value = match.color || '-';
+        rackInput.value = match.rack || '-';
+        remainRollInput.value = match.roll;
+        remainQtyInput.value = match.qty;
+        qtyInput.max = match.qty;
+        rollInput.max = match.roll;
+      } else {
+        styleItemInput.value = '';
+        colorInput.value = '';
+        rackInput.value = '';
+        remainRollInput.value = '';
+        remainQtyInput.value = '';
+      }
     }
 
     function onInStyleChange() {
@@ -1302,75 +1415,6 @@
         if(!colorInput.value || !colorSet.has(colorInput.value)) {
           colorInput.value = singleColor;
         }
-      }
-    }
-
-    function onOutFilterStyleChange() {
-      let styleVal = document.getElementById('outFilterStyle').value.trim();
-      let matchedAux = fabricAux.filter(a => a.styleNo === styleVal);
-      
-      let itemSet = new Set();
-      matchedAux.forEach(m => {
-        if(m.item) itemSet.add(m.item);
-      });
-
-      let cache = window.stockBatchCache || {};
-      for(let b in cache) {
-        if(cache[b].styleNo === styleVal && cache[b].item) {
-          itemSet.add(cache[b].item);
-        }
-      }
-
-      document.getElementById('outItemList').innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
-      updateOutBatchDatalists();
-    }
-
-    function updateOutBatchDatalists() {
-      let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
-      let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
-      let cache = window.stockBatchCache || {};
-
-      let optionsHtml = '';
-      for(let batchNo in cache) {
-        let m = cache[batchNo];
-        if(m.qty > 0) {
-          if(filterStyle && m.styleNo !== filterStyle) continue;
-          if(filterItem && m.item !== filterItem) continue;
-
-          optionsHtml += `<option value="${batchNo}">[剩余:${m.qty}] 款号:${m.styleNo} 类别:${m.item} 订单色:${m.orderColor||'-'} 面料色:${m.color||'-'} 货架:${m.rack||'-'}</option>`;
-        }
-      }
-
-      for(let i = 1; i <= 10; i++) {
-        let dl = document.getElementById(`activeStockBatchList_${i}`);
-        if(dl) dl.innerHTML = optionsHtml;
-      }
-    }
-
-    function onOutBatchInput(idx) {
-      let batchVal = document.getElementById(`outBatch_${idx}`).value.trim();
-      let cache = window.stockBatchCache || {};
-      let match = cache[batchVal];
-
-      let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
-      let rackColorInput = document.getElementById(`outRackColor_${idx}`);
-      let remainRollInput = document.getElementById(`outRemainRoll_${idx}`);
-      let remainQtyInput = document.getElementById(`outRemainQty_${idx}`);
-      let qtyInput = document.getElementById(`outQty_${idx}`);
-      let rollInput = document.getElementById(`outRoll_${idx}`);
-
-      if(match) {
-        styleItemInput.value = `${match.styleNo} | ${match.item}`;
-        rackColorInput.value = `${match.rack||'-'} | ${match.orderColor||'-'}/${match.color||'-'}`;
-        remainRollInput.value = match.roll;
-        remainQtyInput.value = match.qty;
-        qtyInput.max = match.qty;
-        rollInput.max = match.roll;
-      } else {
-        styleItemInput.value = '';
-        rackColorInput.value = '';
-        remainRollInput.value = '';
-        remainQtyInput.value = '';
       }
     }
 
@@ -1546,7 +1590,7 @@
       updateOutFilterDropdowns();
       updateBalanceFilterDropdowns();
       renderBalanceSheet();
-      renderTransferStyleList();
+      updateTransferStyleList();
       renderTransferTable();
       updatePrintInvoiceDropdown();
       let userName = currentUser ? currentUser.name : '';
@@ -1856,7 +1900,7 @@
       renderBalanceSheet();
     }
 
-    // 💡 调拨中心智能化联动函数
+    // 💡 调拨中心拆分款号、类别、颜色独立的智能化联动函数
     function updateTransferStyleList() {
       let fromFty = document.getElementById('transFromFty').value.trim();
       let styleDl = document.getElementById('transferStyleList');
@@ -1891,31 +1935,51 @@
     }
 
     function updateTransferItemList() {
-      let fromFty = document.getElementById('transFromFty').value.trim();
       let styleVal = document.getElementById('transStyle').value.trim();
-      let itemColorDl = document.getElementById('transferItemColorList');
-      if(!itemColorDl) return;
+      let itemDl = document.getElementById('transferItemList');
+      if(!itemDl) return;
 
       let cache = window.transferCache || {};
-      let itemColorSet = new Set();
+      let itemSet = new Set();
 
       for(let b in cache) {
         let m = cache[b];
         if(m.qty > 0) {
           if(styleVal && m.styleNo !== styleVal) continue;
-          let str = `${m.item} / 订单色:${m.orderColor||'-'} / 面料色:${m.color||'-'}`;
-          itemColorSet.add(str);
+          if(m.item) itemSet.add(m.item);
         }
       }
 
-      itemColorDl.innerHTML = [...itemColorSet].map(ic => `<option value="${ic}">`).join('');
+      itemDl.innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
+      updateTransferColorList();
+    }
+
+    function updateTransferColorList() {
+      let styleVal = document.getElementById('transStyle').value.trim();
+      let itemVal = document.getElementById('transItem').value.trim();
+      let colorDl = document.getElementById('transferColorList');
+      if(!colorDl) return;
+
+      let cache = window.transferCache || {};
+      let colorSet = new Set();
+
+      for(let b in cache) {
+        let m = cache[b];
+        if(m.qty > 0) {
+          if(styleVal && m.styleNo !== styleVal) continue;
+          if(itemVal && m.item !== itemVal) continue;
+          if(m.color) colorSet.add(m.color);
+        }
+      }
+
+      colorDl.innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
       updateTransferBatchList();
     }
 
     function updateTransferBatchList() {
-      let fromFty = document.getElementById('transFromFty').value.trim();
       let styleVal = document.getElementById('transStyle').value.trim();
-      let itemColorVal = document.getElementById('transItemColor').value.trim();
+      let itemVal = document.getElementById('transItem').value.trim();
+      let colorVal = document.getElementById('transColor').value.trim();
       let batchDl = document.getElementById('transferBatchList');
       if(!batchDl) return;
 
@@ -1926,12 +1990,10 @@
         let m = cache[b];
         if(m.qty > 0) {
           if(styleVal && m.styleNo !== styleVal) continue;
-          if(itemColorVal) {
-            let str = `${m.item} / 订单色:${m.orderColor||'-'} / 面料色:${m.color||'-'}`;
-            if(str !== itemColorVal) continue;
-          }
+          if(itemVal && m.item !== itemVal) continue;
+          if(colorVal && m.color !== colorVal) continue;
 
-          optionsHtml += `<option value="${b}">[剩余库存:${m.qty} | 卷:${m.roll}] 货架:${m.rack||'-'}</option>`;
+          optionsHtml += `<option value="${b}">[剩余库存:${m.qty} | 卷:${m.roll}] 类别:${m.item} 颜色:${m.color||'-'} 货架:${m.rack||'-'}</option>`;
         }
       }
 
@@ -1945,7 +2007,8 @@
 
       if(match) {
         document.getElementById('transStyle').value = match.styleNo;
-        document.getElementById('transItemColor').value = `${match.item} / 订单色:${match.orderColor||'-'} / 面料色:${match.color||'-'}`;
+        document.getElementById('transItem').value = match.item;
+        document.getElementById('transColor').value = match.color || '';
         document.getElementById('transQty').value = match.qty;
         document.getElementById('transRoll').value = match.roll;
         window.currentTransItemMeta = match;
@@ -1987,7 +2050,8 @@
       document.getElementById('transQty').value = '';
       document.getElementById('transRoll').value = '';
       document.getElementById('transStyle').value = '';
-      document.getElementById('transItemColor').value = '';
+      document.getElementById('transItem').value = '';
+      document.getElementById('transColor').value = '';
     }
 
     function confirmReceiveTransfer(id) {
