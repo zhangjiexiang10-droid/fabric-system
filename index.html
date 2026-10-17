@@ -868,7 +868,7 @@
       }
     }
 
-    // 🎯 严格判定：只有最高管理者（Zaw Aung 且密码/身份正确）才显示管理人后台标签
+    // 🎯 严格判定：只有最高管理者才显示管理人后台标签
     function applyUserPermissions() {
       let ftyInput = document.getElementById('globalFtyFilter');
       let adminBtn = document.getElementById('btn_tabAdmin');
@@ -1056,7 +1056,6 @@
       updateOutBatchDatalists();
     }
 
-    // 🎯 严格级联：款号变更时联动类别、订单颜色、面料颜色
     function onInStyleChange() {
       let styleVal = document.getElementById('inStyle').value.trim();
       let matchedAux = fabricAux.filter(a => a.styleNo === styleVal);
@@ -1079,7 +1078,6 @@
       document.getElementById('auxRackList').innerHTML = [...rackSet].map(r => `<option value="${r}">`).join('');
     }
 
-    // 🎯 严格级联：类别变更时联动订单颜色与面料颜色
     function onInItemChange() {
       let styleVal = document.getElementById('inStyle').value.trim();
       let itemVal = document.getElementById('inItem').value.trim();
@@ -1095,7 +1093,6 @@
       document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
     }
 
-    // 🎯 完美精准联动：当选择或输入订单颜色时，面料颜色严格受当前“款号 + 类别 + 订单颜色”联合约束，绝对不出现多余的其他颜色！
     function onInOrderColorChange() {
       let styleVal = document.getElementById('inStyle').value.trim();
       let itemVal = document.getElementById('inItem').value.trim();
@@ -1260,12 +1257,21 @@
           if(data.factoryList && data.factoryList.length > 0) {
             factoryList = data.factoryList;
           }
-          // 🎯 修复：如果云端存有操作员名单，优先使用云端名单，绝不被默认名单覆盖重置
-          if(data.warehouseUsers && data.warehouseUsers.length > 0) {
-            warehouseUsers = data.warehouseUsers;
-          } else {
-            warehouseUsers = defaultUsers;
-          }
+          
+          // 🎯 修复：合并云端与本地默认用户，确保新添加的人员不会因云端缓存而丢失
+          let cloudUsers = data.warehouseUsers || [];
+          let mergedUsers = [...defaultUsers];
+          cloudUsers.forEach(cu => {
+            if(!mergedUsers.some(mu => mu.name === cu.name)) {
+              mergedUsers.push(cu);
+            } else {
+              let existing = mergedUsers.find(mu => mu.name === cu.name);
+              existing.pass = cu.pass;
+              existing.fty = cu.fty;
+            }
+          });
+          warehouseUsers = mergedUsers;
+
           renderAll();
           updateAuxDatalists();
           if(!isSilent) alert("云端数据同步成功！");
