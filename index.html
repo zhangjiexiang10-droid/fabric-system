@@ -859,14 +859,14 @@
     const BIN_ID = '6ad3251cffd5d1605372fa4a'; 
     const API_KEY = '$2a$10$4BG8r6gdqcF63Xv19dzd/OpvCTrfmblPUWGknBtarAdc.2SkbzSZ.';
 
-    let defaultUsers = [
+    let initialDefaultUsers = [
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位' },
       { name: 'KO KO NAING', pass: '1714', fty: '全部单位' },
       { name: 'MYO THAT PAING', pass: '1864', fty: '二厂 (DA MEI)' },
       { name: 'MYAT MIN', pass: '1234', fty: '一厂 (JUN TAI)' },
       { name: '仓库管理员', pass: '123456', fty: '全部单位' }
     ];
-    let warehouseUsers = [...defaultUsers];
+    let warehouseUsers = [...initialDefaultUsers];
     let currentUser = null;
     let currentGlobalFty = '全部单位';
     let onlyInStock = false;
@@ -899,17 +899,8 @@
         if(localOut && localOut.length > 0) fabricOut = localOut;
         if(localTrans && localTrans.length > 0) fabricTransfers = localTrans;
         if(localFty && localFty.length > 0) factoryList = localFty;
-        if(localUsers && localUsers.length > 0) {
-          let merged = [...defaultUsers];
-          localUsers.forEach(cu => {
-            if(cu && cu.name && !merged.some(m => m.name === cu.name)) {
-              merged.push(cu);
-            } else {
-              let existing = merged.find(m => m.name === cu.name);
-              if(existing) { existing.pass = cu.pass; existing.fty = cu.fty; }
-            }
-          });
-          warehouseUsers = merged;
+        if(localUsers && Array.isArray(localUsers)) {
+          warehouseUsers = localUsers;
         }
       } catch(e) {
         console.warn("读取本地缓存异常", e);
@@ -929,32 +920,23 @@
         if (res.ok) {
           let data = await res.json();
           let cloudRecord = data.record || data;
-          let cloudUsers = cloudRecord.warehouseUsers || [];
+          let cloudUsers = cloudRecord.warehouseUsers;
           let cloudAux = cloudRecord.fabricAux || [];
           let cloudIn = cloudRecord.fabricIn || [];
           let cloudOut = cloudRecord.fabricOut || [];
           let cloudTrans = cloudRecord.fabricTransfers || [];
           let cloudFtyList = cloudRecord.factoryList || [];
 
-          if (cloudUsers.length > 0) {
-            let merged = [...defaultUsers];
-            cloudUsers.forEach(cu => {
-              if(cu && cu.name && !merged.some(m => m.name === cu.name)) {
-                merged.push(cu);
-              } else {
-                let existing = merged.find(m => m.name === cu.name);
-                if(existing) { existing.pass = cu.pass; existing.fty = cu.fty; }
-              }
-            });
-            warehouseUsers = merged;
+          if (cloudUsers && Array.isArray(cloudUsers)) {
+            warehouseUsers = cloudUsers;
             localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
             renderLoginHints();
           }
 
-          if (cloudAux.length > 0) fabricAux = cloudAux;
-          if (cloudIn.length > 0) fabricIn = cloudIn;
-          if (cloudOut.length > 0) fabricOut = cloudOut;
-          if (cloudTrans.length > 0) fabricTransfers = cloudTrans;
+          if (cloudAux.length > 0 || cloudRecord.hasOwnProperty('fabricAux')) fabricAux = cloudAux;
+          if (cloudIn.length > 0 || cloudRecord.hasOwnProperty('fabricIn')) fabricIn = cloudIn;
+          if (cloudOut.length > 0 || cloudRecord.hasOwnProperty('fabricOut')) fabricOut = cloudOut;
+          if (cloudTrans.length > 0 || cloudRecord.hasOwnProperty('fabricTransfers')) fabricTransfers = cloudTrans;
           if (cloudFtyList.length > 0) factoryList = cloudFtyList;
         }
       } catch(e) {
@@ -1548,7 +1530,7 @@
         let cloudIn = cloudRecord.fabricIn || [];
         let cloudOut = cloudRecord.fabricOut || [];
         let cloudTrans = cloudRecord.fabricTransfers || [];
-        let cloudUsers = cloudRecord.warehouseUsers || [];
+        let cloudUsers = cloudRecord.warehouseUsers;
         let cloudFtyList = cloudRecord.factoryList || [];
 
         fabricAux.forEach(a => { if(!cloudAux.some(c => c.id === a.id)) cloudAux.push(a); });
@@ -1556,20 +1538,14 @@
         fabricOut.forEach(o => { if(!cloudOut.some(c => c.id === o.id)) cloudOut.push(o); });
         fabricTransfers.forEach(t => { if(!cloudTrans.some(c => c.id === t.id)) cloudTrans.push(t); });
 
-        warehouseUsers.forEach(u => {
-          if(!cloudUsers.some(c => c.name === u.name)) {
-            cloudUsers.push(u);
-          } else {
-            let existing = cloudUsers.find(c => c.name === u.name);
-            if(existing) { existing.pass = u.pass; existing.fty = u.fty; }
-          }
-        });
+        if (cloudUsers && Array.isArray(cloudUsers)) {
+          warehouseUsers = cloudUsers;
+        }
 
         fabricAux = cloudAux;
         fabricIn = cloudIn;
         fabricOut = cloudOut;
         fabricTransfers = cloudTrans;
-        warehouseUsers = cloudUsers;
         if(cloudFtyList.length > 0) factoryList = cloudFtyList;
 
         let putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
