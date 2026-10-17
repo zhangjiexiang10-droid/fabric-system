@@ -1114,7 +1114,6 @@
 
       document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
       
-      // 如果匹配出的可选面料颜色只有一种，自动帮用户填好或清空错误输入
       if(colorSet.size === 1) {
         let singleColor = [...colorSet][0];
         let colorInput = document.getElementById('inColor');
@@ -1261,6 +1260,7 @@
           if(data.factoryList && data.factoryList.length > 0) {
             factoryList = data.factoryList;
           }
+          // 🎯 修复：如果云端存有操作员名单，优先使用云端名单，绝不被默认名单覆盖重置
           if(data.warehouseUsers && data.warehouseUsers.length > 0) {
             warehouseUsers = data.warehouseUsers;
           } else {
