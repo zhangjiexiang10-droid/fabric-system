@@ -1160,8 +1160,8 @@
             <td class="py-1.5 px-3 font-bold text-xs text-slate-400">#${i}</td>
             <td class="py-1.5 px-3"><input type="text" id="${noPrefix}_${i}" placeholder="输入缸号 (例: BATCH-0${i})" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-white"></td>
             <td class="py-1.5 px-3"><input type="text" id="${rackPrefix}_${i}" list="auxRackList" placeholder="货架号" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold text-amber-600 bg-white"></td>
-            <td class="py-1.5 px-3"><input type="number" id="${rollPrefix}_${i}" placeholder="卷数" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white"></td>
-            <td class="py-1.5 px-3"><input type="number" step="0.1" id="${qtyPrefix}_${i}" placeholder="数量" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-emerald-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" inputmode="numeric" id="${rollPrefix}_${i}" placeholder="卷数" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" inputmode="decimal" id="${qtyPrefix}_${i}" placeholder="数量" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-emerald-600 bg-white"></td>
           </tr>
         `;
       }
@@ -1215,13 +1215,13 @@
               <input type="text" id="outRack_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-slate-600">
             </td>
             <td class="py-1.5 px-3">
-              <input type="number" id="outRoll_${i}" placeholder="卷数" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white">
+              <input type="text" inputmode="numeric" id="outRoll_${i}" placeholder="卷数" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white">
             </td>
             <td class="py-1.5 px-3">
               <input type="text" id="outRemainRoll_${i}" disabled placeholder="-" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-slate-50 text-center">
             </td>
             <td class="py-1.5 px-3">
-              <input type="number" step="0.1" id="outQty_${i}" placeholder="数量" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white">
+              <input type="text" inputmode="decimal" id="outQty_${i}" placeholder="数量" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white">
             </td>
             <td class="py-1.5 px-3">
               <input type="text" id="outRemainQty_${i}" disabled placeholder="-" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-emerald-600 bg-slate-50 text-center">
@@ -1244,11 +1244,22 @@
       let orderColorSet = new Set();
       let colorSet = new Set();
 
+      let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
+      let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+      let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
+      let filterColor = document.getElementById('outFilterColor')?.value.trim() || '';
+
       fabricAux.forEach(a => {
         if(a.styleNo) styleSet.add(a.styleNo);
-        if(a.item) itemSet.add(a.item);
-        if(a.orderColor) orderColorSet.add(a.orderColor);
-        if(a.color) colorSet.add(a.color);
+        if(!filterStyle || a.styleNo === filterStyle) {
+          if(a.item) itemSet.add(a.item);
+          if(!filterItem || a.item === filterItem) {
+            if(a.orderColor) orderColorSet.add(a.orderColor);
+            if(!filterOrderColor || a.orderColor === filterOrderColor) {
+              if(a.color) colorSet.add(a.color);
+            }
+          }
+        }
       });
 
       let map = {};
@@ -1258,9 +1269,15 @@
           map[i.batchNo].qty += (i.qty || 0);
           map[i.batchNo].roll += (i.roll || 0);
           if(i.styleNo) styleSet.add(i.styleNo);
-          if(i.item) itemSet.add(i.item);
-          if(i.orderColor) orderColorSet.add(i.orderColor);
-          if(i.color) colorSet.add(i.color);
+          if(!filterStyle || i.styleNo === filterStyle) {
+            if(i.item) itemSet.add(i.item);
+            if(!filterItem || i.item === filterItem) {
+              if(i.orderColor) orderColorSet.add(i.orderColor);
+              if(!filterOrderColor || i.orderColor === filterOrderColor) {
+                if(i.color) colorSet.add(i.color);
+              }
+            }
+          }
         }
       });
       fabricOut.forEach(o => {
@@ -1274,10 +1291,6 @@
 
       let outStyleList = document.getElementById('outStyleList');
       if(outStyleList) outStyleList.innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
-      
-      let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
-      let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
-      let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
 
       let activeItems = new Set();
       let activeOrderColors = new Set();
@@ -1316,30 +1329,26 @@
     }
 
     function onOutFilterStyleChange() {
-      let styleVal = document.getElementById('outFilterStyle').value.trim();
-      let matchedAux = fabricAux.filter(a => a.styleNo === styleVal);
-      
-      let itemSet = new Set();
-      matchedAux.forEach(m => {
-        if(m.item) itemSet.add(m.item);
-      });
-
-      let cache = window.stockBatchCache || {};
-      for(let b in cache) {
-        if(cache[b].styleNo === styleVal && cache[b].item) {
-          itemSet.add(cache[b].item);
-        }
-      }
-
-      document.getElementById('outItemList').innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
+      let fItem = document.getElementById('outFilterItem');
+      let fOrderColor = document.getElementById('outFilterOrderColor');
+      let fColor = document.getElementById('outFilterColor');
+      if(fItem) fItem.value = '';
+      if(fOrderColor) fOrderColor.value = '';
+      if(fColor) fColor.value = '';
       updateOutFilterDropdowns();
     }
 
     function onOutFilterItemChange() {
+      let fOrderColor = document.getElementById('outFilterOrderColor');
+      let fColor = document.getElementById('outFilterColor');
+      if(fOrderColor) fOrderColor.value = '';
+      if(fColor) fColor.value = '';
       updateOutFilterDropdowns();
     }
 
     function onOutFilterOrderColorChange() {
+      let fColor = document.getElementById('outFilterColor');
+      if(fColor) fColor.value = '';
       updateOutFilterDropdowns();
     }
 
@@ -1390,8 +1399,6 @@
         rackInput.value = match.rack || '-';
         remainRollInput.value = match.roll;
         remainQtyInput.value = match.qty;
-        qtyInput.max = match.qty;
-        rollInput.max = match.roll;
       } else {
         styleItemInput.value = '';
         orderColorInput.value = '';
