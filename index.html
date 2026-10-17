@@ -373,11 +373,11 @@
         <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
           <i class="fa-solid fa-cart-flatbed text-emerald-600"></i> 面料入库登记 (多缸号一次性批量录入)
         </h2>
-        <p class="text-xs text-slate-400 mb-4">所有操作员均可入库、修改与删除。</p>
+        <p class="text-xs text-slate-400 mb-4">所有操作员均可入库、修改与删除。入库工厂不能选择“全部单位”。</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">所属工厂/单位</label>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">所属工厂/单位 (必须选具体工厂)</label>
             <input id="inFty" list="globalFtyDatalist" type="text" placeholder="输入或选择工厂" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600 fty-input-target">
           </div>
           <div>
@@ -892,7 +892,6 @@
       }
     }
 
-    // 💡 重点改进：不管网页有没有登录，一加载页面立刻去云端获取最新用户列表
     async function fetchLatestUsersFromCloud() {
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -925,7 +924,7 @@
             });
             warehouseUsers = merged;
             localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
-            renderLoginHints(); // 立即更新登录弹窗列表
+            renderLoginHints();
           }
 
           if (cloudAux.length > 0) fabricAux = cloudAux;
@@ -981,12 +980,23 @@
         ftyInput.disabled = true;
         ftyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
 
-        if(inFtyInput) { inFtyInput.value = userFty; inFtyInput.disabled = true; inFtyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); }
+        if(inFtyInput) { 
+          inFtyInput.value = userFty; 
+          inFtyInput.disabled = true; 
+          inFtyInput.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
+        }
         if(transFromFty) { transFromFty.value = userFty; transFromFty.disabled = true; transFromFty.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); }
       } else {
         ftyInput.disabled = false;
         ftyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
-        if(inFtyInput) { inFtyInput.disabled = false; inFtyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); }
+        if(inFtyInput) { 
+          inFtyInput.disabled = false; 
+          inFtyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); 
+          // 💡 优化逻辑：即使是最高管理者，入库工厂默认也指向具体工厂，禁止默认是“全部单位”
+          if(!inFtyInput.value || inFtyInput.value === '全部单位') {
+            inFtyInput.value = '二厂 (DA MEI)';
+          }
+        }
         if(transFromFty) { transFromFty.disabled = false; transFromFty.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400'); }
       }
 
@@ -994,7 +1004,7 @@
       if(outFtyInput) {
         outFtyInput.disabled = false;
         outFtyInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-400');
-        if(!outFtyInput.value) {
+        if(!outFtyInput.value || outFtyInput.value === '全部单位') {
           outFtyInput.value = userFty !== '全部单位' ? userFty : '二厂 (DA MEI)';
         }
       }
@@ -1037,7 +1047,6 @@
       loadLocalCache();
       renderLoginHints();
 
-      // 先从云端获取最新用户，确保未登录状态下就能加载到新增用户
       await fetchLatestUsersFromCloud();
 
       let saved = sessionStorage.getItem('wh_user');
@@ -2211,6 +2220,13 @@
 
     function submitBatchInStock() {
       let fty = document.getElementById('inFty').value.trim();
+      
+      // 💡 防呆校验：禁止入库工厂选择“全部单位”
+      if (!fty || fty === '全部单位') {
+        alert("[防呆拦截] 错误：入库工厂必须选择具体的工厂单位（如一厂、二厂等），不能选择“全部单位”！");
+        return;
+      }
+
       let date = document.getElementById('inDate').value;
       let styleNo = document.getElementById('inStyle').value.trim();
       let item = document.getElementById('inItem').value.trim();
@@ -2221,7 +2237,7 @@
       let operator = currentUser ? currentUser.name : '系统';
       let timeStr = getNowTimeString();
 
-      if(!fty || !styleNo || !item) { alert("请填写工厂、款号和面料类别！"); return; }
+      if(!styleNo || !item) { alert("请填写款号和面料类别！"); return; }
 
       let addedCount = 0;
       for(let i = 1; i <= 10; i++) {
@@ -2242,7 +2258,7 @@
       if (addedCount === 0) { alert("请至少在下方表格中填写一行的缸号及数量！"); return; }
 
       saveToCloud();
-      alert(`成功批量入库 ${addedCount} 个缸号的数据！`);
+      alert(`成功批量入库 ${addedCount} 个缸号的数据到 [${fty}]！`);
       
       for(let i = 1; i <= 10; i++) {
         if(document.getElementById(`batchInNo_${i}`)) document.getElementById(`batchInNo_${i}`).value = '';
