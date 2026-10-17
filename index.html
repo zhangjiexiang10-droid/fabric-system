@@ -833,7 +833,7 @@
   <script>
     // ================= 云端配置 =================
     const BIN_ID = '6ad3251cffd5d1605372fa4a'; 
-    const API_KEY = '$2a$10$ffN1AM57TUaiKXIBj4AB/eeJgD0bl/3pFue9io5XvnaklmZyaa76K';
+    const API_KEY = '$2a$10$4BG8r6gdqcF63Xv19dzd/OpvCTrfmblPUWGknBtarAdc.2SkbzSZ.';
 
     let defaultUsers = [
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位' },
@@ -1323,7 +1323,7 @@
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
     }
 
-    // 💡【核心修复】：强力双向同步，把本地数据合并推送上传给新 Bin，绝对不丢数据！
+    // 💡 强力双向同步，把本地数据合并推送上传给新 Bin
     async function manualSync() {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
@@ -1344,19 +1344,17 @@
           cloudRecord = data.record || data;
         }
 
-        // 第二步：把本地已有的数据与云端合并（以不丢失数据为首要目的）
+        // 第二步：把本地已有的数据与云端合并
         let cloudAux = cloudRecord.fabricAux || [];
         let cloudIn = cloudRecord.fabricIn || [];
         let cloudOut = cloudRecord.fabricOut || [];
         let cloudTrans = cloudRecord.fabricTransfers || [];
 
-        // 将本地独有的数据合入云端
         fabricAux.forEach(a => { if(!cloudAux.some(c => c.id === a.id)) cloudAux.push(a); });
         fabricIn.forEach(i => { if(!cloudIn.some(c => c.id === i.id)) cloudIn.push(i); });
         fabricOut.forEach(o => { if(!cloudOut.some(c => c.id === o.id)) cloudOut.push(o); });
         fabricTransfers.forEach(t => { if(!cloudTrans.some(c => c.id === t.id)) cloudTrans.push(t); });
 
-        // 更新全局变量
         fabricAux = cloudAux;
         fabricIn = cloudIn;
         fabricOut = cloudOut;
@@ -1380,7 +1378,6 @@
         });
 
         if(putRes.ok) {
-          // 保存至本地备份
           localStorage.setItem('wh_aux', JSON.stringify(fabricAux));
           localStorage.setItem('wh_in', JSON.stringify(fabricIn));
           localStorage.setItem('wh_out', JSON.stringify(fabricOut));
