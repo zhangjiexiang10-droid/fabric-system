@@ -53,7 +53,7 @@
           安全登入系统
         </button>
         
-        <!-- 💡 登录名册：已彻底屏蔽密码，只显示姓名与授权单位 -->
+        <!-- 登录名册：隐藏密码 -->
         <div class="mt-4 pt-3 border-t border-slate-100">
           <p class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
             <i class="fa-solid fa-users text-indigo-600"></i> 系统操作员名册：
@@ -232,7 +232,7 @@
           <span class="text-xs font-bold text-slate-500">查看单位:</span>
           <input id="globalFtyFilter" list="globalFtyDatalist" onchange="changeGlobalFty()" value="全部单位" class="bg-transparent text-xs font-bold text-indigo-600 focus:outline-none w-32 fty-input-target">
         </div>
-        <button onclick="syncDataFromCloud(false)" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
+        <button onclick="manualSync()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
           <i class="fa-solid fa-rotate" id="syncIcon"></i> 同步
         </button>
         <button onclick="logout()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition" title="退出">
@@ -861,6 +861,24 @@
       { id: '6', name: '外发厂-B', remark: '外协加工', operator: '系统', timeStr: '2026-01-01 00:00' }
     ];
 
+    function loadLocalCache() {
+      try {
+        let localAux = JSON.parse(localStorage.getItem('wh_aux'));
+        let localIn = JSON.parse(localStorage.getItem('wh_in'));
+        let localOut = JSON.parse(localStorage.getItem('wh_out'));
+        let localTrans = JSON.parse(localStorage.getItem('wh_trans'));
+        let localFty = JSON.parse(localStorage.getItem('wh_fty_list'));
+
+        if(localAux && localAux.length > 0) fabricAux = localAux;
+        if(localIn && localIn.length > 0) fabricIn = localIn;
+        if(localOut && localOut.length > 0) fabricOut = localOut;
+        if(localTrans && localTrans.length > 0) fabricTransfers = localTrans;
+        if(localFty && localFty.length > 0) factoryList = localFty;
+      } catch(e) {
+        console.warn("读取本地缓存异常", e);
+      }
+    }
+
     function checkLogin() {
       const pwd = document.getElementById('loginPasswordInput').value.trim();
       
@@ -956,6 +974,9 @@
       renderBatchAuxRows();
       renderOutSmartRows();
 
+      // 先装载本地缓存，确保原本的数据不丢失
+      loadLocalCache();
+
       let localCachedUsers = JSON.parse(localStorage.getItem('wh_users')) || [];
       let merged = [...defaultUsers];
       localCachedUsers.forEach(cu => {
@@ -976,13 +997,12 @@
         document.getElementById('currentUserNameDisplay').innerText = currentUser.name;
         
         applyUserPermissions();
-        await syncDataFromCloud(true);
+        renderAll();
       } else {
-        await syncDataFromCloud(true);
+        renderAll();
       }
     };
 
-    // 🎯 登录提示：安全隐去密码显示
     function renderLoginHints() {
       let hintContainer = document.getElementById('loginHintList');
       if(!hintContainer) return;
@@ -1074,7 +1094,7 @@
     }
 
     function updateOutFilterDropdowns() {
-      let fty = document.getElementById('outFty').value;
+      let fty = document.getElementById('outFty')?.value || '';
       let styleSet = new Set();
       let itemSet = new Set();
 
@@ -1102,7 +1122,8 @@
 
       window.stockBatchCache = map;
 
-      document.getElementById('outStyleList').innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
+      let outStyleList = document.getElementById('outStyleList');
+      if(outStyleList) outStyleList.innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
       
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
       let activeItems = new Set();
@@ -1111,7 +1132,8 @@
           if(a.item) activeItems.add(a.item);
         }
       });
-      document.getElementById('outItemList').innerHTML = [...activeItems].map(i => `<option value="${i}">`).join('');
+      let outItemList = document.getElementById('outItemList');
+      if(outItemList) outItemList.innerHTML = [...activeItems].map(i => `<option value="${i}">`).join('');
 
       updateOutBatchDatalists();
     }
@@ -1250,7 +1272,7 @@
     }
 
     async function initSystem() {
-      await syncDataFromCloud(true);
+      renderAll();
     }
 
     function changeGlobalFty() {
@@ -1301,10 +1323,13 @@
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
     }
 
-    async function syncDataFromCloud(isSilent = false) {
+    // 💡【核心修复】：强力双向同步，把本地数据合并推送上传给新 Bin，绝对不丢数据！
+    async function manualSync() {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
+
       try {
+        // 第一步：先读取云端最新数据
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
           method: 'GET',
           headers: { 
@@ -1313,61 +1338,63 @@
           }
         });
 
+        let cloudRecord = {};
         if (res.ok) {
           let data = await res.json();
-          let record = data.record || data;
-          
-          fabricAux = record.fabricAux || [];
-          fabricIn = record.fabricIn || [];
-          fabricOut = record.fabricOut || [];
-          fabricTransfers = record.fabricTransfers || [];
-          if(record.factoryList && record.factoryList.length > 0) {
-            factoryList = record.factoryList;
-          }
-          
-          let cloudUsers = record.warehouseUsers || [];
-          let localCachedUsers = JSON.parse(localStorage.getItem('wh_users')) || [];
-          let mergedUsers = [...defaultUsers];
+          cloudRecord = data.record || data;
+        }
 
-          [...cloudUsers, ...localCachedUsers].forEach(cu => {
-            if(cu && cu.name) {
-              let exist = mergedUsers.find(m => m.name === cu.name);
-              if(!exist) {
-                mergedUsers.push(cu);
-              } else {
-                if(cu.pass && cu.pass !== '123456') exist.pass = cu.pass;
-                if(cu.fty) exist.fty = cu.fty;
-              }
-            }
-          });
-          warehouseUsers = mergedUsers;
-          localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
-          renderLoginHints();
+        // 第二步：把本地已有的数据与云端合并（以不丢失数据为首要目的）
+        let cloudAux = cloudRecord.fabricAux || [];
+        let cloudIn = cloudRecord.fabricIn || [];
+        let cloudOut = cloudRecord.fabricOut || [];
+        let cloudTrans = cloudRecord.fabricTransfers || [];
 
+        // 将本地独有的数据合入云端
+        fabricAux.forEach(a => { if(!cloudAux.some(c => c.id === a.id)) cloudAux.push(a); });
+        fabricIn.forEach(i => { if(!cloudIn.some(c => c.id === i.id)) cloudIn.push(i); });
+        fabricOut.forEach(o => { if(!cloudOut.some(c => c.id === o.id)) cloudOut.push(o); });
+        fabricTransfers.forEach(t => { if(!cloudTrans.some(c => c.id === t.id)) cloudTrans.push(t); });
+
+        // 更新全局变量
+        fabricAux = cloudAux;
+        fabricIn = cloudIn;
+        fabricOut = cloudOut;
+        fabricTransfers = cloudTrans;
+
+        // 第三步：把合并好的完整数据推送覆盖上传至云端新 Bin
+        let putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json', 
+            'X-Master-Key': API_KEY 
+          },
+          body: JSON.stringify({ 
+            fabricAux, 
+            fabricIn, 
+            fabricOut, 
+            fabricTransfers, 
+            factoryList, 
+            warehouseUsers 
+          })
+        });
+
+        if(putRes.ok) {
+          // 保存至本地备份
+          localStorage.setItem('wh_aux', JSON.stringify(fabricAux));
+          localStorage.setItem('wh_in', JSON.stringify(fabricIn));
+          localStorage.setItem('wh_out', JSON.stringify(fabricOut));
+          localStorage.setItem('wh_trans', JSON.stringify(fabricTransfers));
+          
           renderAll();
-          updateAuxDatalists();
-          if(!isSilent) alert("✅ 云端数据同步成功！多台电脑已实现最新同步。");
+          alert(`✅ 同步成功！本地数据已完整上传并更新至云端（包含入库:${fabricIn.length}条，出库:${fabricOut.length}条）。别的电脑现在点击同步也能看到了！`);
         } else {
-          throw new Error(`HTTP 状态码异常: ${res.status}`);
+          alert(`⚠️ 上传至云端失败，服务器响应状态码: ${putRes.status}`);
         }
+
       } catch(e) {
-        console.warn("云端读取失败，读取本地缓存...", e);
-        fabricAux = JSON.parse(localStorage.getItem('wh_aux')) || [];
-        fabricIn = JSON.parse(localStorage.getItem('wh_in')) || [];
-        fabricOut = JSON.parse(localStorage.getItem('wh_out')) || [];
-        fabricTransfers = JSON.parse(localStorage.getItem('wh_trans')) || [];
-        let localFty = JSON.parse(localStorage.getItem('wh_fty_list'));
-        if(localFty && localFty.length > 0) factoryList = localFty;
-        let localUsers = JSON.parse(localStorage.getItem('wh_users'));
-        if(localUsers && localUsers.length > 0) {
-          localUsers.forEach(lu => {
-            if(!warehouseUsers.some(w => w.name === lu.name)) warehouseUsers.push(lu);
-          });
-        }
-        renderLoginHints();
-        renderAll();
-        updateAuxDatalists();
-        if(!isSilent) alert("⚠️ 云端读取失败，已加载本地备份数据。请确认网络或 JSONBin 访问权限！");
+        console.error("同步失败: ", e);
+        alert(`❌ 同步发生错误，请检查网络或 Bin 配置。错误信息: ${e.message}`);
       } finally {
         if(icon) icon.classList.remove('fa-spin');
       }
@@ -1450,11 +1477,21 @@
       let colorList = [...new Set([...fabricAux.map(i => i.color), ...fabricIn.map(i => i.color)])].filter(Boolean);
       let rackList = [...new Set([...fabricAux.map(i => i.rack), ...fabricIn.map(i => i.rack)])].filter(Boolean);
 
-      document.getElementById('auxStyleList').innerHTML = styleList.map(s => `<option value="${s}">`).join('');
-      document.getElementById('auxItemList').innerHTML = itemList.map(i => `<option value="${i}">`).join('');
-      document.getElementById('auxOrderColorList').innerHTML = orderColorList.map(c => `<option value="${c}">`).join('');
-      document.getElementById('auxColorList').innerHTML = colorList.map(c => `<option value="${c}">`).join('');
-      document.getElementById('auxRackList').innerHTML = rackList.map(r => `<option value="${r}">`).join('');
+      let auxStyleList = document.getElementById('auxStyleList');
+      if(auxStyleList) auxStyleList.innerHTML = styleList.map(s => `<option value="${s}">`).join('');
+
+      let auxItemList = document.getElementById('auxItemList');
+      if(auxItemList) auxItemList.innerHTML = itemList.map(i => `<option value="${i}">`).join('');
+
+      let auxOrderColorList = document.getElementById('auxOrderColorList');
+      if(auxOrderColorList) auxOrderColorList.innerHTML = orderColorList.map(c => `<option value="${c}">`).join('');
+
+      let auxColorList = document.getElementById('auxColorList');
+      if(auxColorList) auxColorList.innerHTML = colorList.map(c => `<option value="${c}">`).join('');
+
+      let auxRackList = document.getElementById('auxRackList');
+      if(auxRackList) auxRackList.innerHTML = rackList.map(r => `<option value="${r}">`).join('');
+
       updateGlobalFtyDatalist();
       updateReceiverFactoryDatalist();
     }
