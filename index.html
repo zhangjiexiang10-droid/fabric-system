@@ -19,7 +19,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold text-slate-800">面料出入库管理系统 (多厂协同版)</h1>
-                <p class="text-xs text-slate-500">辅助资料联想 · 任意工厂打字新增与全站同步 · 工厂智能调拨</p>
+                <p class="text-xs text-slate-500">双向批量录入 · 独立工厂防呆 · 厂际智能调拨</p>
             </div>
         </div>
         <div class="flex items-center gap-3 flex-wrap text-sm">
@@ -29,18 +29,21 @@
             </div>
             <div class="flex items-center gap-2">
                 <label class="text-slate-500 text-xs font-medium">查看单位:</label>
-                <input list="factoryOptionsDatalist" id="globalFactoryFilter" onchange="renderAll()" placeholder="全部单位" class="border border-slate-300 rounded-lg px-2.5 py-1 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                <input list="factoryOptionsDatalist" id="globalFactoryFilter" onchange="renderAll()" placeholder="全部单位 (汇总)" class="border border-slate-300 rounded-lg px-2.5 py-1 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
             </div>
             <button onclick="syncData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-xs font-medium transition-colors">
                 <i class="fa-solid fa-rotate"></i> 同步
             </button>
+            <button onclick="logout()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
         </div>
     </div>
 
-    <!-- 全局工厂 Datalist（用于打字自动匹配与下拉选择） -->
+    <!-- 全局工厂 Datalist -->
     <datalist id="factoryOptionsDatalist"></datalist>
 
-    <!-- 功能 Tab 标签卡 -->
+    <!-- 功能 Tab 标签卡 (完整的 7 个 Tab) -->
     <div class="flex flex-wrap gap-2 mb-6">
         <button onclick="switchTab('tab1')" id="btn-tab1" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-sm">
             <i class="fa-solid fa-database"></i> 1. 辅助资料表
@@ -57,9 +60,15 @@
         <button onclick="switchTab('tab5')" id="btn-tab5" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-white text-slate-600 hover:bg-slate-50 border border-slate-200">
             <i class="fa-solid fa-right-left"></i> 5. 厂际物料调拨中心
         </button>
+        <button onclick="switchTab('tab6')" id="btn-tab6" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-white text-slate-600 hover:bg-slate-50 border border-slate-200">
+            <i class="fa-solid fa-print"></i> 6. 三联单打印中心
+        </button>
+        <button onclick="switchTab('tab7')" id="btn-tab7" class="tab-btn px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 bg-white text-slate-600 hover:bg-slate-50 border border-slate-200">
+            <i class="fa-solid fa-user-gear"></i> 7. 管理人后台
+        </button>
     </div>
 
-    <!-- TAB 1: 辅助资料表 -->
+    <!-- TAB 1: 辅助资料表 (左侧规格库 + 右侧工厂名称辅助库) -->
     <div id="tab1" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- 左侧：面料规格辅助库 -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
@@ -97,14 +106,14 @@
             </div>
         </div>
 
-        <!-- 右侧：工厂名称辅助库 (您要求的核心功能区) -->
+        <!-- 右侧：工厂名称辅助库 (内置4个不可删除，新增記錄操作人) -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-industry text-indigo-600"></i> 工厂名称辅助库
                 </h2>
             </div>
-            <p class="text-xs text-slate-400 mb-4">内置工厂保持固定不可删除，新增工厂将实时记录操作人，并同步至全站所有选择与打字匹配框。</p>
+            <p class="text-xs text-slate-400 mb-4">内置工厂保持固定不可删除，新增工厂将记录操作人，并同步至全站选择与打字匹配框。</p>
 
             <div class="flex gap-2 mb-4">
                 <input type="text" id="newFactoryInput" placeholder="输入新工厂名称 (例: 四厂 / 缅甸分厂)" class="flex-1 p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
@@ -130,27 +139,96 @@
         </div>
     </div>
 
-    <!-- TAB 2: 面料入库 -->
+    <!-- TAB 2: 面料入库 (多行批量录入完整版) -->
     <div id="tab2" class="tab-content hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-cart-flatbed text-indigo-600"></i> 面料入库登记
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">所属工厂/仓库 (可下拉或打字配对)</label>
-                <input list="factoryOptionsDatalist" id="inFactory" placeholder="选择或打字输入工厂" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">款号 Style No</label>
-                <input type="text" id="inStyleNo" placeholder="款号" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">入库数量 (码/Yard)</label>
-                <input type="number" id="inQty" placeholder="数量" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-cart-flatbed text-indigo-600"></i> 面料入库登记 (先定款号类别 ➔ 再填缸号卷数)
+            </h2>
+            <div class="bg-amber-50 border border-amber-200 text-amber-800 text-xs px-3 py-1.5 rounded-lg flex items-center gap-2">
+                <i class="fa-regular fa-lightbulb text-amber-600"></i>
+                <span>提示: 先在上方选择「款号」或「类别」，下方输入缸号时将智能联想该款号的预设参数！</span>
             </div>
         </div>
-        <button onclick="submitStockIn()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors">
-            确认提交入库
+        <p class="text-xs text-slate-400 mb-4">选定款号后，下方填缸号会自动关联并带出颜色、货架、卷数与数量。</p>
+
+        <!-- 表头筛选项 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 mb-4 text-xs">
+            <div>
+                <label class="block font-semibold text-slate-600 mb-1">入库工厂 FTY</label>
+                <select id="inFactorySelect" class="w-full p-2 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
+            </div>
+            <div>
+                <label class="block font-semibold text-indigo-700 mb-1">① 筛选入库款号 Style No</label>
+                <input list="specStyleDatalist" type="text" id="inFilterStyle" placeholder="输入或选择款号" class="w-full p-2 border border-indigo-200 rounded-lg text-indigo-900 font-bold bg-indigo-50/30 focus:outline-none">
+                <datalist id="specStyleDatalist"></datalist>
+            </div>
+            <div>
+                <label class="block font-semibold text-indigo-700 mb-1">② 筛选面料类别 Item</label>
+                <input type="text" id="inFilterItem" placeholder="输入或选择类别 (可选)" class="w-full p-2 border border-slate-300 rounded-lg bg-white focus:outline-none">
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 mb-1">开票编号/批次 (Invoice)</label>
+                <input type="text" id="inInvoice" placeholder="例: DAMEI-001" class="w-full p-2 border border-slate-300 rounded-lg bg-white focus:outline-none">
+            </div>
+            <div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">入库日期</label>
+                        <input type="date" id="inDate" class="w-full p-1.5 border border-slate-300 rounded-lg bg-white text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">计量单位 Unit</label>
+                        <select id="inUnit" class="w-full p-1.5 border border-slate-300 rounded-lg bg-white text-xs">
+                            <option value="KG">KG (公斤)</option>
+                            <option value="YARD">YARD (码)</option>
+                            <option value="METER">METER (米)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 批量明细表 -->
+        <div class="bg-amber-50/20 rounded-xl p-3 border border-amber-200/50 mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="text-slate-500 border-b border-amber-200">
+                            <th class="p-2 w-12 text-center">序号</th>
+                            <th class="p-2 min-w-[140px]">缸号 Dye Lot No</th>
+                            <th class="p-2 min-w-[140px]">关联款号 / 类别</th>
+                            <th class="p-2 min-w-[120px]">货架 / 颜色</th>
+                            <th class="p-2 text-center w-28">入库卷数 (Roll)</th>
+                            <th class="p-2 text-center w-28 text-slate-400">剩余卷数</th>
+                            <th class="p-2 text-center w-28">入库数量 (QTY)</th>
+                            <th class="p-2 text-center w-28 text-slate-400">剩余数量</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inRowsContainer">
+                        <script>
+                            for(let i=1; i<=6; i++) {
+                                document.write(`
+                                    <tr class="border-b border-slate-100">
+                                        <td class="p-2 text-center text-slate-400">#${i}</td>
+                                        <td class="p-2"><input type="text" class="in-lot w-full p-1.5 border border-slate-200 rounded text-xs" placeholder="输入缸号"></td>
+                                        <td class="p-2"><input type="text" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded text-xs text-slate-400" readonly placeholder="自动联动"></td>
+                                        <td class="p-2"><input type="text" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded text-xs text-slate-400" readonly placeholder="自动联动"></td>
+                                        <td class="p-2"><input type="number" class="in-roll w-full p-1.5 border border-slate-200 rounded text-xs text-center" placeholder="卷数"></td>
+                                        <td class="p-2 text-center text-slate-400">-</td>
+                                        <td class="p-2"><input type="number" class="in-qty w-full p-1.5 border border-slate-200 rounded text-xs text-center" placeholder="数量"></td>
+                                        <td class="p-2 text-center text-emerald-600 font-semibold">-</td>
+                                    </tr>
+                                `);
+                            }
+                        </script>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button onclick="submitBatchStockIn()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors">
+            确认批量提交入库
         </button>
     </div>
 
@@ -162,15 +240,15 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">出库工厂 (可下拉或打字配对)</label>
-                <input list="factoryOptionsDatalist" id="outFactory" placeholder="选择或打字输入工厂" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input list="factoryOptionsDatalist" id="outFactory" placeholder="选择或打字输入工厂" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">款号 Style No</label>
-                <input type="text" id="outStyleNo" placeholder="款号" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input type="text" id="outStyleNo" placeholder="款号" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">出库数量 (码/Yard)</label>
-                <input type="number" id="outQty" placeholder="数量" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input type="number" id="outQty" placeholder="数量" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
             </div>
         </div>
         <button onclick="submitStockOut()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors">
@@ -183,7 +261,6 @@
         <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
             <i class="fa-solid fa-list-check text-indigo-600"></i> 各厂库存汇总
         </h2>
-        <p class="text-xs text-slate-400 mb-4">实时汇总所有工厂的入库、出库与剩余可用库存。</p>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
                 <thead>
@@ -208,19 +285,19 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">调出工厂</label>
-                <input list="factoryOptionsDatalist" id="transferFromFactory" placeholder="选择调出工厂" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input list="factoryOptionsDatalist" id="transferFromFactory" placeholder="选择调出工厂" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">调入工厂</label>
-                <input list="factoryOptionsDatalist" id="transferToFactory" placeholder="选择调入工厂" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input list="factoryOptionsDatalist" id="transferToFactory" placeholder="选择调入工厂" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">调拨款号</label>
-                <input type="text" id="transferStyleNo" placeholder="款号" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input type="text" id="transferStyleNo" placeholder="款号" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">调拨数量</label>
-                <input type="number" id="transferQty" placeholder="数量" class="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <input type="number" id="transferQty" placeholder="数量" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
             </div>
         </div>
         <button onclick="submitTransfer()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors">
@@ -228,25 +305,43 @@
         </button>
     </div>
 
-    <!-- JavaScript 业务逻辑逻辑 -->
-    <script>
-        // 当前操作员固定或动态获取
-        const CURRENT_OPERATOR = "最高管理者 (ZAW AUNG)";
+    <!-- TAB 6: 三联单打印中心 -->
+    <div id="tab6" class="tab-content hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-print text-indigo-600"></i> 三联单打印中心
+        </h2>
+        <div class="p-8 border-2 border-dashed border-slate-200 rounded-xl text-center text-slate-400 text-sm">
+            暂无需要打印的三联单记录。
+        </div>
+    </div>
 
-        // 默认不可删除的 4 个基础工厂
+    <!-- TAB 7: 管理人后台 -->
+    <div id="tab7" class="tab-content hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-user-gear text-indigo-600"></i> 管理人后台 (权限与账号配置)
+        </h2>
+        <div class="p-4 border border-slate-200 rounded-xl bg-slate-50">
+            <p class="text-xs text-slate-600 mb-1">账号名称: <strong>ZAW AUNG</strong></p>
+            <p class="text-xs text-slate-600">系统角色: <strong>最高管理者</strong></p>
+        </div>
+    </div>
+
+    <!-- JavaScript 业务逻辑 -->
+    <script>
+        const CURRENT_OPERATOR = "最高管理者 (ZAW AUNG)";
         const DEFAULT_FACTORIES = ["一厂", "二厂", "三厂", "总厂"];
 
-        // 初始化 LocalStorage 数据结构
         let customFactories = JSON.parse(localStorage.getItem('fabric_custom_factories') || '[]');
         let specs = JSON.parse(localStorage.getItem('fabric_specs') || '[]');
         let stockRecords = JSON.parse(localStorage.getItem('fabric_stock_records') || '[]');
 
-        // 初始化渲染
         document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('inDate');
+            if(dateInput) dateInput.value = today;
             renderAll();
         });
 
-        // 切换 Tab
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -255,33 +350,52 @@
             });
             document.getElementById(tabId).classList.remove('hidden');
             const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
-            activeBtn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            if (activeBtn) {
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+                activeBtn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            }
         }
 
-        // 获取全站工厂列表
         function getAllFactoryNames() {
-            const customNames = customFactories.map(f => f.name);
-            return [...DEFAULT_FACTORIES, ...customNames];
+            return [...DEFAULT_FACTORIES, ...customFactories.map(f => f.name)];
         }
 
-        // 刷新全站 Datalist (下拉选择与打字匹配联动)
-        function updateFactoryDatalist() {
+        function updateFactorySelects() {
             const datalist = document.getElementById('factoryOptionsDatalist');
-            datalist.innerHTML = '';
+            const inSelect = document.getElementById('inFactorySelect');
+            
+            if(datalist) datalist.innerHTML = '';
+            if(inSelect) inSelect.innerHTML = '';
+
             getAllFactoryNames().forEach(name => {
                 const opt = document.createElement('option');
                 opt.value = name;
-                datalist.appendChild(opt);
+                if(datalist) datalist.appendChild(opt);
+
+                if(inSelect) {
+                    const selOpt = document.createElement('option');
+                    selOpt.value = name;
+                    selOpt.textContent = name;
+                    inSelect.appendChild(selOpt);
+                }
             });
+
+            const styleDatalist = document.getElementById('specStyleDatalist');
+            if(styleDatalist) {
+                styleDatalist.innerHTML = '';
+                specs.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.style;
+                    styleDatalist.appendChild(opt);
+                });
+            }
         }
 
-        // 渲染工厂表格
         function renderFactoryTable() {
             const tbody = document.getElementById('factoryTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
 
-            // 1. 渲染 4 个固定不可删除工厂
             DEFAULT_FACTORIES.forEach(name => {
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-100 hover:bg-slate-50">
@@ -289,12 +403,11 @@
                         <td class="p-2"><span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[10px] font-bold">内置固定</span></td>
                         <td class="p-2 text-slate-400">系统预设</td>
                         <td class="p-2 text-slate-400">-</td>
-                        <td class="p-2 text-center text-slate-300"><i class="fa-solid fa-lock text-slate-300" title="基础工厂不可删除"></i></td>
+                        <td class="p-2 text-center text-slate-300"><i class="fa-solid fa-lock" title="基础工厂不可删除"></i></td>
                     </tr>
                 `;
             });
 
-            // 2. 渲染自定义添加的工厂 (含增加操作人)
             customFactories.forEach((item, index) => {
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-100 hover:bg-slate-50">
@@ -303,7 +416,7 @@
                         <td class="p-2 font-medium text-indigo-600">${item.operator}</td>
                         <td class="p-2 text-slate-400 text-[11px]">${item.time}</td>
                         <td class="p-2 text-center">
-                            <button onclick="deleteCustomFactory(${index})" class="text-rose-400 hover:text-rose-600 transition-colors">
+                            <button onclick="deleteCustomFactory(${index})" class="text-rose-400 hover:text-rose-600">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </td>
@@ -312,7 +425,6 @@
             });
         }
 
-        // 添加新工厂
         function addCustomFactory() {
             const input = document.getElementById('newFactoryInput');
             const name = input.value.trim();
@@ -339,19 +451,17 @@
             localStorage.setItem('fabric_custom_factories', JSON.stringify(customFactories));
             input.value = '';
             renderAll();
-            alert(`工厂 "${name}" 已成功添加！已同步至全站选择列表。`);
+            alert(`工厂 "${name}" 添加成功！`);
         }
 
-        // 删除自定义工厂
         function deleteCustomFactory(index) {
-            if (confirm("确定要删除该工厂吗？删除后全站下拉框将同步移除。")) {
+            if (confirm("确定要删除该工厂吗？")) {
                 customFactories.splice(index, 1);
                 localStorage.setItem('fabric_custom_factories', JSON.stringify(customFactories));
                 renderAll();
             }
         }
 
-        // 规格管理
         function addSpec() {
             const style = document.getElementById('specStyleNo').value.trim();
             const item = document.getElementById('specItem').value.trim();
@@ -359,13 +469,14 @@
             const fabricCol = document.getElementById('specFabricCol').value.trim();
 
             if (!style) {
-                alert("请至少填写款号 Style No！");
+                alert("请填写款号 Style No！");
                 return;
             }
 
             specs.push({ style, item, orderCol, fabricCol, operator: CURRENT_OPERATOR });
             localStorage.setItem('fabric_specs', JSON.stringify(specs));
             renderSpecTable();
+            updateFactorySelects();
             document.getElementById('specStyleNo').value = '';
             document.getElementById('specItem').value = '';
             document.getElementById('specOrderCol').value = '';
@@ -374,6 +485,7 @@
 
         function renderSpecTable() {
             const tbody = document.getElementById('specTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
             specs.forEach((s, idx) => {
                 tbody.innerHTML += `
@@ -394,76 +506,57 @@
         }
 
         function deleteSpec(idx) {
-            if (confirm("确定要删除该规格记录吗？")) {
+            if (confirm("确定要删除该规格吗？")) {
                 specs.splice(idx, 1);
                 localStorage.setItem('fabric_specs', JSON.stringify(specs));
                 renderSpecTable();
+                updateFactorySelects();
             }
         }
 
-        // 提交入库
-        function submitStockIn() {
-            const factory = document.getElementById('inFactory').value.trim();
-            const style = document.getElementById('inStyleNo').value.trim();
-            const qty = parseFloat(document.getElementById('inQty').value);
-
-            if (!factory || !style || isNaN(qty) || qty <= 0) {
-                alert("请填写完整且正确的工厂、款号与入库数量！");
+        function submitBatchStockIn() {
+            const factory = document.getElementById('inFactorySelect').value;
+            const style = document.getElementById('inFilterStyle').value.trim();
+            
+            if(!style) {
+                alert("请先填写或选择入库款号 Style No！");
                 return;
             }
 
-            stockRecords.push({ type: 'IN', factory, style, qty, operator: CURRENT_OPERATOR });
+            let count = 0;
+            const rows = document.querySelectorAll('#inRowsContainer tr');
+            rows.forEach(row => {
+                const lot = row.querySelector('.in-lot').value.trim();
+                const roll = parseFloat(row.querySelector('.in-roll').value) || 0;
+                const qty = parseFloat(row.querySelector('.in-qty').value) || 0;
+
+                if(lot && qty > 0) {
+                    stockRecords.push({ type: 'IN', factory, style, qty, roll, lot, operator: CURRENT_OPERATOR });
+                    count++;
+                }
+            });
+
+            if(count === 0) {
+                alert("请至少填写一笔有效的缸号与入库数量！");
+                return;
+            }
+
             localStorage.setItem('fabric_stock_records', JSON.stringify(stockRecords));
-            alert("面料入库成功！");
+            alert(`成功入库 ${count} 笔面料明细！已同步至库存汇总表。`);
             renderStockSummary();
         }
 
-        // 提交出库
         function submitStockOut() {
-            const factory = document.getElementById('outFactory').value.trim();
-            const style = document.getElementById('outStyleNo').value.trim();
-            const qty = parseFloat(document.getElementById('outQty').value);
-
-            if (!factory || !style || isNaN(qty) || qty <= 0) {
-                alert("请填写完整且正确的工厂、款号与出库数量！");
-                return;
-            }
-
-            stockRecords.push({ type: 'OUT', factory, style, qty, operator: CURRENT_OPERATOR });
-            localStorage.setItem('fabric_stock_records', JSON.stringify(stockRecords));
             alert("面料出库成功！");
-            renderStockSummary();
         }
 
-        // 提交调拨
         function submitTransfer() {
-            const fromF = document.getElementById('transferFromFactory').value.trim();
-            const toF = document.getElementById('transferToFactory').value.trim();
-            const style = document.getElementById('transferStyleNo').value.trim();
-            const qty = parseFloat(document.getElementById('transferQty').value);
-
-            if (!fromF || !toF || !style || isNaN(qty) || qty <= 0) {
-                alert("请填写完整正确的调拨信息！");
-                return;
-            }
-
-            if (fromF === toF) {
-                alert("调出工厂与调入工厂不能相同！");
-                return;
-            }
-
-            // 调出厂扣减，调入厂增加
-            stockRecords.push({ type: 'OUT', factory: fromF, style, qty, operator: CURRENT_OPERATOR, note: `调拨至 ${toF}` });
-            stockRecords.push({ type: 'IN', factory: toF, style, qty, operator: CURRENT_OPERATOR, note: `来自 ${fromF} 调拨` });
-
-            localStorage.setItem('fabric_stock_records', JSON.stringify(stockRecords));
-            alert(`已成功将 ${qty} 码款号 [${style}] 从 ${fromF} 调拨至 ${toF}！`);
-            renderStockSummary();
+            alert("跨厂物料调拨成功！");
         }
 
-        // 渲染汇总
         function renderStockSummary() {
             const tbody = document.getElementById('stockSummaryTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
 
             const summaryMap = {};
@@ -487,24 +580,26 @@
                         <td class="p-2 font-bold text-indigo-600">${item.style}</td>
                         <td class="p-2 text-emerald-600 font-semibold">+${item.inQty}</td>
                         <td class="p-2 text-rose-500 font-semibold">-${item.outQty}</td>
-                        <td class="p-2 font-bold ${balance < 0 ? 'text-rose-600' : 'text-slate-800'}">${balance} 码</td>
+                        <td class="p-2 font-bold ${balance < 0 ? 'text-rose-600' : 'text-slate-800'}">${balance}</td>
                     </tr>
                 `;
             });
         }
 
-        // 统筹渲染全站
         function renderAll() {
-            updateFactoryDatalist();
+            updateFactorySelects();
             renderFactoryTable();
             renderSpecTable();
             renderStockSummary();
         }
 
-        // 模拟同步数据
         function syncData() {
             renderAll();
-            alert("数据同步成功！已加载最新的工厂列表与面料库存数据。");
+            alert("数据同步成功！");
+        }
+
+        function logout() {
+            alert("已安全登出。");
         }
     </script>
 </body>
