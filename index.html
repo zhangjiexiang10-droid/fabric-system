@@ -517,7 +517,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">③ 订单颜色</label>
-            <input id="outFilterOrderColor" list="outOrderColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700">
+            <input id="outFilterOrderColor" list="outOrderColorList" oninput="onOutFilterOrderColorChange()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700">
             <datalist id="outOrderColorList"></datalist>
           </div>
           <div>
@@ -636,17 +636,17 @@
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-filter text-indigo-600"></i> 按款号筛选 Style</label>
-            <input id="filterStyle" list="filterStyleList" oninput="renderBalanceSheet()" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
+            <input id="filterStyle" list="filterStyleList" oninput="onFilterStyleChange()" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
             <datalist id="filterStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按类别筛选 Item</label>
-            <input id="filterItem" list="filterItemList" oninput="renderBalanceSheet()" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+            <input id="filterItem" list="filterItemList" oninput="onFilterItemChange()" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
             <datalist id="filterItemList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按订单颜色筛选</label>
-            <input id="filterOrderColor" list="filterOrderColorList" oninput="renderBalanceSheet()" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-700">
+            <input id="filterOrderColor" list="filterOrderColorList" oninput="onFilterOrderColorChange()" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-700">
             <datalist id="filterOrderColorList"></datalist>
           </div>
           <div>
@@ -1339,6 +1339,10 @@
       updateOutFilterDropdowns();
     }
 
+    function onOutFilterOrderColorChange() {
+      updateOutFilterDropdowns();
+    }
+
     function updateOutBatchDatalists() {
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
       let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
@@ -1753,20 +1757,36 @@
       let colorSet = new Set();
       let rackSet = new Set();
 
+      let fStyle = document.getElementById('filterStyle')?.value.trim() || '';
+      let fItem = document.getElementById('filterItem')?.value.trim() || '';
+      let fOrderColor = document.getElementById('filterOrderColor')?.value.trim() || '';
+
       fabricIn.forEach(i => {
         if (currentGlobalFty !== '全部单位' && i.fty !== currentGlobalFty) return;
         if(i.styleNo) styleSet.add(i.styleNo);
-        if(i.item) itemSet.add(i.item);
-        if(i.orderColor) orderColorSet.add(i.orderColor);
-        if(i.color) colorSet.add(i.color);
+        if(!fStyle || i.styleNo === fStyle) {
+          if(i.item) itemSet.add(i.item);
+          if((!fStyle || i.styleNo === fStyle) && (!fItem || i.item === fItem)) {
+            if(i.orderColor) orderColorSet.add(i.orderColor);
+            if((!fOrderColor || i.orderColor === fOrderColor)) {
+              if(i.color) colorSet.add(i.color);
+            }
+          }
+        }
         if(i.rack) rackSet.add(i.rack);
       });
       fabricOut.forEach(o => {
         if (currentGlobalFty !== '全部单位' && o.fty !== currentGlobalFty) return;
         if(o.styleNo) styleSet.add(o.styleNo);
-        if(o.item) itemSet.add(o.item);
-        if(o.orderColor) orderColorSet.add(o.orderColor);
-        if(o.color) colorSet.add(o.color);
+        if(!fStyle || o.styleNo === fStyle) {
+          if(o.item) itemSet.add(o.item);
+          if((!fStyle || o.styleNo === fStyle) && (!fItem || o.item === fItem)) {
+            if(o.orderColor) orderColorSet.add(o.orderColor);
+            if((!fOrderColor || o.orderColor === fOrderColor)) {
+              if(o.color) colorSet.add(o.color);
+            }
+          }
+        }
         if(o.rack) rackSet.add(o.rack);
       });
 
@@ -1783,6 +1803,33 @@
       if(rDl) rDl.innerHTML = [...rackSet].map(r=>`<option value="${r}">`).join('');
     }
 
+    function onFilterStyleChange() {
+      let fItem = document.getElementById('filterItem');
+      let fOrderColor = document.getElementById('filterOrderColor');
+      let fColor = document.getElementById('filterColor');
+      if(fItem) fItem.value = '';
+      if(fOrderColor) fOrderColor.value = '';
+      if(fColor) fColor.value = '';
+      updateBalanceFilterDropdowns();
+      renderBalanceSheet();
+    }
+
+    function onFilterItemChange() {
+      let fOrderColor = document.getElementById('filterOrderColor');
+      let fColor = document.getElementById('filterColor');
+      if(fOrderColor) fOrderColor.value = '';
+      if(fColor) fColor.value = '';
+      updateBalanceFilterDropdowns();
+      renderBalanceSheet();
+    }
+
+    function onFilterOrderColorChange() {
+      let fColor = document.getElementById('filterColor');
+      if(fColor) fColor.value = '';
+      updateBalanceFilterDropdowns();
+      renderBalanceSheet();
+    }
+
     function resetBalanceFilters() {
       document.getElementById('filterStyle').value = '';
       document.getElementById('filterItem').value = '';
@@ -1790,6 +1837,7 @@
       document.getElementById('filterColor').value = '';
       document.getElementById('filterRack').value = '';
       document.getElementById('searchBalanceInput').value = '';
+      updateBalanceFilterDropdowns();
       renderBalanceSheet();
     }
 
