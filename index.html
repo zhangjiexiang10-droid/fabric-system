@@ -78,6 +78,7 @@
   </datalist>
 
   <datalist id="receiverFactoryList"></datalist>
+  <datalist id="globalItemList"></datalist>
 
   <!-- ==================== 登录验证遮罩层 ==================== -->
   <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
@@ -172,7 +173,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">面料类别 Item</label>
-            <input id="editItem" type="text" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+            <input id="editItem" list="globalItemList" type="text" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold" onfocus="this.select()">
           </div>
         </div>
         <div class="grid grid-cols-3 gap-3">
@@ -321,7 +322,6 @@
       <button onclick="switchTab('tabAdmin')" id="btn_tabAdmin" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2 cursor-pointer" style="display: none;">
         <i class="fa-solid fa-user-gear"></i> 8. 管理人后台
       </button>
-      <!-- 新增：系统日志管理中心 (仅最高管理者可见) -->
       <button onclick="switchTab('tabLogs')" id="btn_tabLogs" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2 cursor-pointer" style="display: none;">
         <i class="fa-solid fa-shield-halved text-amber-600"></i> 9. 日志管理中心
       </button>
@@ -356,7 +356,7 @@
               <thead>
                 <tr class="bg-indigo-100/60 text-indigo-900 text-xs border-b border-indigo-200">
                   <th class="py-2 px-3 w-16">序号</th>
-                  <th class="py-2 px-3">面料类别 Item</th>
+                  <th class="py-2 px-3">面料类别 Item (支持打字匹配与下拉)</th>
                   <th class="py-2 px-3">订单颜色</th>
                   <th class="py-2 px-3">面料颜色 Col</th>
                 </tr>
@@ -385,6 +385,46 @@
               </tr>
             </thead>
             <tbody id="auxTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 新增：面料类别全局管理与打字匹配库（仿照工厂管理界面） -->
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-indigo-600"></i> 面料类别全局管理与打字匹配库
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">所有新增的类别将自动同步至上方批量录入区及全局智能下拉菜单中。</p>
+          </div>
+          <button onclick="exportTableToExcel('itemMasterTableBody', '面料类别匹配库.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
+            <i class="fa-solid fa-file-excel"></i> 导出 EXCEL
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 normal-role-only">
+          <input id="newItemNameInput" type="text" placeholder="输入面料类别 (例: 花边/အနားသား Zar)" class="px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-indigo-700">
+          <input id="newItemRemarkInput" type="text" placeholder="备注说明" class="px-3 py-2 border border-slate-200 rounded-lg text-sm">
+          <div class="flex items-center">
+            <button onclick="addNewItemMasterName()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm py-2 transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-plus"></i> 确认增加面料类别
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll-container rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3">面料类别名称 Item</th>
+                <th class="py-2.5 px-3">备注说明</th>
+                <th class="py-2.5 px-3">操作者</th>
+                <th class="py-2.5 px-3">操作日期+时间</th>
+                <th class="py-2.5 px-3 no-print normal-role-only">操作</th>
+              </tr>
+            </thead>
+            <tbody id="itemMasterTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -453,7 +493,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">类别 Item</label>
-            <input id="inItem" list="auxItemList" oninput="onInItemChange()" type="text" placeholder="面料类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white" onfocus="this.select()">
+            <input id="inItem" list="auxItemList" oninput="onInItemChange()" type="text" placeholder="面料类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold" onfocus="this.select()">
             <datalist id="auxItemList"></datalist>
           </div>
           <div>
@@ -574,7 +614,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">② 面料类别 Item</label>
-            <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white" onfocus="this.select()">
+            <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold" onfocus="this.select()">
             <datalist id="outItemList"></datalist>
           </div>
           <div>
@@ -766,7 +806,6 @@
             <p class="text-xs text-slate-400 mt-0.5">不区分缸号与货架号，直接汇总该款号、该类别、该颜色的总入库、总出库与总剩余。</p>
           </div>
           <div class="flex items-center gap-2">
-            <!-- 修改：增加“不分工厂查看汇总”切换按钮 -->
             <button id="toggleAllFtySummaryBtn" onclick="toggleAllFtySummary()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
               <i class="fa-solid fa-globe" id="toggleAllFtyIcon"></i> <span id="toggleAllFtyText">不分工厂查看汇总</span>
             </button>
@@ -779,7 +818,6 @@
           </div>
         </div>
 
-        <!-- 增加工厂筛选框（智能下拉 + 打字匹配） -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
           <div>
             <label class="block text-xs font-bold text-indigo-700 mb-1"><i class="fa-solid fa-industry"></i> 工厂 FTY</label>
@@ -1078,6 +1116,7 @@
     let fabricTransfers = [];
     let systemLogs = [];
     
+    // 默认预置工厂
     let factoryList = [
       { id: '1', name: '一厂 (JUN TAI)', remark: '-', operator: '系统', timeStr: '2026-01-01 00:00' },
       { id: '2', name: '二厂 (DA MEI)', remark: '-', operator: '系统', timeStr: '2026-01-01 00:00' },
@@ -1087,6 +1126,21 @@
       { id: '6', name: '外发厂-B', remark: '外协加工', operator: '系统', timeStr: '2026-01-01 00:00' }
     ];
 
+    // 默认预置截图中的面料类别库
+    let itemMasterList = [
+      { id: 'im1', name: '大身面料/Body Shell', remark: '主面料', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im2', name: '大身網眼/Body Zar', remark: '网眼布', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im3', name: '網眼/Zar', remark: '网眼布', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im4', name: '里布/TC', remark: '里布', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im5', name: '针织衬/Fabric Interlining', remark: '衬布', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im6', name: '纸衬/Paper Interlining', remark: '纸衬', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im7', name: '雪纺面料/Chiffon Fabric', remark: '雪纺', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im8', name: '花边/အနားသား Zar', remark: '花边', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im9', name: '滚条/Piping', remark: '滚条', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im10', name: '肩带/ပခုံးကြိုး', remark: '肩带辅料', operator: '系统', timeStr: '2026-01-01 00:00' },
+      { id: 'im11', name: '汗布/TC', remark: '汗布', operator: '系统', timeStr: '2026-01-01 00:00' }
+    ];
+
     function loadLocalCache() {
       try {
         let localAux = JSON.parse(localStorage.getItem('wh_aux'));
@@ -1094,6 +1148,7 @@
         let localOut = JSON.parse(localStorage.getItem('wh_out'));
         let localTrans = JSON.parse(localStorage.getItem('wh_trans'));
         let localFty = JSON.parse(localStorage.getItem('wh_fty_list'));
+        let localItems = JSON.parse(localStorage.getItem('wh_item_master_list'));
         let localUsers = JSON.parse(localStorage.getItem('wh_users'));
         let localLogs = JSON.parse(localStorage.getItem('wh_logs'));
 
@@ -1102,6 +1157,7 @@
         if(localOut && localOut.length > 0) fabricOut = localOut;
         if(localTrans && localTrans.length > 0) fabricTransfers = localTrans;
         if(localFty && localFty.length > 0) factoryList = localFty;
+        if(localItems && localItems.length > 0) itemMasterList = localItems;
         if(localUsers && Array.isArray(localUsers)) warehouseUsers = localUsers;
         if(localLogs && Array.isArray(localLogs)) systemLogs = localLogs;
       } catch(e) {
@@ -1125,6 +1181,7 @@
           if (cloudRecord.fabricOut) fabricOut = cloudRecord.fabricOut;
           if (cloudRecord.fabricTransfers) fabricTransfers = cloudRecord.fabricTransfers;
           if (cloudRecord.factoryList) factoryList = cloudRecord.factoryList;
+          if (cloudRecord.itemMasterList) itemMasterList = cloudRecord.itemMasterList;
           if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
 
           renderLoginHints();
@@ -1308,6 +1365,7 @@
       setupTableKeyNavigation(containerId, 10, 4);
     }
 
+    // 修改：批量录入区“面料类别 Item”支持 list="globalItemList" 智能下拉与打字匹配
     function renderBatchAuxRows() {
       let tbody = document.getElementById('batchAuxRowsContainer');
       if(!tbody) return;
@@ -1316,7 +1374,7 @@
         html += `
           <tr class="border-b border-slate-100">
             <td class="py-1.5 px-3 font-bold text-xs text-slate-400">#${i}</td>
-            <td class="py-1.5 px-3"><input type="text" id="auxItem_${i}" placeholder="面料类别 (例: 大身面料/里布)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="auxItem_${i}" list="globalItemList" placeholder="面料类别 (例: 大身面料/里布)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold bg-white" onfocus="this.select()"></td>
             <td class="py-1.5 px-3"><input type="text" id="auxOrderColor_${i}" placeholder="订单颜色 (例: 05X 蓝色)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-700 bg-white"></td>
             <td class="py-1.5 px-3"><input type="text" id="auxColor_${i}" placeholder="面料颜色 (例: 蓝色)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white"></td>
           </tr>
@@ -1669,6 +1727,7 @@
       localStorage.setItem('wh_out', JSON.stringify(fabricOut));
       localStorage.setItem('wh_trans', JSON.stringify(fabricTransfers));
       localStorage.setItem('wh_fty_list', JSON.stringify(factoryList));
+      localStorage.setItem('wh_item_master_list', JSON.stringify(itemMasterList));
       localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
       localStorage.setItem('wh_logs', JSON.stringify(systemLogs));
       renderLoginHints();
@@ -1677,7 +1736,7 @@
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-          body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, warehouseUsers, systemLogs })
+          body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, itemMasterList, warehouseUsers, systemLogs })
         });
         if(!res.ok) console.error("云端保存返回状态码: ", res.status);
       } catch(e) { 
@@ -1689,6 +1748,7 @@
 
     function renderAll() {
       renderAuxTable();
+      renderItemMasterTable();
       renderFactoryTable();
       renderInTable();
       renderOutTable();
@@ -1708,6 +1768,7 @@
       updateAuxDatalists();
       updateGlobalFtyDatalist();
       updateReceiverFactoryDatalist();
+      updateGlobalItemDatalist();
       applyUserPermissions();
     }
 
@@ -1732,9 +1793,20 @@
       if(dl) dl.innerHTML = [...ftySet].map(f => `<option value="${f}">`).join('');
     }
 
+    // 更新全局面料类别数据源支持智能下拉
+    function updateGlobalItemDatalist() {
+      let itemSet = new Set();
+      itemMasterList.forEach(im => { if(im.name) itemSet.add(im.name); });
+      fabricAux.forEach(a => { if(a.item) itemSet.add(a.item); });
+      fabricIn.forEach(i => { if(i.item) itemSet.add(i.item); });
+
+      let dl = document.getElementById('globalItemList');
+      if(dl) dl.innerHTML = [...itemSet].map(item => `<option value="${item}">`).join('');
+    }
+
     function updateAuxDatalists() {
       let styleList = [...new Set([...fabricAux.map(i => i.styleNo), ...fabricIn.map(i => i.styleNo)])].filter(Boolean);
-      let itemList = [...new Set([...fabricAux.map(i => i.item), ...fabricIn.map(i => i.item)])].filter(Boolean);
+      let itemList = [...new Set([...itemMasterList.map(im => im.name), ...fabricAux.map(i => i.item), ...fabricIn.map(i => i.item)])].filter(Boolean);
       let orderColorList = [...new Set([...fabricAux.map(i => i.orderColor), ...fabricIn.map(i => i.orderColor)])].filter(Boolean);
       let colorList = [...new Set([...fabricAux.map(i => i.color), ...fabricIn.map(i => i.color)])].filter(Boolean);
 
@@ -1752,6 +1824,7 @@
 
       updateGlobalFtyDatalist();
       updateReceiverFactoryDatalist();
+      updateGlobalItemDatalist();
     }
 
     function exportTableToExcel(tbodyId, filename) {
@@ -1821,7 +1894,6 @@
       renderSummarySheet();
     }
 
-    // 增加：不分工厂查看汇总功能
     function toggleAllFtySummary() {
       isAllFtySummary = !isAllFtySummary;
       let btn = document.getElementById('toggleAllFtySummaryBtn');
@@ -1991,7 +2063,6 @@
       tbody.innerHTML = html || `<tr><td colspan="14" class="py-6 text-center text-slate-400 font-semibold">没有找到相符的库存记录</td></tr>`;
     }
 
-    // ================= 进销存汇总表 (支持工厂筛选框 + 不分工厂跨厂大汇总) =================
     function renderSummarySheet() {
       let tbody = document.getElementById('summaryTableBody');
       if(!tbody) return;
@@ -2584,6 +2655,7 @@
       `).join('');
     }
 
+    // 修改：新增规格时若使用了新面料类别，自动收录进底部的“面料类别全局管理库”
     function submitBatchAuxItems() {
       if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法添加规格！"); return; }
 
@@ -2607,6 +2679,17 @@
             item: item || '大身面料',
             orderColor, color, operator, timeStr
           });
+
+          // 如果该类别还不在类别全局库中，自动新增进入类别基础库
+          if (item && !itemMasterList.some(im => im.name === item)) {
+            itemMasterList.push({
+              id: Date.now().toString() + '_auto_' + i,
+              name: item,
+              remark: '批量录入时自动收录',
+              operator: operator,
+              timeStr: timeStr
+            });
+          }
         }
       }
 
@@ -2636,7 +2719,6 @@
       saveToCloud();
     }
 
-    // 修改：从新到旧排序渲染辅助表
     function renderAuxTable() {
       let tbody = document.getElementById('auxTableBody');
       if(!tbody) return;
@@ -2654,6 +2736,50 @@
           <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteAux('${i.id}')" class="text-slate-300 hover:text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
         </tr>
       `).join('');
+    }
+
+    // 新增：在下方增加面料类别全局管理库相关逻辑
+    function addNewItemMasterName() {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法增加面料类别！"); return; }
+
+      let name = document.getElementById('newItemNameInput').value.trim();
+      let remark = document.getElementById('newItemRemarkInput').value.trim();
+
+      if(!name) { alert("请输入面料类别名称！"); return; }
+      if(itemMasterList.some(im => im.name === name)) { alert("该面料类别已存在！"); return; }
+
+      itemMasterList.push({ id: Date.now().toString(), name, remark: remark || '-', operator: currentUser ? currentUser.name : '系统', timeStr: getNowTimeString() });
+      recordLog('ACTION', '新增面料类别', `新增面料类别：${name} (${remark})`);
+      saveToCloud();
+      alert(`成功增加面料类别：${name}！`);
+      document.getElementById('newItemNameInput').value = '';
+      document.getElementById('newItemRemarkInput').value = '';
+    }
+
+    function deleteItemMasterName(id) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“仅查看”账号，无法删除面料类别！"); return; }
+
+      if(confirm("确定要删除这个面料类别名称吗？")) {
+        let itemObj = itemMasterList.find(im => im.id === id);
+        if(itemObj) recordLog('ACTION', '删除面料类别', `删除了面料类别：${itemObj.name}`);
+        itemMasterList = itemMasterList.filter(im => im.id !== id);
+        saveToCloud();
+      }
+    }
+
+    function renderItemMasterTable() {
+      let tbody = document.getElementById('itemMasterTableBody');
+      if(!tbody) return;
+      tbody.innerHTML = itemMasterList.map(im => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-bold text-indigo-700">${im.name}</td>
+          <td class="py-2.5 px-3 text-slate-600">${im.remark || '-'}</td>
+          <td class="py-2.5 px-3 text-xs font-bold text-indigo-600">${im.operator}</td>
+          <td class="py-2.5 px-3 text-xs text-slate-500">${im.timeStr || '-'}</td>
+          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteItemMasterName('${im.id}')" class="text-slate-300 hover:text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
+        </tr>
+      `).join('');
+      updateGlobalItemDatalist();
     }
 
     function addNewFactoryName() {
@@ -3040,7 +3166,6 @@
       container.innerHTML = allPagesHtml;
     }
 
-    // ================= 日志管理表格渲染函数 (仅最高管理者) =================
     function renderLogsTable() {
       let tbody = document.getElementById('logsTableBody');
       if(!tbody) return;
