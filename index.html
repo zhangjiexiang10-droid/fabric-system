@@ -31,7 +31,6 @@
     <option value="外发厂-B">
   </datalist>
 
-  <!-- 🎯 专门用于领用人名称实时同步辅助资料中工厂信息的动态匹配库 -->
   <datalist id="receiverFactoryList"></datalist>
 
   <!-- ==================== 登录验证遮罩层 ==================== -->
@@ -54,13 +53,11 @@
           安全登入系统
         </button>
         
-        <!-- 💡 仅显示操作员名字列表（不显示密码，保证安全性） -->
         <div class="mt-4 pt-3 border-t border-slate-100">
           <p class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
             <i class="fa-solid fa-users text-indigo-600"></i> 系统操作员名册：
           </p>
           <div id="loginHintList" class="max-h-28 overflow-y-auto space-y-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 text-slate-600">
-            <!-- 动态渲染 -->
           </div>
         </div>
       </div>
@@ -74,7 +71,7 @@
         <h3 class="text-base font-bold text-slate-950 flex items-center gap-2">
           <i class="fa-solid fa-user-pen text-indigo-600"></i> 修改操作员权限与密码
         </h3>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <input type="hidden" id="editUserNameHidden">
       <div class="space-y-4">
@@ -234,8 +231,8 @@
           <span class="text-xs font-bold text-slate-500">查看单位:</span>
           <input id="globalFtyFilter" list="globalFtyDatalist" onchange="changeGlobalFty()" value="全部单位" class="bg-transparent text-xs font-bold text-indigo-600 focus:outline-none w-32 fty-input-target">
         </div>
-        <button onclick="syncDataFromCloud()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
-          <i class="fa-solid fa-rotate" id="syncIcon"></i> 同步
+        <button onclick="syncDataFromCloud(false)" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
+          <i class="fa-solid fa-rotate" id="syncIcon"></i> 强力同步云端
         </button>
         <button onclick="logout()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition" title="退出">
           <i class="fa-solid fa-right-from-bracket"></i>
@@ -263,13 +260,12 @@
       <button onclick="switchTab('tabPrint')" id="btn_tabPrint" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2">
         <i class="fa-solid fa-print"></i> 6. 三联单打印中心
       </button>
-      <!-- 🎯 严格控制：只有最高管理者可见管理人后台按钮 -->
       <button onclick="switchTab('tabAdmin')" id="btn_tabAdmin" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2" style="display: none;">
         <i class="fa-solid fa-user-gear"></i> 7. 管理人后台
       </button>
     </div>
 
-    <!-- ==================== TAB 1: 辅助资料表 ==================== -->
+    <!-- TAB 1: 辅助资料表 -->
     <div id="tabAux" class="sheet-content space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex justify-between items-center mb-4">
@@ -370,7 +366,7 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 2: 面料入库登记 ==================== -->
+    <!-- TAB 2: 面料入库登记 -->
     <div id="tabIn" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
@@ -486,7 +482,7 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 3: 面料出库登记 ==================== -->
+    <!-- TAB 3: 面料出库登记 -->
     <div id="tabOut" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex justify-between items-center mb-2">
@@ -499,7 +495,6 @@
         </div>
         <p class="text-xs text-slate-400 mb-4">款號與類別支援打字匹配与即時剩餘檢測，批次號随单位智能联动。</p>
         
-        <!-- 🎯 领用人名称已绑定 receiverFactoryList，实时套用辅助表中的工厂信息进行下拉和打字匹配 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">领料出库单位 FTY</label>
@@ -605,7 +600,7 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 4: 库存汇总表 ==================== -->
+    <!-- TAB 4: 库存汇总表 -->
     <div id="tabBalance" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
@@ -684,7 +679,7 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 5: 厂际物料调拨中心 ==================== -->
+    <!-- TAB 5: 厂际物料调拨中心 -->
     <div id="tabTransfer" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
@@ -756,7 +751,7 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 6: 三联领料单打印中心 ==================== -->
+    <!-- TAB 6: 三联领料单打印中心 -->
     <div id="tabPrint" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200 no-print flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3 w-full md:w-auto">
@@ -783,7 +778,7 @@
       </div>
     </div>
 
-    <!-- ==================== TAB 7: 管理人后台 (仅最高管理者可见) ==================== -->
+    <!-- TAB 7: 管理人后台 -->
     <div id="tabAdmin" class="sheet-content hidden space-y-6">
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex justify-between items-center mb-4">
@@ -836,10 +831,9 @@
 
   <script>
     // ================= 云端配置 =================
-    const BIN_ID = '6ad260c4ffd5d1605371ad7c'; 
+    const BIN_ID = '6ad3251cffd5d1605372fa4a'; 
     const API_KEY = '$2a$10$ffN1AM57TUaiKXIBj4AB/eeJgD0bl/3pFue9io5XvnaklmZyaa76K';
 
-    // 🎯 基础内置默认操作员名单
     let defaultUsers = [
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位' },
       { name: 'KO KO NAING', pass: '1714', fty: '全部单位' },
@@ -869,7 +863,6 @@
     function checkLogin() {
       const pwd = document.getElementById('loginPasswordInput').value.trim();
       
-      // 🎯 绝对保证：如果输入最高管理者专属密码 199779，直接登录成功
       if (pwd === '199779') {
         currentUser = { name: '最高管理者 (ZAW AUNG)', fty: '全部单位' };
       } else {
@@ -933,7 +926,6 @@
       }
     }
 
-    // 🎯 核心功能：当选择出库领料单位时，自动根据括号内英文名生成开票批次前缀（如 FUYUAN-001）
     function onOutFtyChange() {
       let ftyVal = document.getElementById('outFty')?.value.trim() || '';
       let invoiceInput = document.getElementById('outInvoice');
@@ -1307,24 +1299,33 @@
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
     }
 
+    // 🎯 核心升級：雲端同步（加入 HTTP Status 與 Access Key 雙重防護）
     async function syncDataFromCloud(isSilent = false) {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          headers: { 'X-Master-Key': API_KEY }
+          method: 'GET',
+          headers: { 
+            'X-Master-Key': API_KEY,
+            'X-Bin-Meta': 'false'
+          }
         });
+
         if (res.ok) {
-          let data = (await res.json()).record;
-          fabricAux = data.fabricAux || [];
-          fabricIn = data.fabricIn || [];
-          fabricOut = data.fabricOut || [];
-          fabricTransfers = data.fabricTransfers || [];
-          if(data.factoryList && data.factoryList.length > 0) {
-            factoryList = data.factoryList;
+          let data = await res.json();
+          // 防呆判定：適應有無 bin metadata 的回傳格式
+          let record = data.record || data;
+          
+          fabricAux = record.fabricAux || [];
+          fabricIn = record.fabricIn || [];
+          fabricOut = record.fabricOut || [];
+          fabricTransfers = record.fabricTransfers || [];
+          if(record.factoryList && record.factoryList.length > 0) {
+            factoryList = record.factoryList;
           }
           
-          let cloudUsers = data.warehouseUsers || [];
+          let cloudUsers = record.warehouseUsers || [];
           let localCachedUsers = JSON.parse(localStorage.getItem('wh_users')) || [];
           let mergedUsers = [...defaultUsers];
 
@@ -1345,10 +1346,12 @@
 
           renderAll();
           updateAuxDatalists();
-          if(!isSilent) alert("云端数据同步成功！");
+          if(!isSilent) alert("✅ 云端数据同步成功！多台电脑已实现最新同步。");
+        } else {
+          throw new Error(`HTTP 状态码异常: ${res.status}`);
         }
       } catch(e) {
-        console.log("读取本地缓存...");
+        console.warn("云端读取失败，读取本地缓存...", e);
         fabricAux = JSON.parse(localStorage.getItem('wh_aux')) || [];
         fabricIn = JSON.parse(localStorage.getItem('wh_in')) || [];
         fabricOut = JSON.parse(localStorage.getItem('wh_out')) || [];
@@ -1364,6 +1367,7 @@
         renderLoginHints();
         renderAll();
         updateAuxDatalists();
+        if(!isSilent) alert("⚠️ 雲端讀取失敗，已載入本地備份數據。請確認網路或 JSONBin 訪問權限！");
       } finally {
         if(icon) icon.classList.remove('fa-spin');
       }
@@ -1379,12 +1383,18 @@
       renderLoginHints();
 
       try {
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+          headers: { 
+            'Content-Type': 'application/json', 
+            'X-Master-Key': API_KEY 
+          },
           body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, warehouseUsers })
         });
-      } catch(e) { console.error("云端保存失败"); }
+        if(!res.ok) console.error("云端保存返回状态码: ", res.status);
+      } catch(e) { 
+        console.error("云端保存失败: ", e); 
+      }
       renderAll();
       updateAuxDatalists();
     }
@@ -1404,11 +1414,10 @@
       if(isMaster) renderUserTable();
       updateAuxDatalists();
       updateGlobalFtyDatalist();
-      updateReceiverFactoryDatalist(); // 🎯 实时更新领用人匹配列表
+      updateReceiverFactoryDatalist();
       applyUserPermissions();
     }
 
-    // 🎯 核心新函数：实时同步工厂名称全局管理表中的所有工厂到领用人名称的下拉和打字匹配中
     function updateReceiverFactoryDatalist() {
       let receiverDl = document.getElementById('receiverFactoryList');
       if(!receiverDl) return;
