@@ -53,6 +53,7 @@
           安全登入系统
         </button>
         
+        <!-- 💡 登录名册：已彻底屏蔽密码，只显示姓名与授权单位 -->
         <div class="mt-4 pt-3 border-t border-slate-100">
           <p class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
             <i class="fa-solid fa-users text-indigo-600"></i> 系统操作员名册：
@@ -232,7 +233,7 @@
           <input id="globalFtyFilter" list="globalFtyDatalist" onchange="changeGlobalFty()" value="全部单位" class="bg-transparent text-xs font-bold text-indigo-600 focus:outline-none w-32 fty-input-target">
         </div>
         <button onclick="syncDataFromCloud(false)" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
-          <i class="fa-solid fa-rotate" id="syncIcon"></i> 强力同步云端
+          <i class="fa-solid fa-rotate" id="syncIcon"></i> 同步
         </button>
         <button onclick="logout()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition" title="退出">
           <i class="fa-solid fa-right-from-bracket"></i>
@@ -981,13 +982,14 @@
       }
     };
 
+    // 🎯 登录提示：安全隐去密码显示
     function renderLoginHints() {
       let hintContainer = document.getElementById('loginHintList');
       if(!hintContainer) return;
       hintContainer.innerHTML = warehouseUsers.map(u => `
         <div class="flex justify-between items-center py-1 px-1.5 border-b border-slate-100">
           <span class="font-bold text-slate-700"><i class="fa-solid fa-user text-indigo-500 mr-1.5"></i>${u.name}</span>
-          <span class="text-slate-400 text-[10px]">密码: ${u.pass} | 授权: ${u.fty || '全部'}</span>
+          <span class="text-slate-400 text-[10px]">授权: ${u.fty || '全部'}</span>
         </div>
       `).join('');
     }
@@ -1299,7 +1301,6 @@
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
     }
 
-    // 🎯 核心升級：雲端同步（加入 HTTP Status 與 Access Key 雙重防護）
     async function syncDataFromCloud(isSilent = false) {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
@@ -1314,7 +1315,6 @@
 
         if (res.ok) {
           let data = await res.json();
-          // 防呆判定：適應有無 bin metadata 的回傳格式
           let record = data.record || data;
           
           fabricAux = record.fabricAux || [];
@@ -1367,7 +1367,7 @@
         renderLoginHints();
         renderAll();
         updateAuxDatalists();
-        if(!isSilent) alert("⚠️ 雲端讀取失敗，已載入本地備份數據。請確認網路或 JSONBin 訪問權限！");
+        if(!isSilent) alert("⚠️ 云端读取失败，已加载本地备份数据。请确认网络或 JSONBin 访问权限！");
       } finally {
         if(icon) icon.classList.remove('fa-spin');
       }
