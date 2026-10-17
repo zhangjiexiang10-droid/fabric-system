@@ -129,11 +129,11 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">订单颜色</label>
-            <input id="editOrderColor" type="text" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+            <input id="editOrderColor" type="text" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-indigo-600">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">面料颜色 Col</label>
-            <input id="editColor" type="text" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+            <input id="editColor" type="text" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-amber-600">
           </div>
         </div>
         <div class="grid grid-cols-3 gap-3">
@@ -496,7 +496,7 @@
         </div>
         <p class="text-xs text-slate-400 mb-4">款號、類別與顏色支援打字匹配与即時剩餘檢測，批次號随单位智能联动。</p>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">领料出库单位 FTY</label>
             <input id="outFty" list="globalFtyDatalist" onchange="onOutFtyChange()" type="text" placeholder="领料单位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target">
@@ -507,17 +507,22 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">① 款号 Style</label>
-            <input id="outFilterStyle" list="outStyleList" oninput="onOutFilterStyleChange()" type="text" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+            <input id="outFilterStyle" list="outStyleList" oninput="onOutFilterStyleChange()" type="text" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
             <datalist id="outStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">② 面料类别 Item</label>
-            <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="输入或选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white">
+            <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white">
             <datalist id="outItemList"></datalist>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">③ 颜色 Color (筛选)</label>
-            <input id="outFilterColor" list="outColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="输入或选择颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">③ 订单颜色</label>
+            <input id="outFilterOrderColor" list="outOrderColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700">
+            <datalist id="outOrderColorList"></datalist>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">④ 面料颜色 Col</label>
+            <input id="outFilterColor" list="outColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
             <datalist id="outColorList"></datalist>
           </div>
           <div>
@@ -549,7 +554,8 @@
                   <th class="py-2 px-3 w-12">序号</th>
                   <th class="py-2 px-3 w-40">缸号 (Batch No.)</th>
                   <th class="py-2 px-3 w-36">关联款号 / 类别</th>
-                  <th class="py-2 px-3 w-32 font-bold text-amber-600">颜色 (Color)</th>
+                  <th class="py-2 px-3 w-28 font-bold text-indigo-700">订单颜色</th>
+                  <th class="py-2 px-3 w-28 font-bold text-amber-600">面料颜色</th>
                   <th class="py-2 px-3 w-28">货架号 (Rack)</th>
                   <th class="py-2 px-3 w-28">出库卷数 (Roll)</th>
                   <th class="py-2 px-3 w-24 text-indigo-600 font-bold">剩余卷数</th>
@@ -627,25 +633,30 @@
           </div>
         </div>
 
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1"><i class="fa-solid fa-filter text-indigo-600"></i> 按款号筛选 Style</label>
-            <input id="filterStyle" list="filterStyleList" oninput="renderBalanceSheet()" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
+            <input id="filterStyle" list="filterStyleList" oninput="renderBalanceSheet()" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-600">
             <datalist id="filterStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按类别筛选 Item</label>
-            <input id="filterItem" list="filterItemList" oninput="renderBalanceSheet()" placeholder="输入或选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+            <input id="filterItem" list="filterItemList" oninput="renderBalanceSheet()" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
             <datalist id="filterItemList"></datalist>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">按颜色筛选 Color</label>
-            <input id="filterColor" list="filterColorList" oninput="renderBalanceSheet()" placeholder="输入或选择颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+            <label class="block text-xs font-bold text-slate-600 mb-1">按订单颜色筛选</label>
+            <input id="filterOrderColor" list="filterOrderColorList" oninput="renderBalanceSheet()" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-indigo-700">
+            <datalist id="filterOrderColorList"></datalist>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">按面料颜色筛选 Col</label>
+            <input id="filterColor" list="filterColorList" oninput="renderBalanceSheet()" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
             <datalist id="filterColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-600 mb-1">按货架筛选 Rack</label>
-            <input id="filterRack" list="filterRackList" oninput="renderBalanceSheet()" placeholder="输入或选择货架" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
+            <input id="filterRack" list="filterRackList" oninput="renderBalanceSheet()" placeholder="选择货架" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white text-amber-600">
             <datalist id="filterRackList"></datalist>
           </div>
           <div class="flex gap-2">
@@ -703,19 +714,24 @@
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">款号 Style No (可打字匹配)</label>
-              <input id="transStyle" list="transferStyleList" oninput="updateTransferItemList()" type="text" placeholder="输入或选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+              <input id="transStyle" list="transferStyleList" oninput="updateTransferItemList()" type="text" placeholder="选择款号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
               <datalist id="transferStyleList"></datalist>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">面料类别 Item (可打字匹配)</label>
-              <input id="transItem" list="transferItemList" oninput="updateTransferColorList()" type="text" placeholder="输入或选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold">
+              <input id="transItem" list="transferItemList" oninput="updateTransferColorList()" type="text" placeholder="选择类别" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold">
               <datalist id="transferItemList"></datalist>
             </div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">颜色 Color (可打字匹配)</label>
-              <input id="transColor" list="transferColorList" oninput="updateTransferBatchList()" type="text" placeholder="输入或选择颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">订单颜色</label>
+              <input id="transOrderColor" list="transferOrderColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择订单颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700">
+              <datalist id="transferOrderColorList"></datalist>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">面料颜色 Col</label>
+              <input id="transColor" list="transferColorList" oninput="updateTransferBatchList()" type="text" placeholder="选择面料颜色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600">
               <datalist id="transferColorList"></datalist>
             </div>
             <div>
@@ -1162,7 +1178,7 @@
           <tr class="border-b border-slate-100">
             <td class="py-1.5 px-3 font-bold text-xs text-slate-400">#${i}</td>
             <td class="py-1.5 px-3"><input type="text" id="auxItem_${i}" placeholder="面料类别 (例: 大身面料/里布)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold bg-white"></td>
-            <td class="py-1.5 px-3"><input type="text" id="auxOrderColor_${i}" placeholder="订单颜色 (例: 05X 蓝色)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="auxOrderColor_${i}" placeholder="订单颜色 (例: 05X 蓝色)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-700 bg-white"></td>
             <td class="py-1.5 px-3"><input type="text" id="auxColor_${i}" placeholder="面料颜色 (例: 蓝色)" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white"></td>
           </tr>
         `;
@@ -1188,6 +1204,9 @@
             </td>
             <td class="py-1.5 px-3">
               <input type="text" id="outStyleItem_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 font-bold text-slate-600">
+            </td>
+            <td class="py-1.5 px-3">
+              <input type="text" id="outOrderColor_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-indigo-700 font-bold">
             </td>
             <td class="py-1.5 px-3">
               <input type="text" id="outColor_${i}" disabled placeholder="自动联动" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-amber-600 font-bold">
@@ -1222,11 +1241,13 @@
       let fty = document.getElementById('outFty')?.value || '';
       let styleSet = new Set();
       let itemSet = new Set();
+      let orderColorSet = new Set();
       let colorSet = new Set();
 
       fabricAux.forEach(a => {
         if(a.styleNo) styleSet.add(a.styleNo);
         if(a.item) itemSet.add(a.item);
+        if(a.orderColor) orderColorSet.add(a.orderColor);
         if(a.color) colorSet.add(a.color);
       });
 
@@ -1238,6 +1259,7 @@
           map[i.batchNo].roll += (i.roll || 0);
           if(i.styleNo) styleSet.add(i.styleNo);
           if(i.item) itemSet.add(i.item);
+          if(i.orderColor) orderColorSet.add(i.orderColor);
           if(i.color) colorSet.add(i.color);
         }
       });
@@ -1255,8 +1277,10 @@
       
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
       let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+      let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
 
       let activeItems = new Set();
+      let activeOrderColors = new Set();
       let activeColors = new Set();
 
       fabricAux.forEach(a => {
@@ -1270,8 +1294,10 @@
           if(!filterStyle || m.styleNo === filterStyle) {
             if(m.item) activeItems.add(m.item);
             if(!filterItem || m.item === filterItem) {
-              if(m.color) activeColors.add(m.color);
-              if(m.orderColor) activeColors.add(m.orderColor);
+              if(m.orderColor) activeOrderColors.add(m.orderColor);
+              if(!filterOrderColor || m.orderColor === filterOrderColor) {
+                if(m.color) activeColors.add(m.color);
+              }
             }
           }
         }
@@ -1279,6 +1305,9 @@
 
       let outItemList = document.getElementById('outItemList');
       if(outItemList) outItemList.innerHTML = [...activeItems].map(i => `<option value="${i}">`).join('');
+
+      let outOrderColorList = document.getElementById('outOrderColorList');
+      if(outOrderColorList) outOrderColorList.innerHTML = [...activeOrderColors].map(c => `<option value="${c}">`).join('');
 
       let outColorList = document.getElementById('outColorList');
       if(outColorList) outColorList.innerHTML = [...activeColors].map(c => `<option value="${c}">`).join('');
@@ -1313,6 +1342,7 @@
     function updateOutBatchDatalists() {
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
       let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+      let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
       let filterColor = document.getElementById('outFilterColor')?.value.trim() || '';
       let cache = window.stockBatchCache || {};
 
@@ -1322,9 +1352,10 @@
         if(m.qty > 0) {
           if(filterStyle && m.styleNo !== filterStyle) continue;
           if(filterItem && m.item !== filterItem) continue;
-          if(filterColor && m.color !== filterColor && m.orderColor !== filterColor) continue;
+          if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
+          if(filterColor && m.color !== filterColor) continue;
 
-          optionsHtml += `<option value="${batchNo}">[剩余:${m.qty}] 款号:${m.styleNo} 类别:${m.item} 颜色:${m.color||'-'} 货架:${m.rack||'-'}</option>`;
+          optionsHtml += `<option value="${batchNo}">[剩余:${m.qty}] 款号:${m.styleNo} 类别:${m.item} 订单色:${m.orderColor||'-'} 面料色:${m.color||'-'} 货架:${m.rack||'-'}</option>`;
         }
       }
 
@@ -1340,6 +1371,7 @@
       let match = cache[batchVal];
 
       let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
+      let orderColorInput = document.getElementById(`outOrderColor_${idx}`);
       let colorInput = document.getElementById(`outColor_${idx}`);
       let rackInput = document.getElementById(`outRack_${idx}`);
       let remainRollInput = document.getElementById(`outRemainRoll_${idx}`);
@@ -1349,6 +1381,7 @@
 
       if(match) {
         styleItemInput.value = `${match.styleNo} | ${match.item}`;
+        orderColorInput.value = match.orderColor || '-';
         colorInput.value = match.color || '-';
         rackInput.value = match.rack || '-';
         remainRollInput.value = match.roll;
@@ -1357,6 +1390,7 @@
         rollInput.max = match.roll;
       } else {
         styleItemInput.value = '';
+        orderColorInput.value = '';
         colorInput.value = '';
         rackInput.value = '';
         remainRollInput.value = '';
@@ -1715,6 +1749,7 @@
     function updateBalanceFilterDropdowns() {
       let styleSet = new Set();
       let itemSet = new Set();
+      let orderColorSet = new Set();
       let colorSet = new Set();
       let rackSet = new Set();
 
@@ -1722,6 +1757,7 @@
         if (currentGlobalFty !== '全部单位' && i.fty !== currentGlobalFty) return;
         if(i.styleNo) styleSet.add(i.styleNo);
         if(i.item) itemSet.add(i.item);
+        if(i.orderColor) orderColorSet.add(i.orderColor);
         if(i.color) colorSet.add(i.color);
         if(i.rack) rackSet.add(i.rack);
       });
@@ -1729,17 +1765,20 @@
         if (currentGlobalFty !== '全部单位' && o.fty !== currentGlobalFty) return;
         if(o.styleNo) styleSet.add(o.styleNo);
         if(o.item) itemSet.add(o.item);
+        if(o.orderColor) orderColorSet.add(o.orderColor);
         if(o.color) colorSet.add(o.color);
         if(o.rack) rackSet.add(o.rack);
       });
 
       let sDl = document.getElementById('filterStyleList');
       let iDl = document.getElementById('filterItemList');
+      let ocDl = document.getElementById('filterOrderColorList');
       let cDl = document.getElementById('filterColorList');
       let rDl = document.getElementById('filterRackList');
 
       if(sDl) sDl.innerHTML = [...styleSet].map(s=>`<option value="${s}">`).join('');
       if(iDl) iDl.innerHTML = [...itemSet].map(i=>`<option value="${i}">`).join('');
+      if(ocDl) ocDl.innerHTML = [...orderColorSet].map(c=>`<option value="${c}">`).join('');
       if(cDl) cDl.innerHTML = [...colorSet].map(c=>`<option value="${c}">`).join('');
       if(rDl) rDl.innerHTML = [...rackSet].map(r=>`<option value="${r}">`).join('');
     }
@@ -1747,6 +1786,7 @@
     function resetBalanceFilters() {
       document.getElementById('filterStyle').value = '';
       document.getElementById('filterItem').value = '';
+      document.getElementById('filterOrderColor').value = '';
       document.getElementById('filterColor').value = '';
       document.getElementById('filterRack').value = '';
       document.getElementById('searchBalanceInput').value = '';
@@ -1759,6 +1799,7 @@
 
       let fStyle = document.getElementById('filterStyle')?.value.trim() || '';
       let fItem = document.getElementById('filterItem')?.value.trim() || '';
+      let fOrderColor = document.getElementById('filterOrderColor')?.value.trim() || '';
       let fColor = document.getElementById('filterColor')?.value.trim() || '';
       let fRack = document.getElementById('filterRack')?.value.trim() || '';
       let query = (document.getElementById('searchBalanceInput')?.value || '').toLowerCase();
@@ -1792,7 +1833,8 @@
 
         if(fStyle && d.styleNo !== fStyle) continue;
         if(fItem && d.item !== fItem) continue;
-        if(fColor && d.color !== fColor && d.orderColor !== fColor) continue;
+        if(fOrderColor && d.orderColor !== fOrderColor) continue;
+        if(fColor && d.color !== fColor) continue;
         if(fRack && d.rack !== fRack) continue;
 
         let searchStr = `${d.fty} ${d.styleNo} ${d.item} ${d.batchNo} ${d.orderColor} ${d.color} ${d.rack}`.toLowerCase();
@@ -1960,12 +2002,35 @@
       }
 
       itemDl.innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
+      updateTransferOrderColorList();
+    }
+
+    function updateTransferOrderColorList() {
+      let styleVal = document.getElementById('transStyle').value.trim();
+      let itemVal = document.getElementById('transItem').value.trim();
+      let orderColorDl = document.getElementById('transferOrderColorList');
+      if(!orderColorDl) return;
+
+      let cache = window.transferCache || {};
+      let orderColorSet = new Set();
+
+      for(let b in cache) {
+        let m = cache[b];
+        if(m.qty > 0) {
+          if(styleVal && m.styleNo !== styleVal) continue;
+          if(itemVal && m.item !== itemVal) continue;
+          if(m.orderColor) orderColorSet.add(m.orderColor);
+        }
+      }
+
+      orderColorDl.innerHTML = [...orderColorSet].map(c => `<option value="${c}">`).join('');
       updateTransferColorList();
     }
 
     function updateTransferColorList() {
       let styleVal = document.getElementById('transStyle').value.trim();
       let itemVal = document.getElementById('transItem').value.trim();
+      let orderColorVal = document.getElementById('transOrderColor').value.trim();
       let colorDl = document.getElementById('transferColorList');
       if(!colorDl) return;
 
@@ -1977,8 +2042,8 @@
         if(m.qty > 0) {
           if(styleVal && m.styleNo !== styleVal) continue;
           if(itemVal && m.item !== itemVal) continue;
+          if(orderColorVal && m.orderColor !== orderColorVal) continue;
           if(m.color) colorSet.add(m.color);
-          if(m.orderColor) colorSet.add(m.orderColor);
         }
       }
 
@@ -1989,6 +2054,7 @@
     function updateTransferBatchList() {
       let styleVal = document.getElementById('transStyle').value.trim();
       let itemVal = document.getElementById('transItem').value.trim();
+      let orderColorVal = document.getElementById('transOrderColor').value.trim();
       let colorVal = document.getElementById('transColor').value.trim();
       let batchDl = document.getElementById('transferBatchList');
       if(!batchDl) return;
@@ -2001,9 +2067,10 @@
         if(m.qty > 0) {
           if(styleVal && m.styleNo !== styleVal) continue;
           if(itemVal && m.item !== itemVal) continue;
-          if(colorVal && m.color !== colorVal && m.orderColor !== colorVal) continue;
+          if(orderColorVal && m.orderColor !== orderColorVal) continue;
+          if(colorVal && m.color !== colorVal) continue;
 
-          optionsHtml += `<option value="${b}">[剩余库存:${m.qty} | 卷:${m.roll}] 类别:${m.item} 颜色:${m.color||'-'} 货架:${m.rack||'-'}</option>`;
+          optionsHtml += `<option value="${b}">[剩余库存:${m.qty} | 卷:${m.roll}] 类别:${m.item} 订单色:${m.orderColor||'-'} 面料色:${m.color||'-'} 货架:${m.rack||'-'}</option>`;
         }
       }
 
@@ -2018,6 +2085,7 @@
       if(match) {
         document.getElementById('transStyle').value = match.styleNo;
         document.getElementById('transItem').value = match.item;
+        document.getElementById('transOrderColor').value = match.orderColor || '';
         document.getElementById('transColor').value = match.color || '';
         document.getElementById('transQty').value = match.qty;
         document.getElementById('transRoll').value = match.roll;
@@ -2065,6 +2133,7 @@
       document.getElementById('transRoll').value = '';
       document.getElementById('transStyle').value = '';
       document.getElementById('transItem').value = '';
+      document.getElementById('transOrderColor').value = '';
       document.getElementById('transColor').value = '';
       document.getElementById('labelTransQty').innerText = '调拨数量 QTY';
       document.getElementById('labelTransRoll').innerText = '调拨卷数 Roll';
@@ -2122,7 +2191,6 @@
       }
     }
 
-    // 💡 优化后的调拨记录删除逻辑：删除调拨单时自动联动删除两端的出入库流水记录
     function deleteTransfer(id) {
       let trans = fabricTransfers.find(t => t.id === id);
       if(!trans) return;
@@ -2133,7 +2201,6 @@
 
       if(confirm(msg)) {
         if(trans.status === '已完成') {
-          // 自动级联删除关联的出库记录和入库记录
           fabricOut = fabricOut.filter(o => o.transferId !== id && o.invoice !== `TRANS-${id.slice(-6)}`);
           fabricIn = fabricIn.filter(i => i.transferId !== id && i.come !== `调拨自 ${trans.fromFty}`);
         }
@@ -2600,7 +2667,6 @@
       renderPrintSheet();
     }
 
-    // 计算指定参数在库存汇总表中实时的剩余数量
     function getRealtimeBalance(fty, styleNo, item, batchNo, orderColor, color, rack) {
       let inTotal = 0;
       let outTotal = 0;
@@ -2636,7 +2702,7 @@
       let receiverStr = batchItems[0].receiver || '-';
       let operatorName = currentUser ? currentUser.name : (batchItems[0].operator || 'ZAW AUNG');
 
-      let pageSize = 10; // 固定每页10行，撑满整张A4纸
+      let pageSize = 10;
       let totalPages = Math.ceil(batchItems.length / pageSize) || 1;
 
       let allPagesHtml = '';
