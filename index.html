@@ -863,8 +863,7 @@
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位' },
       { name: 'KO KO NAING', pass: '1714', fty: '全部单位' },
       { name: 'MYO THAT PAING', pass: '1864', fty: '二厂 (DA MEI)' },
-      { name: 'MYAT MIN', pass: '1234', fty: '一厂 (JUN TAI)' },
-      { name: '仓库管理员', pass: '123456', fty: '全部单位' }
+      { name: 'MYAT MIN', pass: '1234', fty: '一厂 (JUN TAI)' }
     ];
     let warehouseUsers = [...initialDefaultUsers];
     let currentUser = null;
@@ -907,7 +906,7 @@
       }
     }
 
-    async function fetchLatestUsersFromCloud() {
+    async function fetchLatestDataFromCloud() {
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
           method: 'GET',
@@ -921,11 +920,11 @@
           let data = await res.json();
           let cloudRecord = data.record || data;
           let cloudUsers = cloudRecord.warehouseUsers;
-          let cloudAux = cloudRecord.fabricAux || [];
-          let cloudIn = cloudRecord.fabricIn || [];
-          let cloudOut = cloudRecord.fabricOut || [];
-          let cloudTrans = cloudRecord.fabricTransfers || [];
-          let cloudFtyList = cloudRecord.factoryList || [];
+          let cloudAux = cloudRecord.fabricAux;
+          let cloudIn = cloudRecord.fabricIn;
+          let cloudOut = cloudRecord.fabricOut;
+          let cloudTrans = cloudRecord.fabricTransfers;
+          let cloudFtyList = cloudRecord.factoryList;
 
           if (cloudUsers && Array.isArray(cloudUsers)) {
             warehouseUsers = cloudUsers;
@@ -933,11 +932,13 @@
             renderLoginHints();
           }
 
-          if (cloudAux.length > 0 || cloudRecord.hasOwnProperty('fabricAux')) fabricAux = cloudAux;
-          if (cloudIn.length > 0 || cloudRecord.hasOwnProperty('fabricIn')) fabricIn = cloudIn;
-          if (cloudOut.length > 0 || cloudRecord.hasOwnProperty('fabricOut')) fabricOut = cloudOut;
-          if (cloudTrans.length > 0 || cloudRecord.hasOwnProperty('fabricTransfers')) fabricTransfers = cloudTrans;
-          if (cloudFtyList.length > 0) factoryList = cloudFtyList;
+          if (cloudAux && Array.isArray(cloudAux)) fabricAux = cloudAux;
+          if (cloudIn && Array.isArray(cloudIn)) fabricIn = cloudIn;
+          if (cloudOut && Array.isArray(cloudOut)) fabricOut = cloudOut;
+          if (cloudTrans && Array.isArray(cloudTrans)) fabricTransfers = cloudTrans;
+          if (cloudFtyList && Array.isArray(cloudFtyList)) factoryList = cloudFtyList;
+
+          renderAll();
         }
       } catch(e) {
         console.warn("读取云端最新数据异常", e);
@@ -1072,7 +1073,8 @@
       loadLocalCache();
       renderLoginHints();
 
-      await fetchLatestUsersFromCloud();
+      // 自动静默从云端获取最新数据与用户名单
+      await fetchLatestDataFromCloud();
 
       let saved = sessionStorage.getItem('wh_user');
       if (saved) {
@@ -1510,81 +1512,9 @@
     async function manualSync() {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
-
-      try {
-        let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          method: 'GET',
-          headers: { 
-            'X-Master-Key': API_KEY,
-            'X-Bin-Meta': 'false'
-          }
-        });
-
-        let cloudRecord = {};
-        if (res.ok) {
-          let data = await res.json();
-          cloudRecord = data.record || data;
-        }
-
-        let cloudAux = cloudRecord.fabricAux || [];
-        let cloudIn = cloudRecord.fabricIn || [];
-        let cloudOut = cloudRecord.fabricOut || [];
-        let cloudTrans = cloudRecord.fabricTransfers || [];
-        let cloudUsers = cloudRecord.warehouseUsers;
-        let cloudFtyList = cloudRecord.factoryList || [];
-
-        fabricAux.forEach(a => { if(!cloudAux.some(c => c.id === a.id)) cloudAux.push(a); });
-        fabricIn.forEach(i => { if(!cloudIn.some(c => c.id === i.id)) cloudIn.push(i); });
-        fabricOut.forEach(o => { if(!cloudOut.some(c => c.id === o.id)) cloudOut.push(o); });
-        fabricTransfers.forEach(t => { if(!cloudTrans.some(c => c.id === t.id)) cloudTrans.push(t); });
-
-        if (cloudUsers && Array.isArray(cloudUsers)) {
-          warehouseUsers = cloudUsers;
-        }
-
-        fabricAux = cloudAux;
-        fabricIn = cloudIn;
-        fabricOut = cloudOut;
-        fabricTransfers = cloudTrans;
-        if(cloudFtyList.length > 0) factoryList = cloudFtyList;
-
-        let putRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json', 
-            'X-Master-Key': API_KEY 
-          },
-          body: JSON.stringify({ 
-            fabricAux, 
-            fabricIn, 
-            fabricOut, 
-            fabricTransfers, 
-            factoryList, 
-            warehouseUsers 
-          })
-        });
-
-        if(putRes.ok) {
-          localStorage.setItem('wh_aux', JSON.stringify(fabricAux));
-          localStorage.setItem('wh_in', JSON.stringify(fabricIn));
-          localStorage.setItem('wh_out', JSON.stringify(fabricOut));
-          localStorage.setItem('wh_trans', JSON.stringify(fabricTransfers));
-          localStorage.setItem('wh_fty_list', JSON.stringify(factoryList));
-          localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
-          
-          renderLoginHints();
-          renderAll();
-          alert(`✅ 同步成功！数据与操作员名单已双向同步更新！`);
-        } else {
-          alert(`⚠️ 上传至云端失败，服务器响应状态码: ${putRes.status}`);
-        }
-
-      } catch(e) {
-        console.error("同步失败: ", e);
-        alert(`❌ 同步发生错误: ${e.message}`);
-      } finally {
-        if(icon) icon.classList.remove('fa-spin');
-      }
+      await fetchLatestDataFromCloud();
+      if(icon) icon.classList.remove('fa-spin');
+      alert("✅ 已成功从云端同步最新数据！");
     }
 
     async function saveToCloud() {
