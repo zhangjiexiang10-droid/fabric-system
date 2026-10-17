@@ -821,13 +821,14 @@
     const BIN_ID = '6ad260c4ffd5d1605371ad7c'; 
     const API_KEY = '$2a$10$ffN1AM57TUaiKXIBj4AB/eeJgD0bl/3pFue9io5XvnaklmZyaa76K';
 
+    // 🎯 内置默认操作员名单（确保您的账号和常用账号绝对不会失效）
     let defaultUsers = [
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位' },
       { name: 'KO KO NAING', pass: '1714', fty: '全部单位' },
       { name: 'MYO THAT PAING', pass: '1864', fty: '二厂 (DA MEI)' },
       { name: '仓库管理员', pass: '123456', fty: '全部单位' }
     ];
-    let warehouseUsers = defaultUsers;
+    let warehouseUsers = [...defaultUsers];
     let currentUser = null;
     let currentGlobalFty = '全部单位';
     let onlyInStock = false;
@@ -919,6 +920,12 @@
       renderBatchRows('batchInRowsContainer', 'batchInNo', 'batchInRack', 'batchInRoll', 'batchInQty');
       renderBatchAuxRows();
       renderOutSmartRows();
+
+      // 先从本地缓存恢复用户名单，防止云端异步延迟或未读到导致新加账号失效
+      let localUsers = JSON.parse(localStorage.getItem('wh_users'));
+      if (localUsers && localUsers.length > 0) {
+        warehouseUsers = localUsers;
+      }
 
       let saved = sessionStorage.getItem('wh_user');
       if (saved) {
@@ -1258,19 +1265,28 @@
             factoryList = data.factoryList;
           }
           
-          // 🎯 修复：合并云端与本地默认用户，确保新添加的人员不会因云端缓存而丢失
+          // 🎯 核心修复：深度安全合并云端与本地用户，确保任何新增人员都不会被云端覆盖丢失
           let cloudUsers = data.warehouseUsers || [];
           let mergedUsers = [...defaultUsers];
-          cloudUsers.forEach(cu => {
-            if(!mergedUsers.some(mu => mu.name === cu.name)) {
-              mergedUsers.push(cu);
-            } else {
+          
+          // 合并本地缓存中的用户
+          let localCachedUsers = JSON.parse(localStorage.getItem('wh_users')) || [];
+          let allCandidateUsers = [...cloudUsers, ...localCachedUsers, ...warehouseUsers];
+          
+          allCandidateUsers.forEach(cu => {
+            if (cu && cu.name) {
               let existing = mergedUsers.find(mu => mu.name === cu.name);
-              existing.pass = cu.pass;
-              existing.fty = cu.fty;
+              if (!existing) {
+                mergedUsers.push(cu);
+              } else {
+                // 如果云端或本地有更新的密码，优先保留非默认值
+                if(cu.pass && cu.pass !== '123456') existing.pass = cu.pass;
+                if(cu.fty) existing.fty = cu.fty;
+              }
             }
           });
           warehouseUsers = mergedUsers;
+          localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
 
           renderAll();
           updateAuxDatalists();
