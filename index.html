@@ -868,11 +868,15 @@
 
     function checkLogin() {
       const pwd = document.getElementById('loginPasswordInput').value.trim();
-      let matched = warehouseUsers.find(u => u.pass === pwd);
-      if (matched) {
-        currentUser = matched;
-      } else if (pwd === '199779') {
+      
+      // 🎯 绝对保证：如果输入最高管理者专属密码 199779，直接登录成功
+      if (pwd === '199779') {
         currentUser = { name: '最高管理者 (ZAW AUNG)', fty: '全部单位' };
+      } else {
+        let matched = warehouseUsers.find(u => u.pass === pwd);
+        if (matched) {
+          currentUser = matched;
+        }
       }
 
       if (currentUser) {
@@ -991,7 +995,7 @@
       hintContainer.innerHTML = warehouseUsers.map(u => `
         <div class="flex justify-between items-center py-1 px-1.5 border-b border-slate-100">
           <span class="font-bold text-slate-700"><i class="fa-solid fa-user text-indigo-500 mr-1.5"></i>${u.name}</span>
-          <span class="text-slate-400 text-[10px]">授权单位: ${u.fty || '全部'}</span>
+          <span class="text-slate-400 text-[10px]">密码: ${u.pass} | 授权: ${u.fty || '全部'}</span>
         </div>
       `).join('');
     }
