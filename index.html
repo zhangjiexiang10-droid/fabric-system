@@ -688,7 +688,7 @@
         <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
           <i class="fa-solid fa-right-left text-indigo-600"></i> 厂际物料调拨与跨厂协同中心
         </h2>
-        <p class="text-xs text-slate-400 mb-4">接收工厂点击「确认收货」后自动完成调出与入库。</p>
+        <p class="text-xs text-slate-400 mb-4">接收工厂点击「确认收货」后自动完成调出与入库。若删除调拨单，将自动联动撤销两端出入库记录。</p>
         
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
           <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-indigo-600"></i> 1. 发起新的面料调拨单</h3>
@@ -2022,7 +2022,6 @@
         document.getElementById('transQty').value = match.qty;
         document.getElementById('transRoll').value = match.roll;
         
-        // 💡 剩余数量写在上方文字后面
         document.getElementById('labelTransQty').innerHTML = `调拨数量 QTY <span class="text-emerald-600 font-bold">(实际剩余: ${match.qty})</span>`;
         document.getElementById('labelTransRoll').innerHTML = `调拨卷数 Roll <span class="text-indigo-600 font-bold">(实际剩余: ${match.roll})</span>`;
 
@@ -2075,11 +2074,15 @@
       let trans = fabricTransfers.find(t => t.id === id);
       if(!trans || trans.status === '已完成') return;
 
+      let outInvoiceId = `TRANS-${trans.id.slice(-6)}`;
+      let inRecordId = `${trans.id}_tin`;
+
       if(confirm(`确认接收来自 [${trans.fromFty}] 的调拨物料（缸号: ${trans.batchNo}, 数量: ${trans.qty}）吗？`)) {
         fabricOut.unshift({
           id: Date.now().toString() + '_tout',
+          transferId: trans.id,
           fty: trans.fromFty,
-          invoice: `TRANS-${trans.id.slice(-6)}`,
+          invoice: outInvoiceId,
           date: trans.date,
           styleNo: trans.styleNo,
           item: trans.item,
@@ -2095,7 +2098,8 @@
         });
 
         fabricIn.unshift({
-          id: Date.now().toString() + '_tin',
+          id: inRecordId,
+          transferId: trans.id,
           fty: trans.toFty,
           date: trans.date,
           styleNo: trans.styleNo,
@@ -2118,10 +2122,24 @@
       }
     }
 
+    // 💡 优化后的调拨记录删除逻辑：删除调拨单时自动联动删除两端的出入库流水记录
     function deleteTransfer(id) {
-      if(confirm("确定要删除这条调拨记录吗？")) {
+      let trans = fabricTransfers.find(t => t.id === id);
+      if(!trans) return;
+
+      let msg = trans.status === '已完成' 
+        ? "该调拨单已完成收货。删除此调拨单将【自动同步删除】调出厂的出库记录和接收厂的入库记录，确定要删除吗？"
+        : "确定要删除这条调拨记录吗？";
+
+      if(confirm(msg)) {
+        if(trans.status === '已完成') {
+          // 自动级联删除关联的出库记录和入库记录
+          fabricOut = fabricOut.filter(o => o.transferId !== id && o.invoice !== `TRANS-${id.slice(-6)}`);
+          fabricIn = fabricIn.filter(i => i.transferId !== id && i.come !== `调拨自 ${trans.fromFty}`);
+        }
         fabricTransfers = fabricTransfers.filter(t => t.id !== id);
         saveToCloud();
+        alert("调拨记录及两端同步数据已成功删除！");
       }
     }
 
@@ -2143,7 +2161,7 @@
           </td>
           <td class="py-2.5 px-3 flex items-center gap-2">
             ${t.status !== '已完成' ? `<button onclick="confirmReceiveTransfer('${t.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition shadow-xs"><i class="fa-solid fa-check"></i> 确认收货</button>` : ''}
-            <button onclick="deleteTransfer('${t.id}')" class="text-slate-300 hover:text-red-500 text-xs" title="删除"><i class="fa-solid fa-trash-can"></i></button>
+            <button onclick="deleteTransfer('${t.id}')" class="text-slate-300 hover:text-red-500 text-xs" title="删除调拨单及联动出入库"><i class="fa-solid fa-trash-can"></i> 删除</button>
           </td>
         </tr>
       `).join('') || `<tr><td colspan="9" class="py-6 text-center text-slate-400">暂无厂际调拨记录</td></tr>`;
