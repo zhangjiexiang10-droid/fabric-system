@@ -51,10 +51,10 @@
           安全登入系统
         </button>
         
-        <!-- 💡 可用账号密码提示区 -->
+        <!-- 💡 仅显示操作员名字列表（不显示密码，保证安全性） -->
         <div class="mt-4 pt-3 border-t border-slate-100">
           <p class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
-            <i class="fa-solid fa-circle-info text-indigo-600"></i> 系统可用账号密码提示：
+            <i class="fa-solid fa-users text-indigo-600"></i> 系统操作员名册（点击可快速查看提示）：
           </p>
           <div id="loginHintList" class="max-h-28 overflow-y-auto space-y-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 text-slate-600">
             <!-- 动态渲染 -->
@@ -498,10 +498,15 @@
         </div>
         <p class="text-xs text-slate-400 mb-4">款號與類別支援打字匹配与即時剩餘檢測。</p>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <!-- 🎯 新增：领用出库单位、领用人、款号、类别、批次、日期、单位 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">领料出库单位 FTY</label>
             <input id="outFty" list="globalFtyDatalist" onchange="updateOutFilterDropdowns()" type="text" placeholder="领料单位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">领用人名称</label>
+            <input id="outReceiver" type="text" placeholder="输入领用人/部门" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">① 筛选领料款号 Style</label>
@@ -576,6 +581,7 @@
             <thead>
               <tr class="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
                 <th class="py-2 px-3">领料单位 FTY</th>
+                <th class="py-2 px-3 font-bold text-indigo-600">领用人</th>
                 <th class="py-2 px-3 font-bold text-indigo-600">开票批次 (Invoice)</th>
                 <th class="py-2 px-3">日期</th>
                 <th class="py-2 px-3">款号</th>
@@ -959,13 +965,14 @@
       }
     };
 
+    // 🎯 登录提示：只显示操作员姓名（不显示密码，保护安全性）
     function renderLoginHints() {
       let hintContainer = document.getElementById('loginHintList');
       if(!hintContainer) return;
       hintContainer.innerHTML = warehouseUsers.map(u => `
-        <div class="flex justify-between items-center py-0.5 px-1 border-b border-slate-100">
-          <span class="font-bold text-slate-700">${u.name}</span>
-          <span class="text-indigo-600 font-mono font-bold bg-indigo-50 px-1.5 py-0.5 rounded">密码: ${u.pass}</span>
+        <div class="flex justify-between items-center py-1 px-1.5 border-b border-slate-100">
+          <span class="font-bold text-slate-700"><i class="fa-solid fa-user text-indigo-500 mr-1.5"></i>${u.name}</span>
+          <span class="text-slate-400 text-[10px]">授权单位: ${u.fty || '全部'}</span>
         </div>
       `).join('');
     }
@@ -1294,7 +1301,6 @@
             factoryList = data.factoryList;
           }
           
-          // 🎯 核心防丢合并：绝对保证默认账号 + 本地缓存账号 + 云端账号取并集
           let cloudUsers = data.warehouseUsers || [];
           let localCachedUsers = JSON.parse(localStorage.getItem('wh_users')) || [];
           let mergedUsers = [...defaultUsers];
@@ -2142,6 +2148,7 @@
 
     function submitBatchOutStock() {
       let fty = document.getElementById('outFty').value.trim();
+      let receiver = document.getElementById('outReceiver').value.trim();
       let invoice = document.getElementById('outInvoice').value.trim();
       let date = document.getElementById('outDate').value;
       let unit = document.getElementById('outUnit').value;
@@ -2149,6 +2156,7 @@
       let timeStr = getNowTimeString();
 
       if(!invoice || !fty) { alert("请填写领料单位与开票编号/批次！"); return; }
+      if(!receiver) { alert("请填写领用人名称！"); return; }
 
       let addedCount = 0;
       let cache = window.stockBatchCache || {};
@@ -2173,6 +2181,7 @@
           fabricOut.unshift({
             id: Date.now().toString() + '_' + i,
             fty,
+            receiver,
             invoice,
             date,
             styleNo: stockInfo.styleNo,
@@ -2208,12 +2217,13 @@
 
       let filtered = fabricOut.filter(i => {
         if (currentGlobalFty !== '全部单位' && i.fty !== currentGlobalFty) return false;
-        return (i.styleNo + i.item + (i.batchNo||'') + (i.orderColor||'') + (i.color||'') + (i.rack||'') + i.invoice).toLowerCase().includes(query);
+        return (i.styleNo + i.item + (i.batchNo||'') + (i.orderColor||'') + (i.color||'') + (i.rack||'') + i.invoice + (i.receiver||'')).toLowerCase().includes(query);
       });
 
       tbody.innerHTML = filtered.map(i => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
           <td class="py-2 px-3 font-bold text-amber-600 text-xs">${i.fty}</td>
+          <td class="py-2 px-3 font-bold text-indigo-600">${i.receiver || '-'}</td>
           <td class="py-2 px-3 font-bold text-indigo-600">${i.invoice}</td>
           <td class="py-2 px-3 text-xs text-slate-500">${i.date}</td>
           <td class="py-2 px-3 font-bold">${i.styleNo}</td>
@@ -2268,6 +2278,7 @@
 
       let dateStr = batchItems[0].date || new Date().toISOString().split('T')[0];
       let ftyStr = batchItems[0].fty || currentGlobalFty;
+      let receiverStr = batchItems[0].receiver || '-';
 
       let pageSize = 10;
       let totalPages = Math.ceil(batchItems.length / pageSize) || 1;
@@ -2312,7 +2323,7 @@
               <div class="text-center font-bold text-xs text-red-600 mb-0.5">${titleText} (第 ${p+1}/${totalPages} 页)</div>
               <div class="flex justify-between items-center text-[10px] mb-1 px-1 font-semibold">
                 <span>日期：${dateStr}</span>
-                <span>领料单位：${ftyStr} | 开单人：${currentUser ? currentUser.name : 'ZAW AUNG'}</span>
+                <span>领料单位：${ftyStr} | 领用人：${receiverStr} | 开单人：${currentUser ? currentUser.name : 'ZAW AUNG'}</span>
               </div>
               
               <table class="w-full border border-black text-center text-[10px]">
