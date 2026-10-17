@@ -1056,6 +1056,7 @@
       updateOutBatchDatalists();
     }
 
+    // 🎯 严格级联：款号变更时联动类别、订单颜色、面料颜色
     function onInStyleChange() {
       let styleVal = document.getElementById('inStyle').value.trim();
       let matchedAux = fabricAux.filter(a => a.styleNo === styleVal);
@@ -1078,6 +1079,7 @@
       document.getElementById('auxRackList').innerHTML = [...rackSet].map(r => `<option value="${r}">`).join('');
     }
 
+    // 🎯 严格级联：类别变更时联动订单颜色与面料颜色
     function onInItemChange() {
       let styleVal = document.getElementById('inStyle').value.trim();
       let itemVal = document.getElementById('inItem').value.trim();
@@ -1093,7 +1095,7 @@
       document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
     }
 
-    // 🎯 新增：当订单颜色改变时，面料颜色自动联动匹配对应规格
+    // 🎯 完美精准联动：当选择或输入订单颜色时，面料颜色严格受当前“款号 + 类别 + 订单颜色”联合约束，绝对不出现多余的其他颜色！
     function onInOrderColorChange() {
       let styleVal = document.getElementById('inStyle').value.trim();
       let itemVal = document.getElementById('inItem').value.trim();
@@ -1111,6 +1113,15 @@
       });
 
       document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
+      
+      // 如果匹配出的可选面料颜色只有一种，自动帮用户填好或清空错误输入
+      if(colorSet.size === 1) {
+        let singleColor = [...colorSet][0];
+        let colorInput = document.getElementById('inColor');
+        if(!colorInput.value || !colorSet.has(colorInput.value)) {
+          colorInput.value = singleColor;
+        }
+      }
     }
 
     function onOutFilterStyleChange() {
