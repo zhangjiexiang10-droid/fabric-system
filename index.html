@@ -12,9 +12,9 @@
       #printArea, #printArea * { visibility: visible; }
       #printArea { position: absolute; left: 0; top: 0; width: 100%; }
       .no-print { display: none !important; }
-      @page { size: A4 portrait; margin: 5mm; }
+      @page { size: A4 portrait; margin: 4mm; }
       .page-break { page-break-after: always; break-after: page; }
-      body { font-size: 11px; }
+      body { font-size: 10.5px; }
     }
   </style>
 </head>
@@ -522,7 +522,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">开票编号/批次 (Invoice)</label>
-            <input id="outInvoice" type="text" placeholder="自动联动" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+            <input id="outInvoice" type="text" placeholder="自动递增编号" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">出库日期</label>
@@ -690,7 +690,6 @@
         </h2>
         <p class="text-xs text-slate-400 mb-4">接收工厂点击「确认收货」后自动完成调出与入库。</p>
         
-        <!-- 💡 调拨中心按最新截图拆分：款号、类别、颜色分别独立且支持打字匹配与智能联动 -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
           <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-indigo-600"></i> 1. 发起新的面料调拨单</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -774,9 +773,8 @@
           </div>
           <div class="bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-200 flex items-center gap-2">
             <span class="text-xs font-bold text-indigo-700">选择批次:</span>
-            <select id="printInvoiceSelect" onchange="renderPrintSheet()" class="bg-white px-2 py-1 rounded text-xs font-bold text-indigo-600 border border-indigo-300 focus:outline-none">
-              <option value="">-- 请选择批次 --</option>
-            </select>
+            <input id="printInvoiceSelect" list="printInvoiceList" onchange="renderPrintSheet()" placeholder="输入或选择批次" class="bg-white px-2.5 py-1 rounded text-xs font-bold text-indigo-600 border border-indigo-300 focus:outline-none w-44">
+            <datalist id="printInvoiceList"></datalist>
           </div>
         </div>
         <button onclick="window.print()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2 shrink-0">
@@ -1031,6 +1029,7 @@
       }
     }
 
+    // 💡 自动按单位生成递增编号 (例如 DAMEI-001 -> DAMEI-002)
     function onOutFtyChange() {
       let ftyVal = document.getElementById('outFty')?.value.trim() || '';
       let invoiceInput = document.getElementById('outInvoice');
@@ -1043,7 +1042,21 @@
       } else if (ftyVal) {
         prefix = ftyVal.substring(0, 4).toUpperCase();
       }
-      invoiceInput.value = `${prefix}-001`;
+
+      // 统计现有相同前缀的Invoice数量来自动递增
+      let existingInvoices = new Set(fabricOut.map(o => o.invoice).filter(Boolean));
+      let maxNum = 0;
+      existingInvoices.forEach(inv => {
+        if (inv.startsWith(prefix + '-')) {
+          let numPart = parseInt(inv.split('-')[1]);
+          if (!isNaN(numPart) && numPart > maxNum) {
+            maxNum = numPart;
+          }
+        }
+      });
+
+      let nextNum = String(maxNum + 1).padStart(3, '0');
+      invoiceInput.value = `${prefix}-${nextNum}`;
       updateOutFilterDropdowns();
     }
 
@@ -1900,7 +1913,6 @@
       renderBalanceSheet();
     }
 
-    // 💡 调拨中心拆分款号、类别、颜色独立的智能化联动函数
     function updateTransferStyleList() {
       let fromFty = document.getElementById('transFromFty').value.trim();
       let styleDl = document.getElementById('transferStyleList');
@@ -2508,6 +2520,7 @@
       saveToCloud();
       alert(`成功批量出库 ${addedCount} 个缸号的数据！`);
       renderOutSmartRows();
+      onOutFtyChange(); // 自动生成下一个递增编号
     }
 
     function deleteOut(id) {
@@ -2552,17 +2565,13 @@
 
     function updatePrintInvoiceDropdown() {
       let select = document.getElementById('printInvoiceSelect');
-      if(!select) return;
+      let dl = document.getElementById('printInvoiceList');
+      if(!select || !dl) return;
 
-      let invoices = [...new Set(fabricOut.map(i => i.invoice))];
-      let currentVal = select.value;
+      let invoices = [...new Set(fabricOut.map(i => i.invoice))].filter(Boolean);
+      dl.innerHTML = invoices.map(inv => `<option value="${inv}">`).join('');
 
-      select.innerHTML = '<option value="">-- 请选择批次 --</option>' + 
-        invoices.map(inv => `<option value="${inv}">${inv}</option>`).join('');
-
-      if(invoices.includes(currentVal)) {
-        select.value = currentVal;
-      } else if(invoices.length > 0) {
+      if(invoices.length > 0 && !select.value) {
         select.value = invoices[0];
       }
       renderPrintSheet();
@@ -2573,7 +2582,7 @@
       let select = document.getElementById('printInvoiceSelect');
       if(!container || !select) return;
 
-      let selectedInvoice = select.value;
+      let selectedInvoice = select.value.trim();
       let batchItems = fabricOut.filter(i => i.invoice === selectedInvoice);
 
       if(batchItems.length === 0) {
@@ -2584,8 +2593,9 @@
       let dateStr = batchItems[0].date || new Date().toISOString().split('T')[0];
       let ftyStr = batchItems[0].fty || currentGlobalFty;
       let receiverStr = batchItems[0].receiver || '-';
+      let operatorName = currentUser ? currentUser.name : (batchItems[0].operator || 'ZAW AUNG');
 
-      let pageSize = 10;
+      let pageSize = 6; // 精准适配高度撑满A4纸不留空白
       let totalPages = Math.ceil(batchItems.length / pageSize) || 1;
 
       let allPagesHtml = '';
@@ -2598,15 +2608,15 @@
           let item = pageItems[i] || {};
           let rowNum = p * pageSize + (i + 1);
           tableRows += `
-            <tr class="border-b border-black text-[10px] h-5 text-center">
-              <td class="border-r border-black py-0.5">${item.styleNo ? rowNum : ''}</td>
-              <td class="border-r border-black font-bold text-left px-1">${item.styleNo || ''}</td>
-              <td class="border-r border-black text-left px-1">${item.item || ''}</td>
-              <td class="border-r border-black font-bold text-indigo-700 text-left px-1">${item.batchNo || ''}</td>
-              <td class="border-r border-black text-left px-1">${item.orderColor || ''}</td>
-              <td class="border-r border-black text-left px-1">${item.color || ''}</td>
+            <tr class="border-b border-black text-[11px] h-6 text-center">
+              <td class="border-r border-black py-0.5 w-8">${item.styleNo ? rowNum : ''}</td>
+              <td class="border-r border-black font-bold text-left px-1.5">${item.styleNo || ''}</td>
+              <td class="border-r border-black text-left px-1.5">${item.item || ''}</td>
+              <td class="border-r border-black font-bold text-indigo-700 text-left px-1.5">${item.batchNo || ''}</td>
+              <td class="border-r border-black text-left px-1.5">${item.orderColor || ''}</td>
+              <td class="border-r border-black text-left px-1.5">${item.color || ''}</td>
               <td class="border-r border-black font-semibold">${item.rack || ''}</td>
-              <td class="border-r border-black font-bold">${item.qty || ''}</td>
+              <td class="border-r border-black font-bold text-emerald-700">${item.qty || ''}</td>
               <td class="border-r border-black">${item.unit || ''}</td>
               <td class="border-r border-black font-bold">${item.roll || ''}</td>
               <td class="border-r border-black">${item.fty || ''}</td>
@@ -2624,28 +2634,28 @@
         let pageTripleHtml = '';
         titles.forEach((titleText, idx) => {
           pageTripleHtml += `
-            <div class="border border-black p-2 mb-2 bg-white text-[10px]">
-              <div class="text-center font-bold text-xs text-red-600 mb-0.5">${titleText} (第 ${p+1}/${totalPages} 页)</div>
-              <div class="flex justify-between items-center text-[10px] mb-1 px-1 font-semibold">
+            <div class="border border-black p-2 mb-2 bg-white text-[11px]">
+              <div class="text-center font-bold text-sm text-red-600 mb-0.5">${titleText} (第 ${p+1}/${totalPages} 页)</div>
+              <div class="flex justify-between items-center text-[11px] mb-1 px-1 font-semibold">
                 <span>日期：${dateStr}</span>
-                <span>领料单位：${ftyStr} | 领用人：${receiverStr} | 开单人：${currentUser ? currentUser.name : 'ZAW AUNG'}</span>
+                <span>领料单位：${ftyStr} | 领用人：${receiverStr} | 开单人：${operatorName}</span>
               </div>
               
-              <table class="w-full border border-black text-center text-[10px]">
+              <table class="w-full border border-black text-center text-[11px]">
                 <thead>
                   <tr class="bg-slate-100 border-b border-black">
-                    <th class="border-r border-black py-0.5 w-6">NO</th>
-                    <th class="border-r border-black py-0.5">Style No</th>
-                    <th class="border-r border-black py-0.5">Item 类别</th>
-                    <th class="border-r border-black py-0.5">缸号 Batch</th>
-                    <th class="border-r border-black py-0.5">订单颜色</th>
-                    <th class="border-r border-black py-0.5">面料颜色 Col</th>
-                    <th class="border-r border-black py-0.5">货架号</th>
-                    <th class="border-r border-black py-0.5">QTY 数量</th>
-                    <th class="border-r border-black py-0.5">Unit</th>
-                    <th class="border-r border-black py-0.5">Roll 卷</th>
-                    <th class="border-r border-black py-0.5">FTY</th>
-                    <th class="py-0.5">Balance</th>
+                    <th class="border-r border-black py-1 w-8">NO</th>
+                    <th class="border-r border-black py-1">Style No</th>
+                    <th class="border-r border-black py-1">Item 类别</th>
+                    <th class="border-r border-black py-1">缸号 Batch</th>
+                    <th class="border-r border-black py-1">订单颜色</th>
+                    <th class="border-r border-black py-1">面料颜色 Col</th>
+                    <th class="border-r border-black py-1">货架号</th>
+                    <th class="border-r border-black py-1">QTY 数量</th>
+                    <th class="border-r border-black py-1">Unit</th>
+                    <th class="border-r border-black py-1">Roll 卷</th>
+                    <th class="border-r border-black py-1">FTY</th>
+                    <th class="py-1">Balance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2653,8 +2663,8 @@
                 </tbody>
               </table>
 
-              <div class="flex justify-between text-[10px] mt-1 pt-1 border-t border-dashed border-black px-2">
-                <span>開單人：__________</span>
+              <div class="flex justify-between text-[11px] mt-1.5 pt-1 border-t border-dashed border-black px-2">
+                <span>開單人：<b>${operatorName}</b></span>
                 <span>倉庫領料人：__________</span>
                 <span>會計/管理：__________</span>
               </div>
@@ -2662,7 +2672,7 @@
           `;
         });
 
-        allPagesHtml += `<div class="${p > 0 ? 'page-break mt-6 pt-4 border-t-2 border-dashed border-slate-300' : ''}">${pageTripleHtml}</div>`;
+        allPagesHtml += `<div class="${p > 0 ? 'page-break mt-4 pt-2 border-t-2 border-dashed border-slate-300' : ''}">${pageTripleHtml}</div>`;
       }
 
       container.innerHTML = allPagesHtml;
