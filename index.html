@@ -34,13 +34,14 @@
   <!-- ==================== 登录验证遮罩层 ==================== -->
   <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 border border-slate-200">
-      <div class="text-center mb-6">
+      <div class="text-center mb-5">
         <div class="w-14 h-14 bg-indigo-600 text-white rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 shadow-sm">
           <i class="fa-solid fa-user-shield"></i>
         </div>
         <h2 class="text-xl font-bold text-slate-900">面料出入库管理系统</h2>
         <p class="text-xs text-slate-400 mt-1">请输入操作员密码以登入系统</p>
       </div>
+      
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">操作员密码 Password</label>
@@ -49,6 +50,16 @@
         <button onclick="checkLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl py-2.5 text-sm transition shadow-sm">
           安全登入系统
         </button>
+        
+        <!-- 💡 可用账号密码提示区 -->
+        <div class="mt-4 pt-3 border-t border-slate-100">
+          <p class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-indigo-600"></i> 系统可用账号密码提示：
+          </p>
+          <div id="loginHintList" class="max-h-28 overflow-y-auto space-y-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 text-slate-600">
+            <!-- 动态渲染 -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -821,11 +832,12 @@
     const BIN_ID = '6ad260c4ffd5d1605371ad7c'; 
     const API_KEY = '$2a$10$ffN1AM57TUaiKXIBj4AB/eeJgD0bl/3pFue9io5XvnaklmZyaa76K';
 
-    // 🎯 内置默认操作员名单（确保您的账号和常用账号绝对不会失效）
+    // 🎯 基础内置默认操作员名单
     let defaultUsers = [
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部单位' },
       { name: 'KO KO NAING', pass: '1714', fty: '全部单位' },
       { name: 'MYO THAT PAING', pass: '1864', fty: '二厂 (DA MEI)' },
+      { name: 'MYAT MIN', pass: '1234', fty: '一厂 (JUN TAI)' },
       { name: '仓库管理员', pass: '123456', fty: '全部单位' }
     ];
     let warehouseUsers = [...defaultUsers];
@@ -869,7 +881,6 @@
       }
     }
 
-    // 🎯 严格判定：只有最高管理者才显示管理人后台标签
     function applyUserPermissions() {
       let ftyInput = document.getElementById('globalFtyFilter');
       let adminBtn = document.getElementById('btn_tabAdmin');
@@ -921,11 +932,16 @@
       renderBatchAuxRows();
       renderOutSmartRows();
 
-      // 先从本地缓存恢复用户名单，防止云端异步延迟或未读到导致新加账号失效
-      let localUsers = JSON.parse(localStorage.getItem('wh_users'));
-      if (localUsers && localUsers.length > 0) {
-        warehouseUsers = localUsers;
-      }
+      // 🎯 加载本地存储和默认用户
+      let localCachedUsers = JSON.parse(localStorage.getItem('wh_users')) || [];
+      let merged = [...defaultUsers];
+      localCachedUsers.forEach(cu => {
+        if(cu && cu.name && !merged.some(m => m.name === cu.name)) {
+          merged.push(cu);
+        }
+      });
+      warehouseUsers = merged;
+      renderLoginHints();
 
       let saved = sessionStorage.getItem('wh_user');
       if (saved) {
@@ -938,8 +954,21 @@
         
         applyUserPermissions();
         await syncDataFromCloud(true);
+      } else {
+        await syncDataFromCloud(true);
       }
     };
+
+    function renderLoginHints() {
+      let hintContainer = document.getElementById('loginHintList');
+      if(!hintContainer) return;
+      hintContainer.innerHTML = warehouseUsers.map(u => `
+        <div class="flex justify-between items-center py-0.5 px-1 border-b border-slate-100">
+          <span class="font-bold text-slate-700">${u.name}</span>
+          <span class="text-indigo-600 font-mono font-bold bg-indigo-50 px-1.5 py-0.5 rounded">密码: ${u.pass}</span>
+        </div>
+      `).join('');
+    }
 
     function renderBatchRows(containerId, noPrefix, rackPrefix, rollPrefix, qtyPrefix) {
       let tbody = document.getElementById(containerId);
@@ -1265,28 +1294,25 @@
             factoryList = data.factoryList;
           }
           
-          // 🎯 核心修复：深度安全合并云端与本地用户，确保任何新增人员都不会被云端覆盖丢失
+          // 🎯 核心防丢合并：绝对保证默认账号 + 本地缓存账号 + 云端账号取并集
           let cloudUsers = data.warehouseUsers || [];
-          let mergedUsers = [...defaultUsers];
-          
-          // 合并本地缓存中的用户
           let localCachedUsers = JSON.parse(localStorage.getItem('wh_users')) || [];
-          let allCandidateUsers = [...cloudUsers, ...localCachedUsers, ...warehouseUsers];
-          
-          allCandidateUsers.forEach(cu => {
-            if (cu && cu.name) {
-              let existing = mergedUsers.find(mu => mu.name === cu.name);
-              if (!existing) {
+          let mergedUsers = [...defaultUsers];
+
+          [...cloudUsers, ...localCachedUsers].forEach(cu => {
+            if(cu && cu.name) {
+              let exist = mergedUsers.find(m => m.name === cu.name);
+              if(!exist) {
                 mergedUsers.push(cu);
               } else {
-                // 如果云端或本地有更新的密码，优先保留非默认值
-                if(cu.pass && cu.pass !== '123456') existing.pass = cu.pass;
-                if(cu.fty) existing.fty = cu.fty;
+                if(cu.pass && cu.pass !== '123456') exist.pass = cu.pass;
+                if(cu.fty) exist.fty = cu.fty;
               }
             }
           });
           warehouseUsers = mergedUsers;
           localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
+          renderLoginHints();
 
           renderAll();
           updateAuxDatalists();
@@ -1301,8 +1327,12 @@
         let localFty = JSON.parse(localStorage.getItem('wh_fty_list'));
         if(localFty && localFty.length > 0) factoryList = localFty;
         let localUsers = JSON.parse(localStorage.getItem('wh_users'));
-        if(localUsers && localUsers.length > 0) warehouseUsers = localUsers;
-        else warehouseUsers = defaultUsers;
+        if(localUsers && localUsers.length > 0) {
+          localUsers.forEach(lu => {
+            if(!warehouseUsers.some(w => w.name === lu.name)) warehouseUsers.push(lu);
+          });
+        }
+        renderLoginHints();
         renderAll();
         updateAuxDatalists();
       } finally {
@@ -1317,6 +1347,7 @@
       localStorage.setItem('wh_trans', JSON.stringify(fabricTransfers));
       localStorage.setItem('wh_fty_list', JSON.stringify(factoryList));
       localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
+      renderLoginHints();
 
       try {
         await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
