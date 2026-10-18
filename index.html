@@ -326,6 +326,9 @@
       <button onclick="switchTab('tabLogs')" id="btn_tabLogs" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2 cursor-pointer" style="display: none;">
         <i class="fa-solid fa-shield-halved text-amber-600"></i> 9. 日志管理 System Logs
       </button>
+      <button onclick="switchTab('tabBin')" id="btn_tabBin" class="tab-btn px-4 py-2 bg-white text-slate-600 font-semibold rounded-xl text-sm border border-slate-200 hover:bg-slate-50 transition items-center gap-2 cursor-pointer" style="display: none;">
+        <i class="fa-solid fa-trash-arrow-up text-red-600"></i> 10. 刪除恢復中心 Bin
+      </button>
     </div>
 
     <!-- TAB 1: 輔助資料表 -->
@@ -1117,6 +1120,43 @@
       </div>
     </div>
 
+    <!-- TAB 10: 刪除恢復中心 (Bin / Recycle Bin) -->
+    <div id="tabBin" class="sheet-content hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-trash-arrow-up text-red-600"></i> 已刪除記錄回收站與恢復中心 Deleted Records Recycle Bin
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">專屬於最高管理者的回收站，可隨時將誤刪除的數據一鍵恢復至原位。 (Admin Only)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearTrashBin()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-trash"></i> 清空回收站 Clear Bin
+            </button>
+            <button onclick="exportTableToExcel('trashTableBody', '已刪除回收站記錄.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
+              <i class="fa-solid fa-file-excel"></i> 導出 Export
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll-container rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
+              <tr class="text-slate-600 text-xs border-b border-slate-200">
+                <th class="py-2.5 px-3 w-36">刪除時間 Delete Time</th>
+                <th class="py-2.5 px-3 w-28 font-bold text-indigo-600">數據類型 Category</th>
+                <th class="py-2.5 px-3">款號 / 名稱 / 詳情 Style / Title / Detail</th>
+                <th class="py-2.5 px-3 w-28">操作人 Operator</th>
+                <th class="py-2.5 px-3 w-32 text-center no-print">操作 Action</th>
+              </tr>
+            </thead>
+            <tbody id="trashTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -1138,6 +1178,7 @@
     let isAllFtySummary = false;
 
     let fabricAux = [];
+    let trashBin = []; // 回收站記錄數組
     
     // 預置恢復的 22 筆入庫明細數據
     let fabricIn = [
@@ -1202,6 +1243,7 @@
         let localItems = JSON.parse(localStorage.getItem('wh_item_master_list'));
         let localUsers = JSON.parse(localStorage.getItem('wh_users'));
         let localLogs = JSON.parse(localStorage.getItem('wh_logs'));
+        let localBin = JSON.parse(localStorage.getItem('wh_trash_bin'));
 
         if(localAux && localAux.length > 0) fabricAux = localAux;
         if(localIn && localIn.length > 0) fabricIn = localIn;
@@ -1211,6 +1253,7 @@
         if(localItems && localItems.length > 0) itemMasterList = localItems;
         if(localUsers && Array.isArray(localUsers)) warehouseUsers = localUsers;
         if(localLogs && Array.isArray(localLogs)) systemLogs = localLogs;
+        if(localBin && Array.isArray(localBin)) trashBin = localBin;
       } catch(e) {
         console.warn("讀取本地緩存異常", e);
       }
@@ -1234,6 +1277,7 @@
           if (cloudRecord.factoryList) factoryList = cloudRecord.factoryList;
           if (cloudRecord.itemMasterList) itemMasterList = cloudRecord.itemMasterList;
           if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
+          if (cloudRecord.trashBin) trashBin = cloudRecord.trashBin;
 
           autoScanAndRepairAux();
           renderLoginHints();
@@ -1244,7 +1288,7 @@
       }
     }
 
-    // 自動掃描入庫補全輔助規格（確保 100% 同步顯示在輔助資料庫中，絕無遺漏）
+    // 自動掃描入庫補全輔助規格
     function autoScanAndRepairAux() {
       let added = 0;
       fabricIn.forEach(i => {
@@ -1281,6 +1325,20 @@
       saveToCloud();
     }
 
+    // 將刪除的數據放入回收站
+    function moveToTrash(dataType, titleText, originalObj) {
+      let trashItem = {
+        trashId: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 4),
+        dataType: dataType, // 'in', 'out', 'aux', 'itemMaster', 'factory', 'user'
+        titleText: titleText,
+        deletedTime: getNowTimeString(),
+        operator: currentUser ? currentUser.name : '系統',
+        originalData: originalObj
+      };
+      trashBin.unshift(trashItem);
+      saveToCloud();
+    }
+
     function checkLogin() {
       const pwd = document.getElementById('loginPasswordInput').value.trim();
       
@@ -1312,6 +1370,7 @@
       let ftyInput = document.getElementById('globalFtyFilter');
       let adminBtn = document.getElementById('btn_tabAdmin');
       let logsBtn = document.getElementById('btn_tabLogs');
+      let binBtn = document.getElementById('btn_tabBin');
       let roleBadge = document.getElementById('currentUserRoleBadge');
 
       let userName = currentUser ? currentUser.name : '';
@@ -1339,6 +1398,7 @@
 
       if(adminBtn) adminBtn.style.display = isMaster ? 'flex' : 'none';
       if(logsBtn) logsBtn.style.display = isMaster ? 'flex' : 'none';
+      if(binBtn) binBtn.style.display = isMaster ? 'flex' : 'none'; // 只有最高管理者可見回收站
     }
 
     function logout() {
@@ -1831,7 +1891,7 @@
       let userName = currentUser ? currentUser.name : '';
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
 
-      if ((tabId === 'tabAdmin' || tabId === 'tabLogs') && !isMaster) {
+      if ((tabId === 'tabAdmin' || tabId === 'tabLogs' || tabId === 'tabBin') && !isMaster) {
         alert("您沒有權限訪問該後台！ Permission Denied!");
         return;
       }
@@ -1850,6 +1910,7 @@
       if(tabId === 'tabPrint') updatePrintInvoiceDropdown();
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
       if(tabId === 'tabLogs' && isMaster) renderLogsTable();
+      if(tabId === 'tabBin' && isMaster) renderTrashTable();
     }
 
     async function manualSync() {
@@ -1869,13 +1930,14 @@
       localStorage.setItem('wh_item_master_list', JSON.stringify(itemMasterList));
       localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
       localStorage.setItem('wh_logs', JSON.stringify(systemLogs));
+      localStorage.setItem('wh_trash_bin', JSON.stringify(trashBin));
       renderLoginHints();
 
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-          body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, itemMasterList, warehouseUsers, systemLogs })
+          body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, itemMasterList, warehouseUsers, systemLogs, trashBin })
         });
         if(!res.ok) console.error("雲端保存返回狀態碼: ", res.status);
       } catch(e) { 
@@ -1905,6 +1967,7 @@
       if(isMaster) {
         renderUserTable();
         renderLogsTable();
+        renderTrashTable();
       }
       updateAuxDatalists();
       updateGlobalFtyDatalist();
@@ -1941,16 +2004,24 @@
       let countIn = fabricIn.filter(i => i.styleNo === selectedStyle).length;
       let countAux = fabricAux.filter(a => a.styleNo === selectedStyle).length;
 
-      let msg = `⚠️ 【高風險操作警告】\n\n确定要一鍵刪除款號 【${selectedStyle}】 的所有歷史記錄嗎？\n\n系統將自動按照嚴密邏輯依序清理：\n 1. 先刪除【出庫流水】 (${countOut} 條)\n 2. 再刪除【入庫流水】 (${countIn} 條)\n 3. 最後刪除【輔助規格】 (${countAux} 條)\n\n建议先導出 Excel 備份！此操作不可撤銷！`;
+      let msg = `⚠️ 【高風險操作警告】\n\n确定要一鍵刪除款號 【${selectedStyle}】 的所有歷史記錄嗎？\n\n系統將自動按照嚴密邏輯依序清理：\n 1. 先刪除【出庫流水】 (${countOut} 條)\n 2. 再刪除【入庫流水】 (${countIn} 條)\n 3. 最後刪除【輔助規格】 (${countAux} 條)\n\n所有被刪除的數據將自動存入【刪除恢復中心】！`;
 
       if(confirm(msg)) {
+        let deletedOutItems = fabricOut.filter(o => o.styleNo === selectedStyle);
+        let deletedInItems = fabricIn.filter(i => i.styleNo === selectedStyle);
+        let deletedAuxItems = fabricAux.filter(a => a.styleNo === selectedStyle);
+
+        deletedOutItems.forEach(o => moveToTrash('out', `出庫記錄 款號:${o.styleNo} 缸號:${o.batchNo} 數量:${o.qty}`, o));
+        deletedInItems.forEach(i => moveToTrash('in', `入庫記錄 款號:${i.styleNo} 缸號:${i.batchNo} 數量:${i.qty}`, i));
+        deletedAuxItems.forEach(a => moveToTrash('aux', `輔助規格 款號:${a.styleNo} 類別:${a.item}`, a));
+
         fabricOut = fabricOut.filter(o => o.styleNo !== selectedStyle);
         fabricIn = fabricIn.filter(i => i.styleNo !== selectedStyle);
         fabricAux = fabricAux.filter(a => a.styleNo !== selectedStyle);
 
-        recordLog('ACTION', '按款號一鍵批量刪除', `按合規順序(出庫->入庫->規格)一鍵清理款號 [${selectedStyle}]，共刪除出庫 ${countOut} 條、入庫 ${countIn} 條、規格 ${countAux} 條`);
+        recordLog('ACTION', '按款號一鍵批量刪除', `按合規順序一鍵清理款號 [${selectedStyle}]，共移入回收站出庫 ${countOut} 條、入庫 ${countIn} 條、規格 ${countAux} 條`);
         saveToCloud();
-        alert(`✅ 款號 【${selectedStyle}】 的所有歷史數據已按嚴密邏輯完全刪除！`);
+        alert(`✅ 款號 【${selectedStyle}】 的歷史數據已全部刪除，並可隨時在【刪除恢復中心】一鍵恢復！`);
       }
     }
 
@@ -2811,6 +2882,8 @@
     function deleteUser(name) {
       if(name.includes('最高管理者')) { alert("最高管理者賬號不可刪除！ Admin cannot be deleted!"); return; }
       if(confirm(`確定要刪除人員 ${name} 嗎？ Delete User?`)) {
+        let uObj = warehouseUsers.find(u => u.name === name);
+        if(uObj) moveToTrash('user', `操作員姓名: ${uObj.name}`, uObj);
         warehouseUsers = warehouseUsers.filter(u => u.name !== name);
         recordLog('ACTION', '刪除人員賬號', `刪除了操作人員賬號 [${name}]`);
         saveToCloud();
@@ -2837,7 +2910,7 @@
     }
 
     function submitBatchAuxItems() {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法添加規格！ Permission Denied!"); return; }
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號,無法添加規格！ Permission Denied!"); return; }
 
       let styleNo = document.getElementById('auxStyleNo').value.trim();
       let operator = currentUser ? currentUser.name : '系統';
@@ -2892,6 +2965,7 @@
 
       let matched = fabricAux.find(i => i.id === id);
       if(matched) {
+        moveToTrash('aux', `輔助規格 款號:${matched.styleNo} 類別:${matched.item} 顏色:${matched.color||'-'}`, matched);
         recordLog('ACTION', '刪除輔助規格', `刪除了款號 [${matched.styleNo}] 類別 [${matched.item}] 顏色 [${matched.color||'-'}]`);
       }
       fabricAux = fabricAux.filter(i => i.id !== id);
@@ -2939,7 +3013,10 @@
 
       if(confirm("確定要刪除這個麵料類別名稱嗎？ Delete Category?")) {
         let itemObj = itemMasterList.find(im => im.id === id);
-        if(itemObj) recordLog('ACTION', '刪除麵料類別', `刪除了麵料類別：${itemObj.name}`);
+        if(itemObj) {
+          moveToTrash('itemMaster', `麵料類別: ${itemObj.name}`, itemObj);
+          recordLog('ACTION', '刪除麵料類別', `刪除了麵料類別：${itemObj.name}`);
+        }
         itemMasterList = itemMasterList.filter(im => im.id !== id);
         saveToCloud();
       }
@@ -2982,7 +3059,10 @@
 
       if(confirm("確定要刪除這個工廠名稱嗎？ Delete Factory?")) {
         let fty = factoryList.find(f => f.id === id);
-        if(fty) recordLog('ACTION', '刪除工廠節點', `刪除了工廠節點：${fty.name}`);
+        if(fty) {
+          moveToTrash('factory', `工廠名稱: ${fty.name}`, fty);
+          recordLog('ACTION', '刪除工廠節點', `刪除了工廠節點：${fty.name}`);
+        }
         factoryList = factoryList.filter(f => f.id !== id);
         saveToCloud();
       }
@@ -3085,6 +3165,7 @@
 
       let matched = fabricIn.find(i => i.id === id);
       if(matched) {
+        moveToTrash('in', `入庫記錄 工廠:[${matched.fty}] 款號:[${matched.styleNo}] 缸號:[${matched.batchNo}] 數量:${matched.qty}`, matched);
         recordLog('ACTION', '刪除入庫記錄', `刪除了入庫記錄 工廠:[${matched.fty}] 款號:[${matched.styleNo}] 缸號:[${matched.batchNo}] 數量:${matched.qty}`);
       }
       fabricIn = fabricIn.filter(i => i.id !== id);
@@ -3188,6 +3269,7 @@
 
       let matched = fabricOut.find(i => i.id === id);
       if(matched) {
+        moveToTrash('out', `出庫記錄 批次:[${matched.invoice}] 領料單位:[${matched.fty}] 缸號:[${matched.batchNo}] 數量:${matched.qty}`, matched);
         recordLog('ACTION', '刪除出庫記錄', `刪除了出庫記錄 批次:[${matched.invoice}] 領料單位:[${matched.fty}] 缸號:[${matched.batchNo}] 數量:${matched.qty}`);
       }
       fabricOut = fabricOut.filter(i => i.id !== id);
@@ -3406,6 +3488,74 @@
         systemLogs = [];
         saveToCloud();
         renderLogsTable();
+      }
+    }
+
+    // ================= 回收站與恢復功能 =================
+    function renderTrashTable() {
+      let tbody = document.getElementById('trashTableBody');
+      if(!tbody) return;
+
+      tbody.innerHTML = trashBin.map(t => {
+        let typeBadge = '';
+        if(t.dataType === 'in') typeBadge = '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-bold">入庫記錄 In</span>';
+        else if(t.dataType === 'out') typeBadge = '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs font-bold">出庫記錄 Out</span>';
+        else if(t.dataType === 'aux') typeBadge = '<span class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-xs font-bold">輔助規格 Aux</span>';
+        else if(t.dataType === 'itemMaster') typeBadge = '<span class="text-purple-700 bg-purple-50 px-2 py-0.5 rounded text-xs font-bold">麵料類別 Item</span>';
+        else if(t.dataType === 'factory') typeBadge = '<span class="text-teal-700 bg-teal-50 px-2 py-0.5 rounded text-xs font-bold">工廠 Fty</span>';
+        else typeBadge = '<span class="text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-xs font-bold">其他 Other</span>';
+
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50">
+            <td class="py-2.5 px-3 text-xs text-slate-500 font-semibold">${t.deletedTime}</td>
+            <td class="py-2.5 px-3">${typeBadge}</td>
+            <td class="py-2.5 px-3 font-bold text-slate-800 text-xs">${t.titleText}</td>
+            <td class="py-2.5 px-3 text-xs font-bold text-indigo-600">${t.operator}</td>
+            <td class="py-2.5 px-3 text-center no-print">
+              <button onclick="restoreFromTrash('${t.trashId}')" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex items-center justify-center gap-1 mx-auto">
+                <i class="fa-solid fa-trash-arrow-up"></i> 還原 Restore
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('') || `<tr><td colspan="5" class="py-8 text-center text-slate-400 font-semibold">回收站目前是空的 Recycle Bin is Empty</td></tr>`;
+    }
+
+    function restoreFromTrash(trashId) {
+      let idx = trashBin.findIndex(t => t.trashId === trashId);
+      if(idx === -1) return;
+
+      let item = trashBin[idx];
+      let orig = item.originalData;
+
+      if(confirm(`確定要將【${item.titleText}】還原至原來的數據位置嗎？ Restore item?`)) {
+        if(item.dataType === 'in') {
+          fabricIn.unshift(orig);
+        } else if(item.dataType === 'out') {
+          fabricOut.unshift(orig);
+        } else if(item.dataType === 'aux') {
+          fabricAux.unshift(orig);
+        } else if(item.dataType === 'itemMaster') {
+          if(!itemMasterList.some(im => im.id === orig.id)) itemMasterList.unshift(orig);
+        } else if(item.dataType === 'factory') {
+          if(!factoryList.some(f => f.id === orig.id)) factoryList.unshift(orig);
+        } else if(item.dataType === 'user') {
+          if(!warehouseUsers.some(u => u.name === orig.name)) warehouseUsers.push(orig);
+        }
+
+        trashBin.splice(idx, 1);
+        recordLog('ACTION', '回收站還原數據', `成功將刪除的記錄 [${item.titleText}] 還原至原位置`);
+        saveToCloud();
+        alert(`✅ 數據已成功還原至原位！ Restored Successfully!`);
+        renderTrashTable();
+      }
+    }
+
+    function clearTrashBin() {
+      if(confirm("確定要永久清空回收站中的所有記錄嗎？ Clear Bin?")) {
+        trashBin = [];
+        saveToCloud();
+        renderTrashTable();
       }
     }
   </script>
