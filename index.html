@@ -557,9 +557,15 @@
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
           <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-table text-emerald-600"></i> 麵料入庫流水明細 Fabric In History</h2>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <input id="searchInInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderInTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-64">
-            <button onclick="exportTableToExcel('inTableBody', '麵料入庫流水明細.xls')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
+            <select id="searchInStyleSelect" onchange="renderInTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-indigo-600 bg-white">
+              <option value="">按款號篩選 All Styles</option>
+            </select>
+            <input id="searchInInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderInTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-48">
+            <button onclick="exportTableToExcel('inTableBody', '麵料入庫流水明細.xls')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 導出 Export
+            </button>
+            <button onclick="deleteByStyle('in')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer normal-role-only" title="一鍵按款號清理数据">
+              <i class="fa-solid fa-trash-can"></i> 按款一鍵刪除
             </button>
           </div>
         </div>
@@ -691,9 +697,15 @@
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
           <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-table text-amber-600"></i> 麵料出庫流水明細 Fabric Out History</h2>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <input id="searchOutInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderOutTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-64">
-            <button onclick="exportTableToExcel('outTableBody', '麵料出庫流水明細.xls')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
+            <select id="searchOutStyleSelect" onchange="renderOutTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-indigo-600 bg-white">
+              <option value="">按款號篩選 All Styles</option>
+            </select>
+            <input id="searchOutInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderOutTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-48">
+            <button onclick="exportTableToExcel('outTableBody', '麵料出庫流水明細.xls')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 導出 Export
+            </button>
+            <button onclick="deleteByStyle('out')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer normal-role-only" title="一鍵按款號清理数据">
+              <i class="fa-solid fa-trash-can"></i> 按款一鍵刪除
             </button>
           </div>
         </div>
@@ -1785,6 +1797,7 @@
       updateTransferStyleList();
       renderTransferTable();
       updatePrintInvoiceDropdown();
+      updateStyleDropdowns();
       let userName = currentUser ? currentUser.name : '';
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
       if(isMaster) {
@@ -1796,6 +1809,61 @@
       updateReceiverFactoryDatalist();
       updateGlobalItemDatalist();
       applyUserPermissions();
+    }
+
+    function updateStyleDropdowns() {
+      let styles = [...new Set([
+        ...fabricAux.map(a => a.styleNo),
+        ...fabricIn.map(i => i.styleNo),
+        ...fabricOut.map(o => o.styleNo)
+      ])].filter(Boolean);
+
+      let inSelect = document.getElementById('searchInStyleSelect');
+      let outSelect = document.getElementById('searchOutStyleSelect');
+
+      if(inSelect) {
+        let currVal = inSelect.value;
+        inSelect.innerHTML = `<option value="">按款號篩選 All Styles</option>` + styles.map(s => `<option value="${s}">${s}</option>`).join('');
+        inSelect.value = currVal;
+      }
+
+      if(outSelect) {
+        let currVal = outSelect.value;
+        outSelect.innerHTML = `<option value="">按款號篩選 All Styles</option>` + styles.map(s => `<option value="${s}">${s}</option>`).join('');
+        outSelect.value = currVal;
+      }
+    }
+
+    // 嚴格按“先出庫 ➔ 再入庫 ➔ 最後輔助規格”邏輯進行按款號一鍵批量刪除
+    function deleteByStyle(pageSource) {
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除數據！ Permission Denied!"); return; }
+
+      let styleSelectId = pageSource === 'in' ? 'searchInStyleSelect' : 'searchOutStyleSelect';
+      let selectedStyle = document.getElementById(styleSelectId)?.value || '';
+
+      if(!selectedStyle) {
+        alert("請先在下拉菜單中選擇需要批量清理的【款號 Style No】！ Select a Style first!");
+        return;
+      }
+
+      let countOut = fabricOut.filter(o => o.styleNo === selectedStyle).length;
+      let countIn = fabricIn.filter(i => i.styleNo === selectedStyle).length;
+      let countAux = fabricAux.filter(a => a.styleNo === selectedStyle).length;
+
+      let msg = `⚠️ 【高風險操作警告】\n\n确定要一鍵刪除款號 【${selectedStyle}】 的所有歷史記錄嗎？\n\n系統將自動按照嚴密邏輯依序清理：\n 1. 先刪除【出庫流水】 (${countOut} 條)\n 2. 再刪除【入庫流水】 (${countIn} 條)\n 3. 最後刪除【輔助規格】 (${countAux} 條)\n\n建议先導出 Excel 備份！此操作不可撤銷！`;
+
+      if(confirm(msg)) {
+        // 第一步：先刪除出庫
+        fabricOut = fabricOut.filter(o => o.styleNo !== selectedStyle);
+        // 第二步：再刪除入庫
+        fabricIn = fabricIn.filter(i => i.styleNo !== selectedStyle);
+        // 第三步：最後刪除輔助規格
+        fabricAux = fabricAux.filter(a => a.styleNo !== selectedStyle);
+
+        recordLog('ACTION', '按款號一鍵批量刪除', `按合規順序(出庫->入庫->規格)一鍵清理款號 [${selectedStyle}]，共刪除出庫 ${countOut} 條、入庫 ${countIn} 條、規格 ${countAux} 條`);
+        saveToCloud();
+        alert(`✅ 款號 【${selectedStyle}】 的所有歷史數據已按嚴密邏輯完全刪除！`);
+      }
     }
 
     function updateReceiverFactoryDatalist() {
@@ -2908,10 +2976,12 @@
     function renderInTable() {
       let tbody = document.getElementById('inTableBody');
       if(!tbody) return;
+      let selectedStyle = document.getElementById('searchInStyleSelect')?.value || '';
       let query = (document.getElementById('searchInInput')?.value || '').toLowerCase();
       
       let filtered = fabricIn.filter(i => {
         if (currentGlobalFty !== '全部單位 All Factories' && i.fty !== currentGlobalFty) return false;
+        if (selectedStyle && i.styleNo !== selectedStyle) return false;
         return (i.styleNo + i.item + (i.batchNo||'') + (i.orderColor||'') + (i.color||'') + (i.rack||'')).toLowerCase().includes(query);
       });
 
@@ -3009,10 +3079,12 @@
     function renderOutTable() {
       let tbody = document.getElementById('outTableBody');
       if(!tbody) return;
+      let selectedStyle = document.getElementById('searchOutStyleSelect')?.value || '';
       let query = (document.getElementById('searchOutInput')?.value || '').toLowerCase();
 
       let filtered = fabricOut.filter(i => {
         if (currentGlobalFty !== '全部單位 All Factories' && i.fty !== currentGlobalFty) return false;
+        if (selectedStyle && i.styleNo !== selectedStyle) return false;
         return (i.styleNo + i.item + (i.batchNo||'') + (i.orderColor||'') + (i.color||'') + (i.rack||'') + i.invoice + (i.receiver||'')).toLowerCase().includes(query);
       });
 
