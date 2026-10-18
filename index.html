@@ -24,6 +24,7 @@
       scroll-behavior: smooth;
     }
     
+    /* 自定義滾動條外觀 */
     .table-scroll-container::-webkit-scrollbar {
       width: 14px;
     }
@@ -39,6 +40,7 @@
     .table-scroll-container::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    /* 滾動條上下點擊微調箭頭按鈕 */
     .table-scroll-container::-webkit-scrollbar-button:single-button {
       background-color: #e2e8f0;
       display: block;
@@ -98,6 +100,7 @@
           <span>安全登入系統 Login</span>
         </button>
         
+        <!-- 登錄名冊 -->
         <div class="mt-4 pt-3 border-t border-slate-100">
           <p class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
             <i class="fa-solid fa-users text-indigo-600"></i> 系統操作員名冊 Users List:
@@ -264,6 +267,7 @@
 
   <!-- ==================== 主系統界面 ==================== -->
   <div class="max-w-7xl mx-auto">
+    <!-- 頭部 Header -->
     <header class="bg-white rounded-2xl shadow-sm p-6 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-200 no-print">
       <div class="flex items-center gap-3">
         <div class="p-3 bg-indigo-600 text-white rounded-xl">
@@ -292,6 +296,7 @@
       </div>
     </header>
 
+    <!-- 標籤頁切換欄 -->
     <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-2 no-print">
       <button onclick="switchTab('tabAux')" id="btn_tabAux" class="tab-btn px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-database"></i> 1. 輔助資料 Auxiliary Data
@@ -365,6 +370,7 @@
           <i class="fa-solid fa-cloud-arrow-up"></i> 確認批量添加該款號的多種規格 Confirm Batch Add
         </button>
 
+        <!-- 限制展現 10 條高度，右側帶滾動條及上下按鈕 -->
         <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
             <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
@@ -383,6 +389,7 @@
         </div>
       </div>
 
+      <!-- 麵料類別全局管理與打字匹配庫 -->
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex justify-between items-center mb-4">
           <div>
@@ -637,8 +644,8 @@
             <datalist id="outColorList"></datalist>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">開票編號 Invoice No. (手動遞增)</label>
-            <input id="outInvoice" type="text" placeholder="例: DAMEI-001" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
+            <label class="block text-xs font-semibold text-slate-500 mb-1">開票編號 Invoice No.</label>
+            <input id="outInvoice" type="text" placeholder="自動編號 Auto" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">出庫日期 Date</label>
@@ -1108,6 +1115,7 @@
   </div>
 
   <script>
+    // ================= 云端配置 =================
     const BIN_ID = '6ad3251cffd5d1605372fa4a'; 
     const API_KEY = '$2a$10$4BG8r6gdqcF63Xv19dzd/OpvCTrfmblPUWGknBtarAdc.2SkbzSZ.';
 
@@ -1125,32 +1133,7 @@
     let isAllFtySummary = false;
 
     let fabricAux = [];
-    
-    // 已從備份恢復昨天的入庫明細數據 (共22筆)
-    let fabricIn = [
-      { id: "backup_0", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-46", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 297.9, unit: "M", roll: 5, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_1", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-45", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 272.9, unit: "M", roll: 5, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_2", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-44", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 463.5, unit: "M", roll: 8, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_3", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-43", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 946.5, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_4", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-42", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 451.7, unit: "M", roll: 8, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_5", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-41", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 853.3, unit: "M", roll: 15, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_6", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-40", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 959.4, unit: "M", roll: 17, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_7", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-39", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 561.7, unit: "M", roll: 10, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_8", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-38", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 930.5, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_9", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-37", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 568.5, unit: "M", roll: 10, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_10", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-36", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 838.1, unit: "M", roll: 15, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_11", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-35", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 918.7, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_12", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-34", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 955.2, unit: "M", roll: 17, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_13", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-33", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 937.3, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_14", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-32", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 944.4, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_15", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "03.01.201.0794", item: "大身麵料/Body Shell", batchNo: "ZA-9", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 1058.4, unit: "M", roll: 18, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_16", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "03.01.201.0794", item: "大身麵料/Body Shell", batchNo: "ZA-8", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 978.5, unit: "M", roll: 17, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_17", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "03.01.201.0794", item: "大身麵料/Body Shell", batchNo: "ZA-7", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 993.1, unit: "M", roll: 17, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_18", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "03.01.201.0794", item: "大身麵料/Body Shell", batchNo: "ZA-6", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 881.0, unit: "M", roll: 15, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_19", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "03.01.201.0794", item: "大身麵料/Body Shell", batchNo: "ZA-12", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 1010.0, unit: "M", roll: 17, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_20", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "03.01.201.0794", item: "大身麵料/Body Shell", batchNo: "ZA-11", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 999.4, unit: "M", roll: 17, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "backup_21", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "03.01.201.0794", item: "大身麵料/Body Shell", batchNo: "ZA-10", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 951.7, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" }
-    ];
+    let fabricIn = [];
     let fabricOut = [];
     let fabricTransfers = [];
     let systemLogs = [];
@@ -1214,7 +1197,7 @@
           let cloudRecord = data.record || data;
           if (cloudRecord.warehouseUsers) warehouseUsers = cloudRecord.warehouseUsers;
           if (cloudRecord.fabricAux) fabricAux = cloudRecord.fabricAux;
-          if (cloudRecord.fabricIn && cloudRecord.fabricIn.length > 0) fabricIn = cloudRecord.fabricIn;
+          if (cloudRecord.fabricIn) fabricIn = cloudRecord.fabricIn;
           if (cloudRecord.fabricOut) fabricOut = cloudRecord.fabricOut;
           if (cloudRecord.fabricTransfers) fabricTransfers = cloudRecord.fabricTransfers;
           if (cloudRecord.factoryList) factoryList = cloudRecord.factoryList;
@@ -1351,6 +1334,7 @@
       `).join('');
     }
 
+    // 表格鍵盤導航優化：支援上下左右及 Enter 鍵向下移動到同一列下一行
     function setupTableKeyNavigation(tbodyId, rowCount, colCount) {
       let tbody = document.getElementById(tbodyId);
       if(!tbody) return;
@@ -1469,6 +1453,7 @@
       setupTableKeyNavigation('batchOutRowsContainer', 10, 3);
     }
 
+    // 清空入庫表單按鈕邏輯
     function clearInForm() {
       document.getElementById('inStyle').value = '';
       document.getElementById('inItem').value = '';
@@ -1478,6 +1463,7 @@
       renderBatchRows('batchInRowsContainer', 'batchInNo', 'batchInRack', 'batchInRoll', 'batchInQty');
     }
 
+    // 清空出庫表單按鈕邏輯
     function clearOutForm() {
       document.getElementById('outReceiver').value = '';
       document.getElementById('outFilterStyle').value = '';
@@ -1848,6 +1834,7 @@
       }
     }
 
+    // 嚴格按“先出庫 ➔ 再入庫 ➔ 最後輔助規格”邏輯進行按款號一鍵批量刪除
     function deleteByStyle(pageSource) {
       if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除數據！ Permission Denied!"); return; }
 
@@ -1866,8 +1853,11 @@
       let msg = `⚠️ 【高風險操作警告】\n\n确定要一鍵刪除款號 【${selectedStyle}】 的所有歷史記錄嗎？\n\n系統將自動按照嚴密邏輯依序清理：\n 1. 先刪除【出庫流水】 (${countOut} 條)\n 2. 再刪除【入庫流水】 (${countIn} 條)\n 3. 最後刪除【輔助規格】 (${countAux} 條)\n\n建议先導出 Excel 備份！此操作不可撤銷！`;
 
       if(confirm(msg)) {
+        // 第一步：先刪除出庫
         fabricOut = fabricOut.filter(o => o.styleNo !== selectedStyle);
+        // 第二步：再刪除入庫
         fabricIn = fabricIn.filter(i => i.styleNo !== selectedStyle);
+        // 第三步：最後刪除輔助規格
         fabricAux = fabricAux.filter(a => a.styleNo !== selectedStyle);
 
         recordLog('ACTION', '按款號一鍵批量刪除', `按合規順序(出庫->入庫->規格)一鍵清理款號 [${selectedStyle}]，共刪除出庫 ${countOut} 條、入庫 ${countIn} 條、規格 ${countAux} 條`);
