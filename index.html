@@ -17,56 +17,28 @@
       body { font-size: 10px; }
     }
 
-    /* 限制 10 行可視高度及帶箭頭的自定義滾動條樣式 */
     .table-scroll-container {
       max-height: 420px;
       overflow-y: scroll;
       scroll-behavior: smooth;
     }
-    
-    /* 自定義滾動條外觀 */
-    .table-scroll-container::-webkit-scrollbar {
-      width: 14px;
-    }
-    .table-scroll-container::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 8px;
-    }
-    .table-scroll-container::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 8px;
-      border: 2px solid #f1f5f9;
-    }
-    .table-scroll-container::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    /* 滾動條上下點擊微調箭頭按鈕 */
+    .table-scroll-container::-webkit-scrollbar { width: 14px; }
+    .table-scroll-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+    .table-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; border: 2px solid #f1f5f9; }
+    .table-scroll-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .table-scroll-container::-webkit-scrollbar-button:single-button {
-      background-color: #e2e8f0;
-      display: block;
-      border-style: solid;
-      height: 12px;
-      width: 14px;
+      background-color: #e2e8f0; display: block; border-style: solid; height: 12px; width: 14px;
     }
     .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:decrement {
-      border-width: 0 4px 6px 4px;
-      border-color: transparent transparent #475569 transparent;
-    }
-    .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:decrement:hover {
-      border-color: transparent transparent #0f172a transparent;
+      border-width: 0 4px 6px 4px; border-color: transparent transparent #475569 transparent;
     }
     .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:increment {
-      border-width: 6px 4px 0 4px;
-      border-color: #475569 transparent transparent transparent;
-    }
-    .table-scroll-container::-webkit-scrollbar-button:single-button:vertical:increment:hover {
-      border-color: #0f172a transparent transparent transparent;
+      border-width: 6px 4px 0 4px; border-color: #475569 transparent transparent transparent;
     }
   </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen p-4 md:p-6">
 
-  <!-- ==================== 全局工廠數據列表 ==================== -->
   <datalist id="globalFtyDatalist">
     <option value="全部單位 All Factories">
     <option value="一廠 (JUN TAI)">
@@ -80,7 +52,7 @@
   <datalist id="receiverFactoryList"></datalist>
   <datalist id="globalItemList"></datalist>
 
-  <!-- ==================== 登錄驗證遮罩層 ==================== -->
+  <!-- 登錄遮罩 -->
   <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 border border-slate-200">
       <div class="text-center mb-5">
@@ -90,7 +62,6 @@
         <h2 class="text-xl font-bold text-slate-900">麵料出入庫管理系統</h2>
         <p class="text-xs text-slate-400 mt-1">Fabric Inventory System · Login</p>
       </div>
-      
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">操作員密碼 Password</label>
@@ -99,25 +70,22 @@
         <button onclick="checkLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl py-2.5 text-sm transition shadow-sm cursor-pointer flex items-center justify-center gap-2">
           <span>安全登入系統 Login</span>
         </button>
-        
-        <!-- 登錄名冊 -->
         <div class="mt-4 pt-3 border-t border-slate-100">
           <p class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1">
             <i class="fa-solid fa-users text-indigo-600"></i> 系統操作員名冊 Users List:
           </p>
-          <div id="loginHintList" class="max-h-28 overflow-y-auto space-y-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 text-slate-600">
-          </div>
+          <div id="loginHintList" class="max-h-28 overflow-y-auto space-y-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 text-slate-600"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 修改權限彈窗 ==================== -->
+  <!-- 修改權限彈窗 -->
   <div id="editUserModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200">
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-base font-bold text-slate-950 flex items-center gap-2">
-          <i class="fa-solid fa-user-pen text-indigo-600"></i> 修改權限與密碼 Edit User Permission
+          <i class="fa-solid fa-user-pen text-indigo-600"></i> 修改權限與分廠範圍 Edit User Permission
         </h3>
         <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -135,12 +103,12 @@
           <label class="block text-xs font-semibold text-slate-600 mb-1">賬號權限類型 Role</label>
           <select id="editUserRoleSelect" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold bg-white text-indigo-700">
             <option value="normal">完整權限 Full Access (Add/Edit/Delete)</option>
-            <option value="readonly">僅查看 Read Only</option>
+            <option value="readonly">僅查看 Read Only (No Write/Delete)</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">分派管理工廠 Factory</label>
-          <input id="editUserFtyInput" list="globalFtyDatalist" type="text" placeholder="輸入或選擇工廠名稱" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-emerald-600 bg-white fty-input-target">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">分派管理工廠 / 分廠範圍 Factory Scope</label>
+          <input id="editUserFtyInput" list="globalFtyDatalist" type="text" placeholder="輸入或選擇工廠" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-emerald-600 bg-white fty-input-target">
         </div>
         <div class="flex gap-2 pt-2">
           <button onclick="saveEditUser()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm cursor-pointer">
@@ -154,7 +122,7 @@
     </div>
   </div>
 
-  <!-- ==================== 修改流水記錄彈窗 ==================== -->
+  <!-- 修改流水記錄彈窗 -->
   <div id="editRecordModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 border border-slate-200">
       <div class="flex justify-between items-center mb-4">
@@ -216,7 +184,7 @@
     </div>
   </div>
 
-  <!-- ==================== 精准數量移架彈窗 ==================== -->
+  <!-- 精准數量移架彈窗 -->
   <div id="moveRackModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-slate-200">
       <div class="flex justify-between items-center mb-4">
@@ -252,7 +220,6 @@
           <label class="block text-xs font-semibold text-slate-600 mb-1">目標新貨架號 New Rack</label>
           <input id="newRackInput" list="auxRackList" type="text" placeholder="請輸入或選擇新貨架" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-amber-600">
         </div>
-        <p class="text-[11px] text-slate-400">💡 提示：系統將按您填寫的實際數量拆分移至新貨架，原貨架自動保留剩余部分。</p>
         <div class="flex gap-2 pt-2">
           <button onclick="saveMoveRack()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm cursor-pointer">
             確認移架 Confirm Move
@@ -265,9 +232,8 @@
     </div>
   </div>
 
-  <!-- ==================== 主系統界面 ==================== -->
+  <!-- 主系統界面 -->
   <div class="max-w-7xl mx-auto">
-    <!-- 頭部 Header -->
     <header class="bg-white rounded-2xl shadow-sm p-6 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-200 no-print">
       <div class="flex items-center gap-3">
         <div class="p-3 bg-indigo-600 text-white rounded-xl">
@@ -275,13 +241,13 @@
         </div>
         <div>
           <h1 class="text-2xl font-bold text-slate-900">麵料出入庫管理系統 Fabric Inventory System</h1>
-          <p class="text-sm text-slate-500">輔助資料聯想 · 任意工廠打字新增 · 廠際智能調撥 Multi-Factory Warehouse</p>
+          <p class="text-sm text-slate-500">分廠管理 · 權限隔離控制 · 任意工廠打字新增 · 廠際智能調撥 Multi-Factory Warehouse</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
         <div class="bg-indigo-50 px-3 py-2 rounded-xl text-indigo-700 text-xs font-bold flex items-center gap-2">
           <i class="fa-solid fa-user-check"></i> 操作員 User: <span id="currentUserNameDisplay" class="underline">--</span>
-          <span id="currentUserRoleBadge" class="ml-1 text-[10px] px-2 py-0.5 rounded bg-indigo-200 text-indigo-900 font-extrabold hidden">僅查看 Read Only</span>
+          <span id="currentUserRoleBadge" class="ml-1 text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-extrabold hidden">僅查看 Read Only</span>
         </div>
         <div class="flex items-center gap-1 bg-slate-100 px-3 py-1.5 rounded-xl border">
           <span class="text-xs font-bold text-slate-500">查看單位 Factory:</span>
@@ -335,7 +301,7 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-database text-indigo-600"></i> 麵料規格與款號輔助庫 Auxiliary Data Master
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">所有操作員均可添加與刪除（「僅查看」賬號除外）。 All operators can add & delete.</p>
+            <p class="text-xs text-slate-400 mt-0.5">支持入庫自動同步。</p>
           </div>
           <button onclick="exportTableToExcel('auxTableBody', '麵料輔助資料表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 導出 Export EXCEL
@@ -343,7 +309,7 @@
         </div>
         
         <div class="mb-4 normal-role-only">
-          <label class="block text-xs font-bold text-slate-700 mb-1">統一款號 Style No (輸入一次，批量關聯下方所有類別與顏色 Single Style No)</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">統一款號 Style No</label>
           <input id="auxStyleNo" type="text" placeholder="輸入款號 (例: 894MB)" class="w-full sm:w-80 px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-indigo-600 bg-slate-50">
         </div>
 
@@ -370,7 +336,6 @@
           <i class="fa-solid fa-cloud-arrow-up"></i> 確認批量添加該款號的多種規格 Confirm Batch Add
         </button>
 
-        <!-- 限制展現 10 條高度，右側帶滾動條及上下按鈕 -->
         <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
             <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
@@ -389,14 +354,14 @@
         </div>
       </div>
 
-      <!-- 麵料類別全局管理與打字匹配庫 -->
+      <!-- 麵料類別全局管理 -->
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex justify-between items-center mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-layer-group text-indigo-600"></i> 麵料類別全局管理與打字匹配庫 Fabric Category Master
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">所有新增的類別將自動同步至全局智能下拉菜單中。 All categories auto-sync to dropdowns.</p>
+            <p class="text-xs text-slate-400 mt-0.5">所有新增的類別將自動同步至全局下拉菜單。</p>
           </div>
           <button onclick="exportTableToExcel('itemMasterTableBody', '麵料類別匹配庫.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 導出 Export EXCEL
@@ -404,7 +369,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 normal-role-only">
-          <input id="newItemNameInput" type="text" placeholder="輸入麵料類別 (例: 花邊/အနားသား Zar)" class="px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-indigo-700">
+          <input id="newItemNameInput" type="text" placeholder="輸入麵料類別 (例: 花邊)" class="px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-indigo-700">
           <input id="newItemRemarkInput" type="text" placeholder="備註說明 Remark" class="px-3 py-2 border border-slate-200 rounded-lg text-sm">
           <div class="flex items-center">
             <button onclick="addNewItemMasterName()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm py-2 transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
@@ -429,13 +394,14 @@
         </div>
       </div>
 
+      <!-- 工廠名稱全局管理 -->
       <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
         <div class="flex justify-between items-center mb-4">
           <div>
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-industry text-emerald-600"></i> 工廠名稱全局管理與打字匹配庫 Factory Names Master
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">所有操作員均可添加與刪除。 Manage factory names.</p>
+            <p class="text-xs text-slate-400 mt-0.5">所有操作員均可添加與刪除。</p>
           </div>
           <button onclick="exportTableToExcel('ftyTableBody', '工廠名稱列表.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 導出 Export EXCEL
@@ -443,7 +409,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 normal-role-only">
-          <input id="newFtyNameInput" type="text" placeholder="輸入工廠名稱 (例: 四廠 / 順豐外發廠)" class="px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-emerald-700">
+          <input id="newFtyNameInput" type="text" placeholder="輸入工廠名稱" class="px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-emerald-700">
           <input id="newFtyRemarkInput" type="text" placeholder="備註說明 Remark" class="px-3 py-2 border border-slate-200 rounded-lg text-sm">
           <div class="flex items-center">
             <button onclick="addNewFactoryName()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm py-2 transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
@@ -480,7 +446,7 @@
             <i class="fa-solid fa-rotate-right"></i> 清空全部 Clear All
           </button>
         </div>
-        <p class="text-xs text-slate-400 mb-4">多缸號一次性批量錄入（支援 Enter 鍵向下移動）。 Batch enter multiple batch numbers.</p>
+        <p class="text-xs text-slate-400 mb-4">多缸號一次性批量錄入。</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
@@ -517,9 +483,7 @@
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">計量單位 Unit</label>
             <select id="inUnit" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold bg-white">
-              <option value="KG">KG</option>
-              <option value="M">M</option>
-              <option value="YDS">YDS</option>
+              <option value="KG">KG</option><option value="M">M</option><option value="YDS">YDS</option>
             </select>
           </div>
           <div>
@@ -607,12 +571,9 @@
             <button onclick="clearOutForm()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <i class="fa-solid fa-rotate-right"></i> 清空全部 Clear All
             </button>
-            <span class="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-lg border border-amber-200">
-              💡 提示：所有操作員均可出庫、修改與刪除。
-            </span>
           </div>
         </div>
-        <p class="text-xs text-slate-400 mb-4">款號、類別與顏色支持打字匹配與即時剩余檢測。 Auto-check remaining stock.</p>
+        <p class="text-xs text-slate-400 mb-4">款號、類別與顏色支持打字匹配與即時剩余檢測。</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
@@ -654,9 +615,7 @@
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">單位 Unit</label>
             <select id="outUnit" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold">
-              <option value="KG">KG</option>
-              <option value="M">M</option>
-              <option value="YDS">YDS</option>
+              <option value="KG">KG</option><option value="M">M</option><option value="YDS">YDS</option>
             </select>
           </div>
         </div>
@@ -745,7 +704,7 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-chart-bar text-indigo-600"></i> 倉庫庫存明細與缸號結餘總表 Detailed Inventory Balance
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">支持按實際搬遷的數值與卷數進行移架拆分。 Move rack with partial quantities.</p>
+            <p class="text-xs text-slate-400 mt-0.5">支持按實際搬遷的數值與卷數進行移架拆分。</p>
           </div>
           <div class="flex items-center gap-2">
             <button id="toggleInStockBtn" onclick="toggleInStockOnly()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
@@ -825,7 +784,7 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-calculator text-emerald-600"></i> 麵料進銷存匯總表 Stock Inventory Summary
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">不區分缸號與貨架號，直接按款號+類別+顏色匯總。 Summarized by Style + Item + Color.</p>
+            <p class="text-xs text-slate-400 mt-0.5">不區分缸號與貨架號，直接按款號+類別+顏色匯總。</p>
           </div>
           <div class="flex items-center gap-2">
             <button id="toggleAllFtySummaryBtn" onclick="toggleAllFtySummary()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer">
@@ -898,7 +857,7 @@
         <h2 class="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
           <i class="fa-solid fa-right-left text-indigo-600"></i> 廠際物料調撥中心 Factory Stock Transfer
         </h2>
-        <p class="text-xs text-slate-400 mb-4">接收工廠點擊「確認收貨」後自動完成調出與入庫。 Auto Stock Transfer upon confirm.</p>
+        <p class="text-xs text-slate-400 mb-4">接收工廠點擊「確認收貨」後自動完成調出與入庫。</p>
         
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4 normal-role-only">
           <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-paper-plane text-indigo-600"></i> 1. 發起新的麵料調撥單 New Transfer</h3>
@@ -984,7 +943,7 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-print text-indigo-600"></i> 三聯領料單打印中心 Print Receipt Center
             </h2>
-            <p class="text-xs text-slate-400">選擇批次重複列印，超過 10 行自動分頁。 Print 3-copy receipts.</p>
+            <p class="text-xs text-slate-400">選擇批次重複列印，超過 10 行自動分頁。</p>
           </div>
           <div class="bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-200 flex items-center gap-2">
             <span class="text-xs font-bold text-indigo-700">選擇批次 Invoice:</span>
@@ -1010,7 +969,7 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-user-gear text-indigo-600"></i> 系統管理人後台 Admin Panel
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">新增操作員、設置專屬密碼並分派對應權限單位。 Admin only.</p>
+            <p class="text-xs text-slate-400 mt-0.5">新增操作員、設置專屬密碼並分派對應權限單位與查看範圍。</p>
           </div>
           <button onclick="exportTableToExcel('userTableBody', '系統操作員名單.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 導出 Export
@@ -1034,7 +993,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">分派工廠 Factory</label>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">分派工廠 / 範圍 Factory Scope</label>
             <input id="newUserFty" list="globalFtyDatalist" type="text" placeholder="選擇或輸入工廠" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-emerald-600 fty-input-target" onfocus="this.select()">
           </div>
         </div>
@@ -1049,7 +1008,7 @@
                 <th class="py-2.5 px-3">人員姓名 Name</th>
                 <th class="py-2.5 px-3">登錄密碼 Password</th>
                 <th class="py-2.5 px-3 font-bold text-indigo-600">權限類型 Role</th>
-                <th class="py-2.5 px-3 font-bold text-emerald-600">分派單位 Factory</th>
+                <th class="py-2.5 px-3 font-bold text-emerald-600">分派單位 / 範圍 Factory Scope</th>
                 <th class="py-2.5 px-3 no-print">操作 Action</th>
               </tr>
             </thead>
@@ -1067,7 +1026,7 @@
             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
               <i class="fa-solid fa-shield-halved text-amber-600"></i> 系統安全日志審計中心 Audit System Logs
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">自動追蹤所有人員的登錄及詳細操作歷史。 Track logins and operations.</p>
+            <p class="text-xs text-slate-400 mt-0.5">自動追蹤所有人員的登錄及詳細操作歷史。</p>
           </div>
           <button onclick="exportTableToExcel('logsTableBody', '系統審計日志記錄.xls')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer">
             <i class="fa-solid fa-file-excel"></i> 導出 Export
@@ -1115,7 +1074,6 @@
   </div>
 
   <script>
-    // ================= 云端配置 =================
     const BIN_ID = '6ad3251cffd5d1605372fa4a'; 
     const API_KEY = '$2a$10$4BG8r6gdqcF63Xv19dzd/OpvCTrfmblPUWGknBtarAdc.2SkbzSZ.';
 
@@ -1123,7 +1081,7 @@
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部單位 All Factories', role: 'normal' },
       { name: 'KO KO NAING', pass: '1714', fty: '全部單位 All Factories', role: 'normal' },
       { name: 'MYO THAT PAING', pass: '1864', fty: '二廠 (DA MEI)', role: 'normal' },
-      { name: 'MYAT MIN', pass: '1234', fty: '一廠 (JUN TAI)', role: 'normal' }
+      { name: 'MYAT MIN', pass: '1234', fty: '一廠 (JUN TAI)', role: 'readonly' }
     ];
     let warehouseUsers = [...initialDefaultUsers];
     let currentUser = null;
@@ -1180,9 +1138,7 @@
         if(localItems && localItems.length > 0) itemMasterList = localItems;
         if(localUsers && Array.isArray(localUsers)) warehouseUsers = localUsers;
         if(localLogs && Array.isArray(localLogs)) systemLogs = localLogs;
-      } catch(e) {
-        console.warn("讀取本地緩存異常", e);
-      }
+      } catch(e) {}
     }
 
     async function fetchLatestDataFromCloud() {
@@ -1207,9 +1163,7 @@
           renderLoginHints();
           renderAll();
         }
-      } catch(e) {
-        console.warn("讀取雲端最新數據異常", e);
-      }
+      } catch(e) {}
     }
 
     function recordLog(type, action, detail) {
@@ -1232,9 +1186,7 @@
         currentUser = { name: '最高管理者 (ZAW AUNG)', fty: '全部單位 All Factories', role: 'normal' };
       } else {
         let matched = warehouseUsers.find(u => u.pass === pwd);
-        if (matched) {
-          currentUser = matched;
-        }
+        if (matched) currentUser = matched;
       }
 
       if (currentUser) {
@@ -1244,7 +1196,7 @@
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('currentUserNameDisplay').innerText = currentUser.name;
         
-        recordLog('LOGIN', '登錄系統', `成功登錄系統，分配工廠權限：${currentUser.fty || '全部單位'}`);
+        recordLog('LOGIN', '登錄系統', `成功登錄系統，分配工廠範圍：${currentUser.fty || '全部單位'}`);
         applyUserPermissions();
         initSystem();
       } else {
@@ -1263,9 +1215,7 @@
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
       let isReadonly = currentUser && currentUser.role === 'readonly';
 
-      if(roleBadge) {
-        roleBadge.style.display = isReadonly ? 'inline-block' : 'none';
-      }
+      if(roleBadge) roleBadge.style.display = isReadonly ? 'inline-block' : 'none';
 
       if (!isMaster) {
         currentGlobalFty = userFty;
@@ -1286,9 +1236,7 @@
     }
 
     function logout() {
-      if(currentUser) {
-        recordLog('LOGIN', '退出系統', '安全退出系統登錄');
-      }
+      if(currentUser) recordLog('LOGIN', '退出系統', '安全退出系統登錄');
       sessionStorage.clear();
       location.reload();
     }
@@ -1303,7 +1251,6 @@
 
       loadLocalCache();
       renderLoginHints();
-
       await fetchLatestDataFromCloud();
 
       let saved = sessionStorage.getItem('wh_user');
@@ -1329,38 +1276,28 @@
       hintContainer.innerHTML = warehouseUsers.map(u => `
         <div class="flex justify-between items-center py-1 px-1.5 border-b border-slate-100">
           <span class="font-bold text-slate-700"><i class="fa-solid fa-user text-indigo-500 mr-1.5"></i>${u.name} ${u.role === 'readonly' ? '<span class="text-[9px] bg-amber-100 text-amber-700 px-1 rounded">僅查看</span>' : ''}</span>
-          <span class="text-slate-400 text-[10px]">授權: ${u.fty || '全部'}</span>
+          <span class="text-slate-400 text-[10px]">範圍: ${u.fty || '全部'}</span>
         </div>
       `).join('');
     }
 
-    // 表格鍵盤導航優化：支援上下左右及 Enter 鍵向下移動到同一列下一行
     function setupTableKeyNavigation(tbodyId, rowCount, colCount) {
       let tbody = document.getElementById(tbodyId);
       if(!tbody) return;
-
       let inputs = tbody.querySelectorAll('input:not([disabled])');
       inputs.forEach((input, index) => {
         input.addEventListener('keydown', function(e) {
-          let keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'];
-          if(keys.includes(e.key)) {
+          if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
             e.preventDefault();
-
             let currentRow = Math.floor(index / colCount);
             let currentCol = index % colCount;
-            let targetRow = currentRow;
-            let targetCol = currentCol;
-
+            let targetRow = currentRow, targetCol = currentCol;
             if(e.key === 'ArrowUp') targetRow = Math.max(0, currentRow - 1);
             if(e.key === 'ArrowDown' || e.key === 'Enter') targetRow = Math.min(rowCount - 1, currentRow + 1);
             if(e.key === 'ArrowLeft') targetCol = Math.max(0, currentCol - 1);
             if(e.key === 'ArrowRight') targetCol = Math.min(colCount - 1, currentCol + 1);
-
             let targetIndex = targetRow * colCount + targetCol;
-            if(inputs[targetIndex]) {
-              inputs[targetIndex].focus();
-              inputs[targetIndex].select();
-            }
+            if(inputs[targetIndex]) { inputs[targetIndex].focus(); inputs[targetIndex].select(); }
           }
         });
       });
@@ -1374,10 +1311,10 @@
         html += `
           <tr class="border-b border-slate-100">
             <td class="py-1.5 px-3 font-bold text-xs text-slate-400">#${i}</td>
-            <td class="py-1.5 px-3"><input type="text" id="${noPrefix}_${i}" placeholder="缸號 (BATCH-0${i})" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-white"></td>
-            <td class="py-1.5 px-3"><input type="text" id="${rackPrefix}_${i}" list="auxRackList" placeholder="貨架 Rack" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold text-amber-600 bg-white"></td>
-            <td class="py-1.5 px-3"><input type="text" inputmode="numeric" id="${rollPrefix}_${i}" placeholder="卷數 Roll" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white"></td>
-            <td class="py-1.5 px-3"><input type="text" inputmode="decimal" id="${qtyPrefix}_${i}" placeholder="數量 QTY" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-emerald-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="${noPrefix}_${i}" placeholder="缸號" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="${rackPrefix}_${i}" list="auxRackList" placeholder="貨架" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold text-amber-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" inputmode="numeric" id="${rollPrefix}_${i}" placeholder="卷數" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" inputmode="decimal" id="${qtyPrefix}_${i}" placeholder="數量" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-emerald-600 bg-white"></td>
           </tr>
         `;
       }
@@ -1393,9 +1330,9 @@
         html += `
           <tr class="border-b border-slate-100">
             <td class="py-1.5 px-3 font-bold text-xs text-slate-400">#${i}</td>
-            <td class="py-1.5 px-3"><input type="text" id="auxItem_${i}" list="globalItemList" placeholder="麵料類別 Item" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold bg-white" onfocus="this.select()"></td>
-            <td class="py-1.5 px-3"><input type="text" id="auxOrderColor_${i}" placeholder="訂單顏色 Order Color" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-700 bg-white"></td>
-            <td class="py-1.5 px-3"><input type="text" id="auxColor_${i}" placeholder="麵料顏色 Fabric Col" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="auxItem_${i}" list="globalItemList" placeholder="麵料類別" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-semibold bg-white" onfocus="this.select()"></td>
+            <td class="py-1.5 px-3"><input type="text" id="auxOrderColor_${i}" placeholder="訂單顏色" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-700 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="auxColor_${i}" placeholder="麵料顏色" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white"></td>
           </tr>
         `;
       }
@@ -1407,53 +1344,30 @@
       let tbody = document.getElementById('batchOutRowsContainer');
       let datalistContainer = document.getElementById('activeStockBatchListContainer');
       if(!tbody || !datalistContainer) return;
-
-      let html = '';
-      let datalistsHtml = '';
-
+      let html = '', datalistsHtml = '';
       for(let i = 1; i <= 10; i++) {
         html += `
           <tr class="border-b border-slate-100">
             <td class="py-1.5 px-3 font-bold text-xs text-slate-400">#${i}</td>
-            <td class="py-1.5 px-3">
-              <input type="text" id="outBatch_${i}" list="activeStockBatchList_${i}" oninput="onOutBatchInput(${i})" placeholder="選擇缸號 Batch" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-white batch-input-target" data-row="${i}">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" id="outStyleItem_${i}" disabled placeholder="Auto Style/Item" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 font-bold text-slate-600">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" id="outOrderColor_${i}" disabled placeholder="Auto Order Col" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-indigo-700 font-bold">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" id="outColor_${i}" disabled placeholder="Auto Fabric Col" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-amber-600 font-bold">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" id="outRack_${i}" disabled placeholder="Auto Rack" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-slate-600">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" inputmode="numeric" id="outRoll_${i}" placeholder="卷數 Roll" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" id="outRemainRoll_${i}" disabled placeholder="-" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-slate-50 text-center">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" inputmode="decimal" id="outQty_${i}" placeholder="數量 QTY" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white">
-            </td>
-            <td class="py-1.5 px-3">
-              <input type="text" id="outRemainQty_${i}" disabled placeholder="-" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-emerald-600 bg-slate-50 text-center">
-            </td>
+            <td class="py-1.5 px-3"><input type="text" id="outBatch_${i}" list="activeStockBatchList_${i}" oninput="onOutBatchInput(${i})" placeholder="選擇缸號" class="w-full px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="outStyleItem_${i}" disabled placeholder="Style/Item" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 font-bold text-slate-600"></td>
+            <td class="py-1.5 px-3"><input type="text" id="outOrderColor_${i}" disabled placeholder="Order Col" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-indigo-700 font-bold"></td>
+            <td class="py-1.5 px-3"><input type="text" id="outColor_${i}" disabled placeholder="Fabric Col" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-amber-600 font-bold"></td>
+            <td class="py-1.5 px-3"><input type="text" id="outRack_${i}" disabled placeholder="Rack" class="w-full px-2 py-1 border border-slate-200 rounded text-xs bg-slate-50 text-slate-600"></td>
+            <td class="py-1.5 px-3"><input type="text" inputmode="numeric" id="outRoll_${i}" placeholder="卷數" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="outRemainRoll_${i}" disabled placeholder="-" class="w-20 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-indigo-600 bg-slate-50 text-center"></td>
+            <td class="py-1.5 px-3"><input type="text" inputmode="decimal" id="outQty_${i}" placeholder="數量" class="w-28 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-amber-600 bg-white"></td>
+            <td class="py-1.5 px-3"><input type="text" id="outRemainQty_${i}" disabled placeholder="-" class="w-24 px-2 py-1 border border-slate-200 rounded text-xs font-bold text-emerald-600 bg-slate-50 text-center"></td>
           </tr>
         `;
         datalistsHtml += `<datalist id="activeStockBatchList_${i}"></datalist>`;
       }
       tbody.innerHTML = html;
       datalistContainer.innerHTML = datalistsHtml;
-
       updateOutFilterDropdowns();
       setupTableKeyNavigation('batchOutRowsContainer', 10, 3);
     }
 
-    // 清空入庫表單按鈕邏輯
     function clearInForm() {
       document.getElementById('inStyle').value = '';
       document.getElementById('inItem').value = '';
@@ -1463,7 +1377,6 @@
       renderBatchRows('batchInRowsContainer', 'batchInNo', 'batchInRack', 'batchInRoll', 'batchInQty');
     }
 
-    // 清空出庫表單按鈕邏輯
     function clearOutForm() {
       document.getElementById('outReceiver').value = '';
       document.getElementById('outFilterStyle').value = '';
@@ -1475,11 +1388,7 @@
 
     function updateOutFilterDropdowns() {
       let fty = document.getElementById('outFty')?.value || '';
-      let styleSet = new Set();
-      let itemSet = new Set();
-      let orderColorSet = new Set();
-      let colorSet = new Set();
-
+      let styleSet = new Set(), itemSet = new Set(), orderColorSet = new Set(), colorSet = new Set();
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
       let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
       let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
@@ -1512,92 +1421,29 @@
           map[o.batchNo].roll -= (o.roll || 0);
         }
       });
-
       window.stockBatchCache = map;
 
-      let outStyleList = document.getElementById('outStyleList');
-      if(outStyleList) outStyleList.innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
-
-      let activeItems = new Set();
-      let activeOrderColors = new Set();
-      let activeColors = new Set();
-
-      fabricAux.forEach(a => {
-        if(!filterStyle || a.styleNo === filterStyle) {
-          if(a.item) activeItems.add(a.item);
-        }
-      });
-      for(let b in map) {
-        let m = map[b];
-        if(m.qty > 0) {
-          if(!filterStyle || m.styleNo === filterStyle) {
-            if(m.item) activeItems.add(m.item);
-            if(!filterItem || m.item === filterItem) {
-              if(m.orderColor) activeOrderColors.add(m.orderColor);
-              if(!filterOrderColor || m.orderColor === filterOrderColor) {
-                if(m.color) activeColors.add(m.color);
-              }
-            }
-          }
-        }
-      }
-
-      let outItemList = document.getElementById('outItemList');
-      if(outItemList) outItemList.innerHTML = [...activeItems].map(i => `<option value="${i}">`).join('');
-
-      let outOrderColorList = document.getElementById('outOrderColorList');
-      if(outOrderColorList) outOrderColorList.innerHTML = [...activeOrderColors].map(c => `<option value="${c}">`).join('');
-
-      let outColorList = document.getElementById('outColorList');
-      if(outColorList) outColorList.innerHTML = [...activeColors].map(c => `<option value="${c}">`).join('');
-
+      document.getElementById('outStyleList').innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
       updateOutBatchDatalists();
     }
 
-    function onOutFilterStyleChange() {
-      let fItem = document.getElementById('outFilterItem');
-      let fOrderColor = document.getElementById('outFilterOrderColor');
-      let fColor = document.getElementById('outFilterColor');
-      if(fItem) fItem.value = '';
-      if(fOrderColor) fOrderColor.value = '';
-      if(fColor) fColor.value = '';
-      updateOutFilterDropdowns();
-    }
-
-    function onOutFilterItemChange() {
-      let fOrderColor = document.getElementById('outFilterOrderColor');
-      let fColor = document.getElementById('outFilterColor');
-      if(fOrderColor) fOrderColor.value = '';
-      if(fColor) fColor.value = '';
-      updateOutFilterDropdowns();
-    }
-
-    function onOutFilterOrderColorChange() {
-      let fColor = document.getElementById('outFilterColor');
-      if(fColor) fColor.value = '';
-      updateOutFilterDropdowns();
-    }
+    function onOutFilterStyleChange() { updateOutFilterDropdowns(); }
+    function onOutFilterItemChange() { updateOutFilterDropdowns(); }
+    function onOutFilterOrderColorChange() { updateOutFilterDropdowns(); }
 
     function updateOutBatchDatalists() {
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
       let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
-      let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
-      let filterColor = document.getElementById('outFilterColor')?.value.trim() || '';
       let cache = window.stockBatchCache || {};
-
       let optionsHtml = '';
       for(let batchNo in cache) {
         let m = cache[batchNo];
         if(m.qty > 0) {
           if(filterStyle && m.styleNo !== filterStyle) continue;
           if(filterItem && m.item !== filterItem) continue;
-          if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
-          if(filterColor && m.color !== filterColor) continue;
-
-          optionsHtml += `<option value="${batchNo}">[Left:${m.qty}] Style:${m.styleNo} Item:${m.item} OrderCol:${m.orderColor||'-'} FabricCol:${m.color||'-'} Rack:${m.rack||'-'}</option>`;
+          optionsHtml += `<option value="${batchNo}">[Left:${m.qty}] Style:${m.styleNo} Item:${m.item}</option>`;
         }
       }
-
       for(let i = 1; i <= 10; i++) {
         let dl = document.getElementById(`activeStockBatchList_${i}`);
         if(dl) dl.innerHTML = optionsHtml;
@@ -1608,108 +1454,41 @@
       let batchVal = document.getElementById(`outBatch_${idx}`).value.trim();
       let cache = window.stockBatchCache || {};
       let match = cache[batchVal];
-
-      let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
-      let orderColorInput = document.getElementById(`outOrderColor_${idx}`);
-      let colorInput = document.getElementById(`outColor_${idx}`);
-      let rackInput = document.getElementById(`outRack_${idx}`);
-      let remainRollInput = document.getElementById(`outRemainRoll_${idx}`);
-      let remainQtyInput = document.getElementById(`outRemainQty_${idx}`);
-
       if(match) {
-        styleItemInput.value = `${match.styleNo} | ${match.item}`;
-        orderColorInput.value = match.orderColor || '-';
-        colorInput.value = match.color || '-';
-        rackInput.value = match.rack || '-';
-        remainRollInput.value = match.roll;
-        remainQtyInput.value = match.qty;
-      } else {
-        styleItemInput.value = '';
-        orderColorInput.value = '';
-        colorInput.value = '';
-        rackInput.value = '';
-        remainRollInput.value = '';
-        remainQtyInput.value = '';
+        document.getElementById(`outStyleItem_${idx}`).value = `${match.styleNo} | ${match.item}`;
+        document.getElementById(`outOrderColor_${idx}`).value = match.orderColor || '-';
+        document.getElementById(`outColor_${idx}`).value = match.color || '-';
+        document.getElementById(`outRack_${idx}`).value = match.rack || '-';
+        document.getElementById(`outRemainRoll_${idx}`).value = match.roll;
+        document.getElementById(`outRemainQty_${idx}`).value = match.qty;
       }
     }
 
     function onInStyleChange() {
       let styleVal = document.getElementById('inStyle').value.trim();
       let matchedAux = fabricAux.filter(a => a.styleNo === styleVal);
-      
-      let itemSet = new Set();
-      let orderColorSet = new Set();
-      let colorSet = new Set();
-      let rackSet = new Set();
-
+      let itemSet = new Set(), orderColorSet = new Set(), colorSet = new Set();
       matchedAux.forEach(m => {
         if(m.item) itemSet.add(m.item);
         if(m.orderColor) orderColorSet.add(m.orderColor);
         if(m.color) colorSet.add(m.color);
-        if(m.rack) rackSet.add(m.rack);
       });
-
       document.getElementById('auxItemList').innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
       document.getElementById('auxOrderColorList').innerHTML = [...orderColorSet].map(c => `<option value="${c}">`).join('');
       document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
-      document.getElementById('auxRackList').innerHTML = [...rackSet].map(r => `<option value="${r}">`).join('');
     }
+    function onInItemChange() {}
+    function onInOrderColorChange() {}
 
-    function onInItemChange() {
-      let styleVal = document.getElementById('inStyle').value.trim();
-      let itemVal = document.getElementById('inItem').value.trim();
-      let matchedAux = fabricAux.filter(a => a.styleNo === styleVal && (!itemVal || a.item === itemVal));
-      
-      let orderColorSet = new Set();
-      let colorSet = new Set();
-      matchedAux.forEach(m => {
-        if(m.orderColor) orderColorSet.add(m.orderColor);
-        if(m.color) colorSet.add(m.color);
-      });
-      document.getElementById('auxOrderColorList').innerHTML = [...orderColorSet].map(c => `<option value="${c}">`).join('');
-      document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
-    }
-
-    function onInOrderColorChange() {
-      let styleVal = document.getElementById('inStyle').value.trim();
-      let itemVal = document.getElementById('inItem').value.trim();
-      let orderColorVal = document.getElementById('inOrderColor').value.trim();
-
-      let matchedAux = fabricAux.filter(a => 
-        (!styleVal || a.styleNo === styleVal) && 
-        (!itemVal || a.item === itemVal) && 
-        (!orderColorVal || a.orderColor === orderColorVal)
-      );
-
-      let colorSet = new Set();
-      matchedAux.forEach(m => {
-        if(m.color) colorSet.add(m.color);
-      });
-
-      document.getElementById('auxColorList').innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
-      
-      if(colorSet.size === 1) {
-        let singleColor = [...colorSet][0];
-        let colorInput = document.getElementById('inColor');
-        if(!colorInput.value || !colorSet.has(colorInput.value)) {
-          colorInput.value = singleColor;
-        }
-      }
-    }
-
-    async function initSystem() {
-      renderAll();
-    }
+    async function initSystem() { renderAll(); }
 
     function changeGlobalFty() {
       let ftyInput = document.getElementById('globalFtyFilter');
       let userName = currentUser ? currentUser.name : '';
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
-      
       if (!isMaster) {
-        let userFty = currentUser.fty || '全部單位 All Factories';
-        ftyInput.value = userFty;
-        currentGlobalFty = userFty;
+        ftyInput.value = currentUser.fty || '全部單位 All Factories';
+        currentGlobalFty = currentUser.fty || '全部單位 All Factories';
         return;
       }
       currentGlobalFty = ftyInput.value.trim() || '全部單位 All Factories';
@@ -1718,18 +1497,12 @@
 
     function getNowTimeString() {
       let now = new Date();
-      let y = now.getFullYear();
-      let m = String(now.getMonth() + 1).padStart(2, '0');
-      let d = String(now.getDate()).padStart(2, '0');
-      let h = String(now.getHours()).padStart(2, '0');
-      let min = String(now.getMinutes()).padStart(2, '0');
-      return `${y}-${m}-${d} ${h}:${min}`;
+      return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     }
 
     function switchTab(tabId) {
       let userName = currentUser ? currentUser.name : '';
       let isMaster = userName.includes('最高管理者') || userName.includes('ZAW AUNG');
-
       if ((tabId === 'tabAdmin' || tabId === 'tabLogs') && !isMaster) {
         alert("您沒有權限訪問該後台！ Permission Denied!");
         return;
@@ -1744,7 +1517,7 @@
       
       if(tabId === 'tabOut') updateOutFilterDropdowns();
       if(tabId === 'tabBalance') { updateBalanceFilterDropdowns(); renderBalanceSheet(); }
-      if(tabId === 'tabSummary') { renderSummarySheet(); }
+      if(tabId === 'tabSummary') renderSummarySheet();
       if(tabId === 'tabTransfer') { updateTransferStyleList(); renderTransferTable(); }
       if(tabId === 'tabPrint') updatePrintInvoiceDropdown();
       if(tabId === 'tabAdmin' && isMaster) renderUserTable();
@@ -1756,7 +1529,7 @@
       if(icon) icon.classList.add('fa-spin');
       await fetchLatestDataFromCloud();
       if(icon) icon.classList.remove('fa-spin');
-      alert("✅ 已成功從雲端同步最新數據！ Cloud Data Synced!");
+      alert("✅ 已成功從雲端同步最新數據！");
     }
 
     async function saveToCloud() {
@@ -1771,17 +1544,13 @@
       renderLoginHints();
 
       try {
-        let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
           body: JSON.stringify({ fabricAux, fabricIn, fabricOut, fabricTransfers, factoryList, itemMasterList, warehouseUsers, systemLogs })
         });
-        if(!res.ok) console.error("雲端保存返回狀態碼: ", res.status);
-      } catch(e) { 
-        console.error("雲端保存失敗: ", e); 
-      }
+      } catch(e) {}
       renderAll();
-      updateAuxDatalists();
     }
 
     function renderAll() {
@@ -1812,64 +1581,44 @@
     }
 
     function updateStyleDropdowns() {
-      let styles = [...new Set([
-        ...fabricAux.map(a => a.styleNo),
-        ...fabricIn.map(i => i.styleNo),
-        ...fabricOut.map(o => o.styleNo)
-      ])].filter(Boolean);
-
+      let styles = [...new Set([...fabricAux.map(a => a.styleNo), ...fabricIn.map(i => i.styleNo), ...fabricOut.map(o => o.styleNo)])].filter(Boolean);
       let inSelect = document.getElementById('searchInStyleSelect');
       let outSelect = document.getElementById('searchOutStyleSelect');
-
       if(inSelect) {
-        let currVal = inSelect.value;
+        let v = inSelect.value;
         inSelect.innerHTML = `<option value="">按款號篩選 All Styles</option>` + styles.map(s => `<option value="${s}">${s}</option>`).join('');
-        inSelect.value = currVal;
+        inSelect.value = v;
       }
-
       if(outSelect) {
-        let currVal = outSelect.value;
+        let v = outSelect.value;
         outSelect.innerHTML = `<option value="">按款號篩選 All Styles</option>` + styles.map(s => `<option value="${s}">${s}</option>`).join('');
-        outSelect.value = currVal;
+        outSelect.value = v;
       }
     }
 
-    // 嚴格按“先出庫 ➔ 再入庫 ➔ 最後輔助規格”邏輯進行按款號一鍵批量刪除
     function deleteByStyle(pageSource) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除數據！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除數據！"); return; }
       let styleSelectId = pageSource === 'in' ? 'searchInStyleSelect' : 'searchOutStyleSelect';
       let selectedStyle = document.getElementById(styleSelectId)?.value || '';
-
-      if(!selectedStyle) {
-        alert("請先在下拉菜單中選擇需要批量清理的【款號 Style No】！ Select a Style first!");
-        return;
-      }
+      if(!selectedStyle) { alert("請先在下拉菜單中選擇需要批量清理的【款號 Style No】！"); return; }
 
       let countOut = fabricOut.filter(o => o.styleNo === selectedStyle).length;
       let countIn = fabricIn.filter(i => i.styleNo === selectedStyle).length;
       let countAux = fabricAux.filter(a => a.styleNo === selectedStyle).length;
 
-      let msg = `⚠️ 【高風險操作警告】\n\n确定要一鍵刪除款號 【${selectedStyle}】 的所有歷史記錄嗎？\n\n系統將自動按照嚴密邏輯依序清理：\n 1. 先刪除【出庫流水】 (${countOut} 條)\n 2. 再刪除【入庫流水】 (${countIn} 條)\n 3. 最後刪除【輔助規格】 (${countAux} 條)\n\n建议先導出 Excel 備份！此操作不可撤銷！`;
-
-      if(confirm(msg)) {
-        // 第一步：先刪除出庫
+      if(confirm(`⚠️ 確定要按順序清理款號 【${selectedStyle}】 的所有歷史記錄嗎？\n(將依序刪除出庫 ${countOut} 條、入庫 ${countIn} 條、輔助規格 ${countAux} 條)`)) {
         fabricOut = fabricOut.filter(o => o.styleNo !== selectedStyle);
-        // 第二步：再刪除入庫
         fabricIn = fabricIn.filter(i => i.styleNo !== selectedStyle);
-        // 第三步：最後刪除輔助規格
         fabricAux = fabricAux.filter(a => a.styleNo !== selectedStyle);
-
-        recordLog('ACTION', '按款號一鍵批量刪除', `按合規順序(出庫->入庫->規格)一鍵清理款號 [${selectedStyle}]，共刪除出庫 ${countOut} 條、入庫 ${countIn} 條、規格 ${countAux} 條`);
+        recordLog('ACTION', '按款號一鍵批量刪除', `清理款號 [${selectedStyle}]`);
         saveToCloud();
-        alert(`✅ 款號 【${selectedStyle}】 的所有歷史數據已按嚴密邏輯完全刪除！`);
+        alert(`✅ 款號 【${selectedStyle}】 已清理完成！`);
       }
     }
 
     function updateReceiverFactoryDatalist() {
       let receiverDl = document.getElementById('receiverFactoryList');
       if(!receiverDl) return;
-
       let ftySet = new Set(["一廠 (JUN TAI)", "二廠 (DA MEI)", "三廠 (DA LI)", "總廠 (FU YUAN)", "外發廠-A", "外發廠-B"]);
       factoryList.forEach(f => { if(f.name) ftySet.add(f.name); });
       receiverDl.innerHTML = [...ftySet].map(name => `<option value="${name}">`).join('');
@@ -1879,10 +1628,6 @@
       let ftySet = new Set(["全部單位 All Factories", "一廠 (JUN TAI)", "二廠 (DA MEI)", "三廠 (DA LI)", "總廠 (FU YUAN)", "外發廠-A", "外發廠-B"]);
       factoryList.forEach(f => { if(f.name) ftySet.add(f.name); });
       fabricIn.forEach(i => { if(i.fty) ftySet.add(i.fty); });
-      fabricOut.forEach(o => { if(o.fty) ftySet.add(o.fty); });
-      fabricTransfers.forEach(t => { if(t.fromFty) ftySet.add(t.fromFty); if(t.toFty) ftySet.add(t.toFty); });
-      warehouseUsers.forEach(u => { if(u.fty) ftySet.add(u.fty); });
-
       let dl = document.getElementById('globalFtyDatalist');
       if(dl) dl.innerHTML = [...ftySet].map(f => `<option value="${f}">`).join('');
     }
@@ -1891,182 +1636,61 @@
       let itemSet = new Set();
       itemMasterList.forEach(im => { if(im.name) itemSet.add(im.name); });
       fabricAux.forEach(a => { if(a.item) itemSet.add(a.item); });
-      fabricIn.forEach(i => { if(i.item) itemSet.add(i.item); });
-
       let dl = document.getElementById('globalItemList');
       if(dl) dl.innerHTML = [...itemSet].map(item => `<option value="${item}">`).join('');
     }
 
     function updateAuxDatalists() {
       let styleList = [...new Set([...fabricAux.map(i => i.styleNo), ...fabricIn.map(i => i.styleNo)])].filter(Boolean);
-      let itemList = [...new Set([...itemMasterList.map(im => im.name), ...fabricAux.map(i => i.item), ...fabricIn.map(i => i.item)])].filter(Boolean);
+      let itemList = [...new Set([...itemMasterList.map(im => im.name), ...fabricAux.map(i => i.item)])].filter(Boolean);
       let orderColorList = [...new Set([...fabricAux.map(i => i.orderColor), ...fabricIn.map(i => i.orderColor)])].filter(Boolean);
       let colorList = [...new Set([...fabricAux.map(i => i.color), ...fabricIn.map(i => i.color)])].filter(Boolean);
 
       let auxStyleList = document.getElementById('auxStyleList');
       if(auxStyleList) auxStyleList.innerHTML = styleList.map(s => `<option value="${s}">`).join('');
-
       let auxItemList = document.getElementById('auxItemList');
       if(auxItemList) auxItemList.innerHTML = itemList.map(i => `<option value="${i}">`).join('');
-
       let auxOrderColorList = document.getElementById('auxOrderColorList');
       if(auxOrderColorList) auxOrderColorList.innerHTML = orderColorList.map(c => `<option value="${c}">`).join('');
-
       let auxColorList = document.getElementById('auxColorList');
       if(auxColorList) auxColorList.innerHTML = colorList.map(c => `<option value="${c}">`).join('');
-
-      updateGlobalFtyDatalist();
-      updateReceiverFactoryDatalist();
-      updateGlobalItemDatalist();
-    }
-
-    function exportTableToExcel(tbodyId, filename) {
-      let tbody = document.getElementById(tbodyId);
-      if(!tbody) return;
-
-      let table = tbody.closest('table');
-      let thead = table.querySelector('thead');
-      let html = '<table>';
-      if(thead) { html += thead.outerHTML; }
-      html += '<tbody>';
-      
-      let rows = tbody.querySelectorAll('tr');
-      rows.forEach(r => {
-        let clonedRow = r.cloneNode(true);
-        let lastCell = clonedRow.querySelector('td:last-child');
-        if(lastCell && (lastCell.querySelector('button') || lastCell.innerText.trim() === '-' || lastCell.classList.contains('no-print'))) {
-          lastCell.remove();
-        }
-        html += clonedRow.outerHTML;
-      });
-      html += '</tbody></table>';
-
-      let blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel' });
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
     }
 
     function toggleInStockOnly() {
       onlyInStock = !onlyInStock;
-      let btn = document.getElementById('toggleInStockBtn');
-      let icon = document.getElementById('toggleIcon');
-      let text = document.getElementById('toggleText');
-
-      if(onlyInStock) {
-        btn.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
-        icon.className = "fa-solid fa-toggle-on";
-        text.innerText = "已開啟：僅看有庫存 Stock > 0";
-      } else {
-        btn.className = "px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
-        icon.className = "fa-solid fa-toggle-off";
-        text.innerText = "只看有庫存 Only Stock > 0";
-      }
       renderBalanceSheet();
     }
 
     function toggleInStockSummaryOnly() {
       onlyInStockSummary = !onlyInStockSummary;
-      let btn = document.getElementById('toggleInStockSummaryBtn');
-      let icon = document.getElementById('toggleSummaryIcon');
-      let text = document.getElementById('toggleSummaryText');
-
-      if(onlyInStockSummary) {
-        btn.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
-        icon.className = "fa-solid fa-toggle-on";
-        text.innerText = "已開啟：僅看有庫存 Stock > 0";
-      } else {
-        btn.className = "px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
-        icon.className = "fa-solid fa-toggle-off";
-        text.innerText = "只看有庫存 Only Stock > 0";
-      }
       renderSummarySheet();
     }
 
     function toggleAllFtySummary() {
       isAllFtySummary = !isAllFtySummary;
-      let btn = document.getElementById('toggleAllFtySummaryBtn');
-      let text = document.getElementById('toggleAllFtyText');
-
-      if(isAllFtySummary) {
-        btn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
-        text.innerText = "已開啟：跨廠大匯總 All Factories";
-      } else {
-        btn.className = "px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs shrink-0 cursor-pointer";
-        text.innerText = "不分工廠查看 All Factories";
-      }
       renderSummarySheet();
     }
 
     function updateBalanceFilterDropdowns() {
-      let styleSet = new Set();
-      let itemSet = new Set();
-      let orderColorSet = new Set();
-      let colorSet = new Set();
-      let rackSet = new Set();
-
-      let fStyle = document.getElementById('filterStyle')?.value.trim() || '';
-      let fItem = document.getElementById('filterItem')?.value.trim() || '';
-      let fOrderColor = document.getElementById('filterOrderColor')?.value.trim() || '';
-
+      let styleSet = new Set(), itemSet = new Set(), orderColorSet = new Set(), colorSet = new Set(), rackSet = new Set();
       fabricIn.forEach(i => {
         if (currentGlobalFty !== '全部單位 All Factories' && i.fty !== currentGlobalFty) return;
         if(i.styleNo) styleSet.add(i.styleNo);
-        if(!fStyle || i.styleNo === fStyle) {
-          if(i.item) itemSet.add(i.item);
-          if((!fStyle || i.styleNo === fStyle) && (!fItem || i.item === fItem)) {
-            if(i.orderColor) orderColorSet.add(i.orderColor);
-            if((!fOrderColor || i.orderColor === fOrderColor)) {
-              if(i.color) colorSet.add(i.color);
-            }
-          }
-        }
+        if(i.item) itemSet.add(i.item);
+        if(i.orderColor) orderColorSet.add(i.orderColor);
+        if(i.color) colorSet.add(i.color);
         if(i.rack) rackSet.add(i.rack);
       });
-
-      let sDl = document.getElementById('filterStyleList');
-      let iDl = document.getElementById('filterItemList');
-      let ocDl = document.getElementById('filterOrderColorList');
-      let cDl = document.getElementById('filterColorList');
-      let rDl = document.getElementById('filterRackList');
-
-      if(sDl) sDl.innerHTML = [...styleSet].map(s=>`<option value="${s}">`).join('');
-      if(iDl) iDl.innerHTML = [...itemSet].map(i=>`<option value="${i}">`).join('');
-      if(ocDl) ocDl.innerHTML = [...orderColorSet].map(c=>`<option value="${c}">`).join('');
-      if(cDl) cDl.innerHTML = [...colorSet].map(c=>`<option value="${c}">`).join('');
-      if(rDl) rDl.innerHTML = [...rackSet].map(r=>`<option value="${r}">`).join('');
+      document.getElementById('filterStyleList').innerHTML = [...styleSet].map(s=>`<option value="${s}">`).join('');
+      document.getElementById('filterItemList').innerHTML = [...itemSet].map(i=>`<option value="${i}">`).join('');
+      document.getElementById('filterOrderColorList').innerHTML = [...orderColorSet].map(c=>`<option value="${c}">`).join('');
+      document.getElementById('filterColorList').innerHTML = [...colorSet].map(c=>`<option value="${c}">`).join('');
+      document.getElementById('filterRackList').innerHTML = [...rackSet].map(r=>`<option value="${r}">`).join('');
     }
 
-    function onFilterStyleChange() {
-      let fItem = document.getElementById('filterItem');
-      let fOrderColor = document.getElementById('filterOrderColor');
-      let fColor = document.getElementById('filterColor');
-      if(fItem) fItem.value = '';
-      if(fOrderColor) fOrderColor.value = '';
-      if(fColor) fColor.value = '';
-      updateBalanceFilterDropdowns();
-      renderBalanceSheet();
-    }
-
-    function onFilterItemChange() {
-      let fOrderColor = document.getElementById('filterOrderColor');
-      let fColor = document.getElementById('filterColor');
-      if(fOrderColor) fOrderColor.value = '';
-      if(fColor) fColor.value = '';
-      updateBalanceFilterDropdowns();
-      renderBalanceSheet();
-    }
-
-    function onFilterOrderColorChange() {
-      let fColor = document.getElementById('filterColor');
-      if(fColor) fColor.value = '';
-      updateBalanceFilterDropdowns();
-      renderBalanceSheet();
-    }
+    function onFilterStyleChange() { updateBalanceFilterDropdowns(); renderBalanceSheet(); }
+    function onFilterItemChange() { updateBalanceFilterDropdowns(); renderBalanceSheet(); }
+    function onFilterOrderColorChange() { updateBalanceFilterDropdowns(); renderBalanceSheet(); }
 
     function resetBalanceFilters() {
       document.getElementById('filterStyle').value = '';
@@ -2075,14 +1699,12 @@
       document.getElementById('filterColor').value = '';
       document.getElementById('filterRack').value = '';
       document.getElementById('searchBalanceInput').value = '';
-      updateBalanceFilterDropdowns();
       renderBalanceSheet();
     }
 
     function renderBalanceSheet() {
       let tbody = document.getElementById('balanceTableBody');
       if(!tbody) return;
-
       let fStyle = document.getElementById('filterStyle')?.value.trim() || '';
       let fItem = document.getElementById('filterItem')?.value.trim() || '';
       let fOrderColor = document.getElementById('filterOrderColor')?.value.trim() || '';
@@ -2099,7 +1721,6 @@
         map[key].inQty += (i.qty || 0);
         map[key].inRoll += (i.roll || 0);
       });
-
       fabricOut.forEach(o => {
         if (currentGlobalFty !== '全部單位 All Factories' && o.fty !== currentGlobalFty) return;
         let batchKey = o.batchNo || '無缸號';
@@ -2115,9 +1736,7 @@
         let d = map[k];
         let balQty = parseFloat((d.inQty - d.outQty).toFixed(1));
         let balRoll = d.inRoll - d.outRoll;
-
         if(onlyInStock && balQty <= 0 && balRoll <= 0) continue;
-
         if(fStyle && d.styleNo !== fStyle) continue;
         if(fItem && d.item !== fItem) continue;
         if(fOrderColor && d.orderColor !== fOrderColor) continue;
@@ -2129,8 +1748,8 @@
 
         let hasStock = balQty > 0 || balRoll > 0;
         let moveBtnHtml = (hasStock && !isReadonly)
-          ? `<button onclick="openMoveRackModal('${d.fty}', '${d.batchNo}', '${d.styleNo}', '${d.item}', '${d.orderColor||''}', '${d.color||''}', '${d.rack||''}', ${balQty}, ${balRoll})" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded text-xs font-bold transition shadow-xs cursor-pointer"><i class="fa-solid fa-location-arrow"></i> 移架 Move</button>`
-          : `<span class="text-slate-300 text-xs">-</span>`;
+          ? `<button onclick="openMoveRackModal('${d.fty}', '${d.batchNo}', '${d.styleNo}', '${d.item}', '${d.orderColor||''}', '${d.color||''}', '${d.rack||''}', ${balQty}, ${balRoll})" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded text-xs font-bold transition shadow-xs cursor-pointer"><i class="fa-solid fa-location-arrow"></i> 移架</button>`
+          : `-`;
 
         html += `
           <tr class="border-b border-slate-100 hover:bg-slate-50">
@@ -2145,21 +1764,18 @@
             <td class="py-2.5 px-3 font-semibold">${d.inRoll}</td>
             <td class="py-2.5 px-3 font-bold text-amber-600">${parseFloat(d.outQty.toFixed(1))}</td>
             <td class="py-2.5 px-3 font-semibold">${d.outRoll}</td>
-            <td class="py-2.5 px-3 font-bold ${balQty<0?'text-red-500':'text-indigo-600'}">${balQty}</td>
-            <td class="py-2.5 px-3 font-bold ${balRoll<0?'text-red-500':'text-indigo-600'}">${balRoll}</td>
-            <td class="py-2.5 px-3 text-center no-print normal-role-only">
-              ${moveBtnHtml}
-            </td>
+            <td class="py-2.5 px-3 font-bold text-indigo-600">${balQty}</td>
+            <td class="py-2.5 px-3 font-bold text-indigo-600">${balRoll}</td>
+            <td class="py-2.5 px-3 text-center no-print normal-role-only">${moveBtnHtml}</td>
           </tr>
         `;
       }
-      tbody.innerHTML = html || `<tr><td colspan="14" class="py-6 text-center text-slate-400 font-semibold">沒有找到相符的庫存記錄 No Data Found</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="14" class="py-6 text-center text-slate-400">沒有找到相符的庫存記錄</td></tr>`;
     }
 
     function renderSummarySheet() {
       let tbody = document.getElementById('summaryTableBody');
       if(!tbody) return;
-
       let fFty = document.getElementById('sumFilterFty')?.value.trim() || '';
       let fStyle = document.getElementById('sumFilterStyle')?.value.trim() || '';
       let fItem = document.getElementById('sumFilterItem')?.value.trim() || '';
@@ -2168,27 +1784,19 @@
       let query = (document.getElementById('searchSummaryInput')?.value || '').toLowerCase();
 
       let map = {};
-
       fabricIn.forEach(i => {
         if (!isAllFtySummary && currentGlobalFty !== '全部單位 All Factories' && i.fty !== currentGlobalFty) return;
         let ftyKey = isAllFtySummary ? '跨廠匯總 All' : i.fty;
         let key = `${ftyKey}_${i.styleNo}_${i.item}_${i.orderColor||''}_${i.color||''}`;
-        if(!map[key]) {
-          map[key] = { fty: ftyKey, styleNo: i.styleNo, item: i.item, orderColor: i.orderColor||'', color: i.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
-        }
-        map[key].inQty += (i.qty || 0);
-        map[key].inRoll += (i.roll || 0);
+        if(!map[key]) map[key] = { fty: ftyKey, styleNo: i.styleNo, item: i.item, orderColor: i.orderColor||'', color: i.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
+        map[key].inQty += (i.qty || 0); map[key].inRoll += (i.roll || 0);
       });
-
       fabricOut.forEach(o => {
         if (!isAllFtySummary && currentGlobalFty !== '全部單位 All Factories' && o.fty !== currentGlobalFty) return;
         let ftyKey = isAllFtySummary ? '跨廠匯總 All' : o.fty;
         let key = `${ftyKey}_${o.styleNo}_${o.item}_${o.orderColor||''}_${o.color||''}`;
-        if(!map[key]) {
-          map[key] = { fty: ftyKey, styleNo: o.styleNo, item: o.item, orderColor: o.orderColor||'', color: o.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
-        }
-        map[key].outQty += (o.qty || 0);
-        map[key].outRoll += (o.roll || 0);
+        if(!map[key]) map[key] = { fty: ftyKey, styleNo: o.styleNo, item: o.item, orderColor: o.orderColor||'', color: o.color||'', inQty: 0, inRoll: 0, outQty: 0, outRoll: 0 };
+        map[key].outQty += (o.qty || 0); map[key].outRoll += (o.roll || 0);
       });
 
       let html = '';
@@ -2196,9 +1804,7 @@
         let d = map[k];
         let balQty = parseFloat((d.inQty - d.outQty).toFixed(1));
         let balRoll = d.inRoll - d.outRoll;
-
         if(onlyInStockSummary && balQty <= 0 && balRoll <= 0) continue;
-
         if(!isAllFtySummary && fFty && fFty !== '全部單位 All Factories' && d.fty !== fFty) continue;
         if(fStyle && d.styleNo !== fStyle) continue;
         if(fItem && d.item !== fItem) continue;
@@ -2209,28 +1815,26 @@
         if(query && !searchStr.includes(query)) continue;
 
         html += `
-          <tr class="border-b border-slate-100 hover:bg-indigo-50/30 transition">
+          <tr class="border-b border-slate-100 hover:bg-indigo-50/30">
             <td class="py-2.5 px-3 font-bold text-indigo-600 text-xs">${d.fty}</td>
             <td class="py-2.5 px-3 font-bold text-slate-800 text-sm">${d.styleNo}</td>
             <td class="py-2.5 px-3 font-semibold">${d.item}</td>
             <td class="py-2.5 px-3 font-bold text-indigo-700">${d.orderColor || '-'}</td>
             <td class="py-2.5 px-3 font-bold text-amber-600">${d.color || '-'}</td>
             <td class="py-2.5 px-3 font-bold text-emerald-600">${parseFloat(d.inQty.toFixed(1))}</td>
-            <td class="py-2.5 px-3 font-semibold text-slate-600">${d.inRoll}</td>
+            <td class="py-2.5 px-3 font-semibold">${d.inRoll}</td>
             <td class="py-2.5 px-3 font-bold text-amber-600">${parseFloat(d.outQty.toFixed(1))}</td>
-            <td class="py-2.5 px-3 font-semibold text-slate-600">${d.outRoll}</td>
-            <td class="py-2.5 px-3 font-bold text-indigo-600 text-base ${balQty < 0 ? 'text-red-500' : ''}">${balQty}</td>
-            <td class="py-2.5 px-3 font-bold text-indigo-600 text-base ${balRoll < 0 ? 'text-red-500' : ''}">${balRoll}</td>
+            <td class="py-2.5 px-3 font-semibold">${d.outRoll}</td>
+            <td class="py-2.5 px-3 font-bold text-indigo-600 text-base">${balQty}</td>
+            <td class="py-2.5 px-3 font-bold text-indigo-600 text-base">${balRoll}</td>
           </tr>
         `;
       }
-
-      tbody.innerHTML = html || `<tr><td colspan="11" class="py-6 text-center text-slate-400 font-semibold">沒有找到相符的進銷存匯總數據 No Summary Found</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="11" class="py-6 text-center text-slate-400">沒有找到匯總數據</td></tr>`;
     }
 
     function resetSummaryFilters() {
-      let sumFty = document.getElementById('sumFilterFty');
-      if(sumFty) sumFty.value = '';
+      document.getElementById('sumFilterFty').value = '';
       document.getElementById('sumFilterStyle').value = '';
       document.getElementById('sumFilterItem').value = '';
       document.getElementById('sumFilterOrderColor').value = '';
@@ -2240,16 +1844,10 @@
     }
 
     function openMoveRackModal(fty, batchNo, styleNo, item, orderColor, color, oldRack, maxQty, maxRoll) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法進行移架操作！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法進行移架操作！"); return; }
       document.getElementById('moveRackFty').value = fty;
       document.getElementById('moveRackBatchNo').value = batchNo;
-      document.getElementById('moveRackStyleNo').value = styleNo;
-      document.getElementById('moveRackItem').value = item;
-      document.getElementById('moveRackOrderColor').value = orderColor;
-      document.getElementById('moveRackColor').value = color;
       document.getElementById('moveRackOldRack').value = oldRack;
-
       document.getElementById('moveRackBatchDisplay').value = `[${fty}] 缸號: ${batchNo} | 現存最大: ${maxQty} (卷:${maxRoll})`;
       document.getElementById('moveQtyInput').value = maxQty;
       document.getElementById('moveRollInput').value = maxRoll;
@@ -2257,213 +1855,105 @@
       document.getElementById('moveRackModal').classList.remove('hidden');
     }
 
-    function closeMoveRackModal() {
-      document.getElementById('moveRackModal').classList.add('hidden');
-    }
+    function closeMoveRackModal() { document.getElementById('moveRackModal').classList.add('hidden'); }
 
     function saveMoveRack() {
       let fty = document.getElementById('moveRackFty').value;
       let batchNo = document.getElementById('moveRackBatchNo').value;
       let oldRack = document.getElementById('moveRackOldRack').value;
-
       let moveQty = parseFloat(document.getElementById('moveQtyInput').value) || 0;
       let moveRoll = parseInt(document.getElementById('moveRollInput').value) || 0;
       let newRack = document.getElementById('newRackInput').value.trim();
 
-      if(!newRack) { alert("請輸入目標新貨架號！ Enter New Rack!"); return; }
-      if(moveQty <= 0) { alert("請輸入有效的移動數量！ Enter Valid QTY!"); return; }
-
+      if(!newRack) { alert("請輸入目標新貨架號！"); return; }
       let targetIn = fabricIn.find(i => i.fty === fty && i.batchNo === batchNo && (i.rack || '') === oldRack) || fabricIn.find(i => i.fty === fty && i.batchNo === batchNo);
-
-      if(!targetIn) { alert("未找到該缸號的入庫記錄！ Record Not Found!"); return; }
-
-      if(moveQty > targetIn.qty) {
-        alert(`輸入的移動數量 (${moveQty}) 不能大於該記錄的當前數量 (${targetIn.qty})！`);
-        return;
-      }
+      if(!targetIn) { alert("未找到入庫記錄！"); return; }
 
       if(moveQty === targetIn.qty) {
         targetIn.rack = newRack;
       } else {
         targetIn.qty = parseFloat((targetIn.qty - moveQty).toFixed(1));
         targetIn.roll = Math.max(0, targetIn.roll - moveRoll);
-
-        let newInRecord = {
+        fabricIn.unshift({
           id: Date.now().toString() + '_moved',
-          fty: targetIn.fty,
-          date: targetIn.date,
-          styleNo: targetIn.styleNo,
-          item: targetIn.item,
-          batchNo: targetIn.batchNo,
-          orderColor: targetIn.orderColor,
-          color: targetIn.color,
-          rack: newRack,
-          qty: moveQty,
-          unit: targetIn.unit || 'KG',
-          roll: moveRoll,
-          come: `部分移架自 ${oldRack||'原貨架'}`,
-          operator: currentUser ? currentUser.name : '系統',
-          timeStr: getNowTimeString()
-        };
-        fabricIn.unshift(newInRecord);
+          fty: targetIn.fty, date: targetIn.date, styleNo: targetIn.styleNo, item: targetIn.item,
+          batchNo: targetIn.batchNo, orderColor: targetIn.orderColor, color: targetIn.color,
+          rack: newRack, qty: moveQty, unit: targetIn.unit || 'KG', roll: moveRoll,
+          come: `部分移架自 ${oldRack||'原貨架'}`, operator: currentUser?.name || '系統', timeStr: getNowTimeString()
+        });
       }
-
-      recordLog('ACTION', '按數量移架', `將工廠 [${fty}] 缸號 [${batchNo}] 數量 ${moveQty} 從貨架 [${oldRack||'-'}] 移至 [${newRack}]`);
+      recordLog('ACTION', '按數量移架', `缸號 [${batchNo}] 數量 ${moveQty} 移至新貨架 [${newRack}]`);
       saveToCloud();
-      alert(`成功將缸號 [${batchNo}] 的數量 ${moveQty}（${moveRoll}卷）移動至新貨架 [${newRack}]！ Rack Moved Successfully!`);
+      alert("移架成功！");
       closeMoveRackModal();
       renderBalanceSheet();
-      renderSummarySheet();
     }
 
     function updateTransferStyleList() {
       let fromFty = document.getElementById('transFromFty').value.trim();
       let styleDl = document.getElementById('transferStyleList');
       if(!styleDl) return;
-
       let map = {};
       fabricIn.forEach(i => {
         if(i.fty === fromFty && i.batchNo) {
           if(!map[i.batchNo]) map[i.batchNo] = { styleNo: i.styleNo, item: i.item, orderColor: i.orderColor, color: i.color, rack: i.rack, qty: 0, roll: 0 };
-          map[i.batchNo].qty += (i.qty || 0);
-          map[i.batchNo].roll += (i.roll || 0);
+          map[i.batchNo].qty += (i.qty || 0); map[i.batchNo].roll += (i.roll || 0);
         }
       });
       fabricOut.forEach(o => {
         if(o.fty === fromFty && o.batchNo && map[o.batchNo]) {
-          map[o.batchNo].qty -= (o.qty || 0);
-          map[o.batchNo].roll -= (o.roll || 0);
+          map[o.batchNo].qty -= (o.qty || 0); map[o.batchNo].roll -= (o.roll || 0);
         }
       });
-
       window.transferCache = map;
-
       let styleSet = new Set();
-      for(let b in map) {
-        if(map[b].qty > 0 && map[b].styleNo) {
-          styleSet.add(map[b].styleNo);
-        }
-      }
-
+      for(let b in map) { if(map[b].qty > 0) styleSet.add(map[b].styleNo); }
       styleDl.innerHTML = [...styleSet].map(s => `<option value="${s}">`).join('');
       updateTransferItemList();
     }
 
     function updateTransferItemList() {
       let styleVal = document.getElementById('transStyle').value.trim();
-      let itemDl = document.getElementById('transferItemList');
-      if(!itemDl) return;
-
       let cache = window.transferCache || {};
       let itemSet = new Set();
-
       for(let b in cache) {
-        let m = cache[b];
-        if(m.qty > 0) {
-          if(styleVal && m.styleNo !== styleVal) continue;
-          if(m.item) itemSet.add(m.item);
-        }
+        if(cache[b].qty > 0 && (!styleVal || cache[b].styleNo === styleVal)) itemSet.add(cache[b].item);
       }
-
-      itemDl.innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
-      updateTransferOrderColorList();
-    }
-
-    function updateTransferOrderColorList() {
-      let styleVal = document.getElementById('transStyle').value.trim();
-      let itemVal = document.getElementById('transItem').value.trim();
-      let orderColorDl = document.getElementById('transferOrderColorList');
-      if(!orderColorDl) return;
-
-      let cache = window.transferCache || {};
-      let orderColorSet = new Set();
-
-      for(let b in cache) {
-        let m = cache[b];
-        if(m.qty > 0) {
-          if(styleVal && m.styleNo !== styleVal) continue;
-          if(itemVal && m.item !== itemVal) continue;
-          if(m.orderColor) orderColorSet.add(m.orderColor);
-        }
-      }
-
-      orderColorDl.innerHTML = [...orderColorSet].map(c => `<option value="${c}">`).join('');
-      updateTransferColorList();
-    }
-
-    function updateTransferColorList() {
-      let styleVal = document.getElementById('transStyle').value.trim();
-      let itemVal = document.getElementById('transItem').value.trim();
-      let orderColorVal = document.getElementById('transOrderColor').value.trim();
-      let colorDl = document.getElementById('transferColorList');
-      if(!colorDl) return;
-
-      let cache = window.transferCache || {};
-      let colorSet = new Set();
-
-      for(let b in cache) {
-        let m = cache[b];
-        if(m.qty > 0) {
-          if(styleVal && m.styleNo !== styleVal) continue;
-          if(itemVal && m.item !== itemVal) continue;
-          if(orderColorVal && m.orderColor !== orderColorVal) continue;
-          if(m.color) colorSet.add(m.color);
-        }
-      }
-
-      colorDl.innerHTML = [...colorSet].map(c => `<option value="${c}">`).join('');
+      document.getElementById('transferItemList').innerHTML = [...itemSet].map(i => `<option value="${i}">`).join('');
       updateTransferBatchList();
     }
 
     function updateTransferBatchList() {
       let styleVal = document.getElementById('transStyle').value.trim();
       let itemVal = document.getElementById('transItem').value.trim();
-      let orderColorVal = document.getElementById('transOrderColor').value.trim();
-      let colorVal = document.getElementById('transColor').value.trim();
-      let batchDl = document.getElementById('transferBatchList');
-      if(!batchDl) return;
-
       let cache = window.transferCache || {};
       let optionsHtml = '';
-
       for(let b in cache) {
         let m = cache[b];
         if(m.qty > 0) {
           if(styleVal && m.styleNo !== styleVal) continue;
           if(itemVal && m.item !== itemVal) continue;
-          if(orderColorVal && m.orderColor !== orderColorVal) continue;
-          if(colorVal && m.color !== colorVal) continue;
-
-          optionsHtml += `<option value="${b}">[Left:${m.qty} | Roll:${m.roll}] Item:${m.item} OrderCol:${m.orderColor||'-'} FabricCol:${m.color||'-'} Rack:${m.rack||'-'}</option>`;
+          optionsHtml += `<option value="${b}">[Left:${m.qty}] Style:${m.styleNo}</option>`;
         }
       }
-
-      batchDl.innerHTML = optionsHtml;
+      document.getElementById('transferBatchList').innerHTML = optionsHtml;
     }
 
     function onTransferBatchChange() {
       let bVal = document.getElementById('transBatchNo').value.trim();
       let cache = window.transferCache || {};
       let match = cache[bVal];
-
       if(match) {
         document.getElementById('transStyle').value = match.styleNo;
         document.getElementById('transItem').value = match.item;
-        document.getElementById('transOrderColor').value = match.orderColor || '';
-        document.getElementById('transColor').value = match.color || '';
         document.getElementById('transQty').value = match.qty;
         document.getElementById('transRoll').value = match.roll;
-        
-        document.getElementById('labelTransQty').innerHTML = `調撥數量 QTY <span class="text-emerald-600 font-bold">(Left: ${match.qty})</span>`;
-        document.getElementById('labelTransRoll').innerHTML = `調撥卷數 Roll <span class="text-indigo-600 font-bold">(Left: ${match.roll})</span>`;
-
         window.currentTransItemMeta = match;
       }
     }
 
     function submitTransferRequest() {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法發起調撥！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法發起調撥！"); return; }
       let fromFty = document.getElementById('transFromFty').value.trim();
       let toFty = document.getElementById('transToFty').value.trim();
       let batchNo = document.getElementById('transBatchNo').value.trim();
@@ -2471,125 +1961,62 @@
       let roll = parseInt(document.getElementById('transRoll').value) || 0;
       let meta = window.currentTransItemMeta || {};
 
-      if(fromFty === toFty) { alert("調出工廠與接收工廠不能相同！ Factories cannot be same!"); return; }
-      if(!batchNo || qty <= 0) { alert("請選擇有效的調撥缸號與數量！ Select Valid Batch & QTY!"); return; }
+      if(fromFty === toFty) { alert("調出工廠與接收工廠不能相同！"); return; }
+      if(!batchNo || qty <= 0) { alert("請選擇有效的缸號與數量！"); return; }
 
-      let transObj = {
+      fabricTransfers.unshift({
         id: Date.now().toString(),
         date: new Date().toISOString().split('T')[0],
         fromFty, toFty, batchNo,
-        styleNo: meta.styleNo || '未知款號',
-        item: meta.item || '麵料',
-        orderColor: meta.orderColor || '',
-        color: meta.color || '',
-        rack: meta.rack || '',
-        qty, roll,
-        operator: currentUser ? currentUser.name : '系統',
-        status: '待接收確認'
-      };
-
-      fabricTransfers.unshift(transObj);
-      recordLog('ACTION', '發起廠際調撥', `從 [${fromFty}] 發起調撥給 [${toFty}]，款號:${transObj.styleNo} 缸號:${batchNo} 數量:${qty}`);
+        styleNo: meta.styleNo || '未知款號', item: meta.item || '麵料',
+        orderColor: meta.orderColor || '', color: meta.color || '', rack: meta.rack || '',
+        qty, roll, operator: currentUser?.name || '系統', status: '待接收確認'
+      });
+      recordLog('ACTION', '發起廠際調撥', `從 [${fromFty}] 調撥至 [${toFty}] 缸號:${batchNo}`);
       saveToCloud();
-      alert(`成功發起調撥申請！ Transfer Request Submitted!`);
-      
-      document.getElementById('transBatchNo').value = '';
-      document.getElementById('transQty').value = '';
-      document.getElementById('transRoll').value = '';
-      document.getElementById('transStyle').value = '';
-      document.getElementById('transItem').value = '';
-      document.getElementById('transOrderColor').value = '';
-      document.getElementById('transColor').value = '';
-      document.getElementById('labelTransQty').innerText = '調撥數量 QTY';
-      document.getElementById('labelTransRoll').innerText = '調撥卷數 Roll';
+      alert("調撥申請發起成功！");
     }
 
     function confirmReceiveTransfer(id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法確認收貨！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法接收！"); return; }
       let trans = fabricTransfers.find(t => t.id === id);
       if(!trans || trans.status === '已完成') return;
 
-      let outInvoiceId = `TRANS-${trans.id.slice(-6)}`;
-      let inRecordId = `${trans.id}_tin`;
-
-      if(confirm(`確認接收來自 [${trans.fromFty}] 的調撥物料（缸號: ${trans.batchNo}, 數量: ${trans.qty}）嗎？ Confirm receive transfer?`)) {
+      if(confirm(`確認接收來自 [${trans.fromFty}] 的物料（缸號: ${trans.batchNo}）嗎？`)) {
         fabricOut.unshift({
-          id: Date.now().toString() + '_tout',
-          transferId: trans.id,
-          fty: trans.fromFty,
-          invoice: outInvoiceId,
-          date: trans.date,
-          styleNo: trans.styleNo,
-          item: trans.item,
-          batchNo: trans.batchNo,
-          orderColor: trans.orderColor,
-          color: trans.color,
-          rack: trans.rack,
-          qty: trans.qty,
-          unit: 'KG',
-          roll: trans.roll,
-          operator: currentUser ? currentUser.name : '系統',
-          timeStr: getNowTimeString()
+          id: Date.now().toString() + '_tout', transferId: trans.id, fty: trans.fromFty,
+          invoice: `TRANS-${trans.id.slice(-6)}`, date: trans.date, styleNo: trans.styleNo,
+          item: trans.item, batchNo: trans.batchNo, orderColor: trans.orderColor, color: trans.color,
+          rack: trans.rack, qty: trans.qty, unit: 'KG', roll: trans.roll, operator: currentUser?.name || '系統', timeStr: getNowTimeString()
         });
-
         fabricIn.unshift({
-          id: inRecordId,
-          transferId: trans.id,
-          fty: trans.toFty,
-          date: trans.date,
-          styleNo: trans.styleNo,
-          item: trans.item,
-          batchNo: trans.batchNo,
-          orderColor: trans.orderColor,
-          color: trans.color,
-          rack: trans.rack,
-          qty: trans.qty,
-          unit: 'KG',
-          roll: trans.roll,
-          come: `調撥自 ${trans.fromFty}`,
-          operator: currentUser ? currentUser.name : '系統',
-          timeStr: getNowTimeString()
+          id: `${trans.id}_tin`, transferId: trans.id, fty: trans.toFty, date: trans.date,
+          styleNo: trans.styleNo, item: trans.item, batchNo: trans.batchNo, orderColor: trans.orderColor,
+          color: trans.color, rack: trans.rack, qty: trans.qty, unit: 'KG', roll: trans.roll,
+          come: `調撥自 ${trans.fromFty}`, operator: currentUser?.name || '系統', timeStr: getNowTimeString()
         });
-
         trans.status = '已完成';
-        recordLog('ACTION', '確認調撥收貨', `工廠 [${trans.toFty}] 成功接收來自 [${trans.fromFty}] 的物料，缸號:${trans.batchNo} 數量:${trans.qty}`);
+        recordLog('ACTION', '確認調撥收貨', `工廠 [${trans.toFty}] 接收調撥缸號:${trans.batchNo}`);
         saveToCloud();
-        alert("物料接收確認成功！ Transfer Confirmed & Saved!");
+        alert("接收確認成功！");
       }
     }
 
     function deleteTransfer(id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除調撥單！ Permission Denied!"); return; }
-
-      let trans = fabricTransfers.find(t => t.id === id);
-      if(!trans) return;
-
-      let msg = trans.status === '已完成' 
-        ? "該調撥單已完成收貨。刪除此調撥單將【自動同步刪除】調出廠的出庫記錄和接收廠的入庫記錄，確定要刪除嗎？ Delete transfer & linked records?"
-        : "確定要刪除這條調撥記錄嗎？ Delete transfer?";
-
-      if(confirm(msg)) {
-        if(trans.status === '已完成') {
-          fabricOut = fabricOut.filter(o => o.transferId !== id && o.invoice !== `TRANS-${id.slice(-6)}`);
-          fabricIn = fabricIn.filter(i => i.transferId !== id && i.come !== `調撥自 ${trans.fromFty}`);
-        }
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
+      if(confirm("確定刪除此調撥單嗎？")) {
         fabricTransfers = fabricTransfers.filter(t => t.id !== id);
-        recordLog('ACTION', '刪除調撥單', `刪除了調撥單 [ID:${id.slice(-6)}]，聯動撤銷其出入庫關聯`);
         saveToCloud();
-        alert("調撥記錄及兩端同步數據已成功刪除！ Deleted successfully!");
       }
     }
 
     function renderTransferTable() {
       let tbody = document.getElementById('transferTableBody');
       if(!tbody) return;
-
       let isReadonly = currentUser && currentUser.role === 'readonly';
-
       tbody.innerHTML = fabricTransfers.map(t => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
-          <td class="py-2.5 px-3 text-xs text-slate-500">${t.date}<br><code class="text-[10px] text-indigo-600">ID:${t.id.slice(-6)}</code></td>
+          <td class="py-2.5 px-3 text-xs text-slate-500">${t.date}<br><code>ID:${t.id.slice(-6)}</code></td>
           <td class="py-2.5 px-3 font-bold text-indigo-600 text-xs">${t.fromFty}</td>
           <td class="py-2.5 px-3 font-bold text-amber-600 text-xs">${t.toFty}</td>
           <td class="py-2.5 px-3 font-bold">${t.styleNo}</td>
@@ -2597,22 +2024,20 @@
           <td class="py-2.5 px-3 font-semibold text-emerald-600">${t.qty} (${t.roll} Roll)</td>
           <td class="py-2.5 px-3 text-xs">${t.operator}</td>
           <td class="py-2.5 px-3 font-bold">
-            ${t.status === '已完成' ? '<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-xs">✅ 已完成 Done</span>' : '<span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs animate-pulse">⏳ 待確認 Pending</span>'}
+            ${t.status === '已完成' ? '<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-xs">✅ 已完成</span>' : '<span class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs">⏳ 待確認</span>'}
           </td>
           <td class="py-2.5 px-3 flex items-center gap-2 no-print normal-role-only">
-            ${(t.status !== '已完成' && !isReadonly) ? `<button onclick="confirmReceiveTransfer('${t.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition shadow-xs cursor-pointer"><i class="fa-solid fa-check"></i> 確認 Confirm</button>` : ''}
-            ${!isReadonly ? `<button onclick="deleteTransfer('${t.id}')" class="text-slate-300 hover:text-red-500 text-xs cursor-pointer" title="刪除 Delete"><i class="fa-solid fa-trash-can"></i> 刪除 Delete</button>` : ''}
+            ${(t.status !== '已完成' && !isReadonly) ? `<button onclick="confirmReceiveTransfer('${t.id}')" class="px-2.5 py-1 bg-emerald-600 text-white rounded text-xs font-bold cursor-pointer"><i class="fa-solid fa-check"></i> 確認</button>` : ''}
+            ${!isReadonly ? `<button onclick="deleteTransfer('${t.id}')" class="text-red-500 text-xs cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>` : ''}
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="9" class="py-6 text-center text-slate-400">暫無廠際調撥記錄 No Transfer History</td></tr>`;
+      `).join('') || `<tr><td colspan="9" class="py-6 text-center text-slate-400">暫無廠際調撥記錄</td></tr>`;
     }
 
     function openEditRecord(type, id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法進行修改！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法修改！"); return; }
       let record = type === 'in' ? fabricIn.find(i => i.id === id) : fabricOut.find(i => i.id === id);
       if(!record) return;
-
       document.getElementById('editRecordId').value = record.id;
       document.getElementById('editRecordType').value = type;
       document.getElementById('editStyle').value = record.styleNo || '';
@@ -2623,46 +2048,31 @@
       document.getElementById('editRack').value = record.rack || '';
       document.getElementById('editQty').value = record.qty || 0;
       document.getElementById('editRoll').value = record.roll || 0;
-
       document.getElementById('editRecordModal').classList.remove('hidden');
     }
 
-    function closeEditRecordModal() {
-      document.getElementById('editRecordModal').classList.add('hidden');
-    }
+    function closeEditRecordModal() { document.getElementById('editRecordModal').classList.add('hidden'); }
 
     function saveEditRecord() {
       let id = document.getElementById('editRecordId').value;
       let type = document.getElementById('editRecordType').value;
-      let styleNo = document.getElementById('editStyle').value.trim();
-      let item = document.getElementById('editItem').value.trim();
-      let batchNo = document.getElementById('editBatchNo').value.trim();
-      let orderColor = document.getElementById('editOrderColor').value.trim();
-      let color = document.getElementById('editColor').value.trim();
-      let rack = document.getElementById('editRack').value.trim();
-      let qty = parseFloat(document.getElementById('editQty').value) || 0;
-      let roll = parseInt(document.getElementById('editRoll').value) || 0;
-
-      if(!styleNo || !batchNo) { alert("款號與缸號不能為空！ Style & Batch cannot be empty!"); return; }
-
       let target = type === 'in' ? fabricIn.find(i => i.id === id) : fabricOut.find(i => i.id === id);
       if(target) {
-        target.styleNo = styleNo;
-        target.item = item;
-        target.batchNo = batchNo;
-        target.orderColor = orderColor;
-        target.color = color;
-        target.rack = rack;
-        target.qty = qty;
-        target.roll = roll;
-        target.operator = currentUser ? currentUser.name : '系統';
+        target.styleNo = document.getElementById('editStyle').value.trim();
+        target.item = document.getElementById('editItem').value.trim();
+        target.batchNo = document.getElementById('editBatchNo').value.trim();
+        target.orderColor = document.getElementById('editOrderColor').value.trim();
+        target.color = document.getElementById('editColor').value.trim();
+        target.rack = document.getElementById('editRack').value.trim();
+        target.qty = parseFloat(document.getElementById('editQty').value) || 0;
+        target.roll = parseInt(document.getElementById('editRoll').value) || 0;
+        target.operator = currentUser?.name || '系統';
         target.timeStr = getNowTimeString();
       }
-
-      recordLog('ACTION', `修改${type==='in'?'入庫':'出庫'}記錄`, `修改記錄 ID:${id.slice(-6)} 款號:${styleNo} 缸號:${batchNo} 數量:${qty}`);
+      recordLog('ACTION', `修改${type==='in'?'入庫':'出庫'}記錄`, `修改記錄 ID:${id.slice(-6)}`);
       saveToCloud();
       closeEditRecordModal();
-      alert("記錄修改成功！ Record Saved!");
+      alert("修改成功！");
     }
 
     function addNewUser() {
@@ -2670,18 +2080,12 @@
       let pass = document.getElementById('newUserPass').value.trim();
       let fty = document.getElementById('newUserFty').value.trim();
       let role = document.getElementById('newUserRole').value;
-
-      if(!name || !pass) { alert("請填寫人員姓名與密碼！ Enter Name & Password!"); return; }
-      if(warehouseUsers.some(u => u.name === name)) { alert("該人員姓名已存在！ User Exists!"); return; }
-
-      warehouseUsers.push({ name, pass, fty: fty || '全部單位 All Factories', role: role || 'normal' });
-      recordLog('ACTION', '新增操作員', `新增操作員 [${name}] 權限:${role==='readonly'?'僅查看':'完整'} 授權工廠:${fty||'全部'}`);
+      if(!name || !pass) { alert("請填寫姓名與密碼！"); return; }
+      warehouseUsers.push({ name, pass, fty: fty || '全部單位 All Factories', role });
       saveToCloud();
-      alert(`成功新增操作人員：${name}！ User Added!`);
-      
+      alert("新增操作員成功！");
       document.getElementById('newUserName').value = '';
       document.getElementById('newUserPass').value = '';
-      document.getElementById('newUserFty').value = '';
       renderUserTable();
     }
 
@@ -2696,36 +2100,28 @@
       document.getElementById('editUserModal').classList.remove('hidden');
     }
 
-    function closeEditUserModal() {
-      document.getElementById('editUserModal').classList.add('hidden');
-    }
+    function closeEditUserModal() { document.getElementById('editUserModal').classList.add('hidden'); }
 
     function saveEditUser() {
       let name = document.getElementById('editUserNameHidden').value;
-      let newPass = document.getElementById('editUserPassInput').value.trim();
-      let newFty = document.getElementById('editUserFtyInput').value.trim();
-      let newRole = document.getElementById('editUserRoleSelect').value;
-
-      if(!newPass) { alert("登錄密碼不能為空！ Password Empty!"); return; }
       let u = warehouseUsers.find(x => x.name === name);
       if(u) {
-        u.pass = newPass;
-        u.fty = newFty || '全部單位 All Factories';
-        u.role = newRole || 'normal';
-        recordLog('ACTION', '修改人員權限', `更新人員 [${name}] 權限與密碼：${newRole==='readonly'?'僅查看':'完整'} 授權單位:${newFty}`);
+        u.pass = document.getElementById('editUserPassInput').value.trim();
+        u.fty = document.getElementById('editUserFtyInput').value.trim() || '全部單位 All Factories';
+        u.role = document.getElementById('editUserRoleSelect').value;
         saveToCloud();
-        alert(`操作員 [${name}] 的密碼與權限已被成功更新！ User Updated!`);
+        alert("更新成功！");
         closeEditUserModal();
         renderUserTable();
       }
     }
 
     function deleteUser(name) {
-      if(name.includes('最高管理者')) { alert("最高管理者賬號不可刪除！ Admin cannot be deleted!"); return; }
-      if(confirm(`確定要刪除人員 ${name} 嗎？ Delete User?`)) {
+      if(name.includes('最高管理者')) { alert("最高管理者不可刪除！"); return; }
+      if(confirm(`確定刪除操作員 ${name} 嗎？`)) {
         warehouseUsers = warehouseUsers.filter(u => u.name !== name);
-        recordLog('ACTION', '刪除人員賬號', `刪除了操作人員賬號 [${name}]`);
         saveToCloud();
+        renderUserTable();
       }
     }
 
@@ -2735,77 +2131,43 @@
       tbody.innerHTML = warehouseUsers.map(u => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
           <td class="py-2.5 px-3 font-bold text-indigo-600">${u.name}</td>
-          <td class="py-2.5 px-3 font-semibold text-slate-600"><code class="bg-slate-100 px-2 py-1 rounded">${u.pass}</code></td>
-          <td class="py-2.5 px-3 font-bold">${u.role === 'readonly' ? '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs">🔒 僅查看 Read Only</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs">✏️ 完整權限 Full Access</span>'}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-600"><code>${u.pass}</code></td>
+          <td class="py-2.5 px-3 font-bold">${u.role === 'readonly' ? '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs">🔒 僅查看</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs">✏️ 完整權限</span>'}</td>
           <td class="py-2.5 px-3 font-bold text-emerald-600">${u.fty || '全部單位 All Factories'}</td>
           <td class="py-2.5 px-3 flex items-center gap-3 no-print">
-            <button onclick="openEditModal('${u.name}')" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-              <i class="fa-solid fa-pen-to-square"></i> 修改 Edit
-            </button>
-            ${u.name.includes('最高管理者') ? '' : `<button onclick="deleteUser('${u.name}')" class="text-slate-300 hover:text-red-500 text-sm cursor-pointer" title="刪除 Delete"><i class="fa-solid fa-trash-can"></i></button>`}
+            <button onclick="openEditModal('${u.name}')" class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold cursor-pointer">修改</button>
+            ${u.name.includes('最高管理者') ? '' : `<button onclick="deleteUser('${u.name}')" class="text-red-500 text-sm cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>`}
           </td>
         </tr>
       `).join('');
     }
 
     function submitBatchAuxItems() {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法添加規格！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
       let styleNo = document.getElementById('auxStyleNo').value.trim();
-      let operator = currentUser ? currentUser.name : '系統';
-      let timeStr = getNowTimeString();
-
-      if(!styleNo) { alert("請先填寫統一的款號 Style No！ Fill Style No!"); return; }
-
-      let addedCount = 0;
+      if(!styleNo) { alert("請填寫款號！"); return; }
+      let count = 0;
       for(let i = 1; i <= 5; i++) {
-        let item = (document.getElementById(`auxItem_${i}`)?.value || '').trim();
-        let orderColor = (document.getElementById(`auxOrderColor_${i}`)?.value || '').trim();
-        let color = (document.getElementById(`auxColor_${i}`)?.value || '').trim();
-
+        let item = document.getElementById(`auxItem_${i}`)?.value.trim();
+        let orderColor = document.getElementById(`auxOrderColor_${i}`)?.value.trim();
+        let color = document.getElementById(`auxColor_${i}`)?.value.trim();
         if(item || orderColor || color) {
-          addedCount++;
+          count++;
           fabricAux.unshift({
-            id: Date.now().toString() + '_' + i,
-            styleNo,
-            item: item || '大身麵料',
-            orderColor, color, operator, timeStr
+            id: Date.now().toString() + '_' + i, styleNo, item: item || '大身麵料',
+            orderColor, color, operator: currentUser?.name || '系統', timeStr: getNowTimeString()
           });
-
-          if (item && !itemMasterList.some(im => im.name === item)) {
-            itemMasterList.push({
-              id: Date.now().toString() + '_auto_' + i,
-              name: item,
-              remark: '批量錄入時自動收錄',
-              operator: operator,
-              timeStr: timeStr
-            });
-          }
         }
       }
-
-      if(addedCount === 0) { alert("請至少在下方表格中填寫一行的麵料類別或顏色！ Enter at least 1 item!"); return; }
-
-      recordLog('ACTION', '新增麵料規格', `為款號 [${styleNo}] 批量添加了 ${addedCount} 條麵料規格`);
+      if(count === 0) { alert("請填寫至少一行規格！"); return; }
       saveToCloud();
-      alert(`成功為款號 [${styleNo}] 批量添加了 ${addedCount} 條規格記錄！ Batch Auxiliary Data Added!`);
-      
+      alert(`成功新增 ${count} 條規格！`);
       document.getElementById('auxStyleNo').value = '';
-      for(let i = 1; i <= 5; i++) {
-        if(document.getElementById(`auxItem_${i}`)) document.getElementById(`auxItem_${i}`).value = '';
-        if(document.getElementById(`auxOrderColor_${i}`)) document.getElementById(`auxOrderColor_${i}`).value = '';
-        if(document.getElementById(`auxColor_${i}`)) document.getElementById(`auxColor_${i}`).value = '';
-      }
       renderBatchAuxRows();
     }
 
     function deleteAux(id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法進行刪除！ Permission Denied!"); return; }
-
-      let matched = fabricAux.find(i => i.id === id);
-      if(matched) {
-        recordLog('ACTION', '刪除輔助規格', `刪除了款號 [${matched.styleNo}] 類別 [${matched.item}] 顏色 [${matched.color||'-'}]`);
-      }
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
       fabricAux = fabricAux.filter(i => i.id !== id);
       saveToCloud();
     }
@@ -2813,10 +2175,7 @@
     function renderAuxTable() {
       let tbody = document.getElementById('auxTableBody');
       if(!tbody) return;
-
-      let sortedAux = [...fabricAux].sort((a, b) => (b.timeStr || '').localeCompare(a.timeStr || ''));
-
-      tbody.innerHTML = sortedAux.map(i => `
+      tbody.innerHTML = fabricAux.map(i => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
           <td class="py-2.5 px-3 font-bold text-indigo-600">${i.styleNo}</td>
           <td class="py-2.5 px-3 font-semibold">${i.item}</td>
@@ -2824,39 +2183,24 @@
           <td class="py-2.5 px-3 font-bold text-amber-600">${i.color || '-'}</td>
           <td class="py-2.5 px-3 text-xs font-bold text-indigo-600">${i.operator}</td>
           <td class="py-2.5 px-3 text-xs text-slate-500">${i.timeStr || '-'}</td>
-          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteAux('${i.id}')" class="text-slate-300 hover:text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
+          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteAux('${i.id}')" class="text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
         </tr>
       `).join('');
     }
 
     function addNewItemMasterName() {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法增加麵料類別！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
       let name = document.getElementById('newItemNameInput').value.trim();
-      let remark = document.getElementById('newItemRemarkInput').value.trim();
-
-      if(!name) { alert("請輸入麵料類別名稱！ Enter Category Name!"); return; }
-      if(itemMasterList.some(im => im.name === name)) { alert("該麵料類別已存在！ Category Exists!"); return; }
-
-      itemMasterList.push({ id: Date.now().toString(), name, remark: remark || '-', operator: currentUser ? currentUser.name : '系統', timeStr: getNowTimeString() });
-      recordLog('ACTION', '新增麵料類別', `新增麵料類別：${name} (${remark})`);
+      if(!name) { alert("請輸入類別名稱！"); return; }
+      itemMasterList.push({ id: Date.now().toString(), name, remark: '-', operator: currentUser?.name || '系統', timeStr: getNowTimeString() });
       saveToCloud();
-      alert(`成功增加麵料類別：${name}！ Category Added!`);
       document.getElementById('newItemNameInput').value = '';
-      document.getElementById('newItemRemarkInput').value = '';
     }
-
     function deleteItemMasterName(id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除麵料類別！ Permission Denied!"); return; }
-
-      if(confirm("確定要刪除這個麵料類別名稱嗎？ Delete Category?")) {
-        let itemObj = itemMasterList.find(im => im.id === id);
-        if(itemObj) recordLog('ACTION', '刪除麵料類別', `刪除了麵料類別：${itemObj.name}`);
-        itemMasterList = itemMasterList.filter(im => im.id !== id);
-        saveToCloud();
-      }
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
+      itemMasterList = itemMasterList.filter(im => im.id !== id);
+      saveToCloud();
     }
-
     function renderItemMasterTable() {
       let tbody = document.getElementById('itemMasterTableBody');
       if(!tbody) return;
@@ -2866,40 +2210,25 @@
           <td class="py-2.5 px-3 text-slate-600">${im.remark || '-'}</td>
           <td class="py-2.5 px-3 text-xs font-bold text-indigo-600">${im.operator}</td>
           <td class="py-2.5 px-3 text-xs text-slate-500">${im.timeStr || '-'}</td>
-          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteItemMasterName('${im.id}')" class="text-slate-300 hover:text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
+          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteItemMasterName('${im.id}')" class="text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
         </tr>
       `).join('');
       updateGlobalItemDatalist();
     }
 
     function addNewFactoryName() {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法增加工廠！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
       let name = document.getElementById('newFtyNameInput').value.trim();
-      let remark = document.getElementById('newFtyRemarkInput').value.trim();
-
-      if(!name) { alert("請輸入工廠名稱！ Enter Factory Name!"); return; }
-      if(factoryList.some(f => f.name === name)) { alert("該工廠名稱已存在！ Factory Exists!"); return; }
-
-      factoryList.push({ id: Date.now().toString(), name, remark: remark || '-', operator: currentUser ? currentUser.name : '系統', timeStr: getNowTimeString() });
-      recordLog('ACTION', '新增工廠名稱', `新增工廠節點：${name} (${remark})`);
+      if(!name) { alert("請輸入工廠名稱！"); return; }
+      factoryList.push({ id: Date.now().toString(), name, remark: '-', operator: currentUser?.name || '系統', timeStr: getNowTimeString() });
       saveToCloud();
-      alert(`成功增加工廠名稱：${name}！ Factory Added!`);
       document.getElementById('newFtyNameInput').value = '';
-      document.getElementById('newFtyRemarkInput').value = '';
     }
-
     function deleteFactoryName(id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除工廠！ Permission Denied!"); return; }
-
-      if(confirm("確定要刪除這個工廠名稱嗎？ Delete Factory?")) {
-        let fty = factoryList.find(f => f.id === id);
-        if(fty) recordLog('ACTION', '刪除工廠節點', `刪除了工廠節點：${fty.name}`);
-        factoryList = factoryList.filter(f => f.id !== id);
-        saveToCloud();
-      }
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
+      factoryList = factoryList.filter(f => f.id !== id);
+      saveToCloud();
     }
-
     function renderFactoryTable() {
       let tbody = document.getElementById('ftyTableBody');
       if(!tbody) return;
@@ -2909,66 +2238,45 @@
           <td class="py-2.5 px-3 text-slate-600">${f.remark || '-'}</td>
           <td class="py-2.5 px-3 text-xs font-bold text-indigo-600">${f.operator}</td>
           <td class="py-2.5 px-3 text-xs text-slate-500">${f.timeStr || '-'}</td>
-          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteFactoryName('${f.id}')" class="text-slate-300 hover:text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
+          <td class="py-2.5 px-3 no-print normal-role-only"><button onclick="deleteFactoryName('${f.id}')" class="text-red-500 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button></td>
         </tr>
       `).join('');
       updateGlobalFtyDatalist();
-      updateReceiverFactoryDatalist();
     }
 
     function submitBatchInStock() {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法錄入入庫！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法入庫！"); return; }
       let fty = document.getElementById('inFty').value.trim();
-      if (!fty || fty.includes('全部單位')) {
-        alert("[防呆攔截] 錯誤：入庫工廠必須選擇具體的工廠單位，不能選擇“全部單位”！ Select specific factory!");
-        return;
-      }
-
-      let date = document.getElementById('inDate').value;
+      if (!fty || fty.includes('全部單位')) { alert("入庫工廠必須選擇具體單位！"); return; }
       let styleNo = document.getElementById('inStyle').value.trim();
       let item = document.getElementById('inItem').value.trim();
-      let orderColor = document.getElementById('inOrderColor').value.trim();
-      let color = document.getElementById('inColor').value.trim();
-      let unit = document.getElementById('inUnit').value;
-      let come = document.getElementById('inCome').value.trim();
-      let operator = currentUser ? currentUser.name : '系統';
-      let timeStr = getNowTimeString();
+      if(!styleNo || !item) { alert("請填寫款號和麵料類別！"); return; }
 
-      if(!styleNo || !item) { alert("請填寫款號和麵料類別！ Enter Style & Item!"); return; }
-
-      let addedCount = 0;
+      let count = 0;
       for(let i = 1; i <= 10; i++) {
-        let batchNo = (document.getElementById(`batchInNo_${i}`)?.value || '').trim();
-        let rack = (document.getElementById(`batchInRack_${i}`)?.value || '').trim();
+        let batchNo = document.getElementById(`batchInNo_${i}`)?.value.trim();
+        let rack = document.getElementById(`batchInRack_${i}`)?.value.trim();
         let roll = parseInt(document.getElementById(`batchInRoll_${i}`)?.value) || 0;
         let qty = parseFloat(document.getElementById(`batchInQty_${i}`)?.value) || 0;
-
         if (batchNo && (qty > 0 || roll > 0)) {
-          addedCount++;
+          count++;
           fabricIn.unshift({
-            id: Date.now().toString() + '_' + i,
-            fty, date, styleNo, item, batchNo, orderColor, color, rack, qty, unit, roll, come, operator, timeStr
+            id: Date.now().toString() + '_' + i, fty, date: document.getElementById('inDate').value,
+            styleNo, item, batchNo, orderColor: document.getElementById('inOrderColor').value.trim(),
+            color: document.getElementById('inColor').value.trim(), rack, qty,
+            unit: document.getElementById('inUnit').value, roll, come: document.getElementById('inCome').value.trim(),
+            operator: currentUser?.name || '系統', timeStr: getNowTimeString()
           });
         }
       }
-
-      if (addedCount === 0) { alert("請至少在下方表格中填寫一行的缸號及數量！ Enter at least 1 row!"); return; }
-
-      recordLog('ACTION', '批量麵料入庫', `工廠 [${fty}] 錄入款號 [${styleNo}] 類別 [${item}] 共 ${addedCount} 組缸號數據`);
+      if (count === 0) { alert("請至少填寫一個缸號！"); return; }
       saveToCloud();
-      alert(`成功批量入庫 ${addedCount} 個缸號的數據到 [${fty}]！ Stock In Saved!`);
-      
+      alert(`成功入庫 ${count} 條數據！`);
       clearInForm();
     }
 
     function deleteIn(id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除數據！ Permission Denied!"); return; }
-
-      let matched = fabricIn.find(i => i.id === id);
-      if(matched) {
-        recordLog('ACTION', '刪除入庫記錄', `刪除了入庫記錄 工廠:[${matched.fty}] 款號:[${matched.styleNo}] 缸號:[${matched.batchNo}] 數量:${matched.qty}`);
-      }
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
       fabricIn = fabricIn.filter(i => i.id !== id);
       saveToCloud();
     }
@@ -2978,13 +2286,11 @@
       if(!tbody) return;
       let selectedStyle = document.getElementById('searchInStyleSelect')?.value || '';
       let query = (document.getElementById('searchInInput')?.value || '').toLowerCase();
-      
       let filtered = fabricIn.filter(i => {
         if (currentGlobalFty !== '全部單位 All Factories' && i.fty !== currentGlobalFty) return false;
         if (selectedStyle && i.styleNo !== selectedStyle) return false;
-        return (i.styleNo + i.item + (i.batchNo||'') + (i.orderColor||'') + (i.color||'') + (i.rack||'')).toLowerCase().includes(query);
+        return (i.styleNo + i.item + (i.batchNo||'')).toLowerCase().includes(query);
       });
-
       tbody.innerHTML = filtered.map(i => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
           <td class="py-2 px-3 font-bold text-indigo-600 text-xs">${i.fty}</td>
@@ -2996,82 +2302,55 @@
           <td class="py-2 px-3 font-bold text-amber-600">${i.color || '-'}</td>
           <td class="py-2 px-3 font-semibold text-amber-700">${i.rack || '-'}</td>
           <td class="py-2 px-3 font-bold text-emerald-600">${i.qty}</td>
-          <td class="py-2 px-3 text-xs font-semibold">${i.unit}</td>
-          <td class="py-2 px-3 font-semibold">${i.roll}</td>
+          <td class="py-2 px-3 text-xs">${i.unit}</td>
+          <td class="py-2 px-3">${i.roll}</td>
           <td class="py-2 px-3 text-xs">${i.come || '-'}</td>
           <td class="py-2 px-3 text-xs font-bold text-indigo-600">${i.operator}</td>
           <td class="py-2 px-3 text-xs text-slate-500">${i.timeStr || '-'}</td>
           <td class="py-2 px-3 flex items-center gap-2 no-print normal-role-only">
-            <button onclick="openEditRecord('in', '${i.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-xs font-bold transition cursor-pointer" title="修改 Edit"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteIn('${i.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded text-xs transition cursor-pointer" title="刪除 Delete"><i class="fa-solid fa-trash-can"></i></button>
+            <button onclick="openEditRecord('in', '${i.id}')" class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs cursor-pointer"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="deleteIn('${i.id}')" class="px-2 py-1 bg-red-50 text-red-500 rounded text-xs cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
           </td>
         </tr>
       `).join('');
     }
 
     function submitBatchOutStock() {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法進行出庫操作！ Permission Denied!"); return; }
-
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法出庫！"); return; }
       let fty = document.getElementById('outFty').value.trim();
       let receiver = document.getElementById('outReceiver').value.trim();
       let invoice = document.getElementById('outInvoice').value.trim();
-      let date = document.getElementById('outDate').value;
-      let unit = document.getElementById('outUnit').value;
-      let operator = currentUser ? currentUser.name : '系統';
-      let timeStr = getNowTimeString();
+      if(!invoice || !fty) { alert("請填寫領料單位與發票號！"); return; }
+      if(!receiver) { alert("請填寫領用人！"); return; }
 
-      if(!invoice || !fty) { alert("請填寫領料單位與開票編號！ Fill Factory & Invoice!"); return; }
-      if(!receiver) { alert("請填寫領用人名稱！ Fill Receiver Name!"); return; }
-
-      let addedCount = 0;
+      let count = 0;
       let cache = window.stockBatchCache || {};
-
       for(let i = 1; i <= 10; i++) {
-        let batchNo = (document.getElementById(`outBatch_${i}`)?.value || '').trim();
+        let batchNo = document.getElementById(`outBatch_${i}`)?.value.trim();
         let roll = parseInt(document.getElementById(`outRoll_${i}`)?.value) || 0;
         let qty = parseFloat(document.getElementById(`outQty_${i}`)?.value) || 0;
-
         if (batchNo && (qty > 0 || roll > 0)) {
-          let stockInfo = cache[batchNo];
-          if(!stockInfo) {
-            alert(`[防呆攔截] 錯誤：當前領料單位 [${fty}] 中不存在缸號 [${batchNo}] 的入庫記錄！ No Stock Record!`);
-            return;
-          }
-          if(qty > stockInfo.qty) {
-            alert(`[防呆攔截] 缸號 [${batchNo}] 剩余庫存僅剩 ${stockInfo.qty}，出庫數量不能大於庫存！ Exceed Stock!`);
-            return;
-          }
-
-          addedCount++;
+          let stock = cache[batchNo];
+          if(!stock) { alert(`缸號 [${batchNo}] 不存在！`); return; }
+          count++;
           fabricOut.unshift({
-            id: Date.now().toString() + '_' + i,
-            fty, receiver, invoice, date,
-            styleNo: stockInfo.styleNo,
-            item: stockInfo.item,
-            orderColor: stockInfo.orderColor,
-            color: stockInfo.color,
-            rack: stockInfo.rack,
-            qty, unit, roll, operator, timeStr
+            id: Date.now().toString() + '_' + i, fty, receiver, invoice,
+            date: document.getElementById('outDate').value, styleNo: stock.styleNo,
+            item: stock.item, orderColor: stock.orderColor, color: stock.color, rack: stock.rack,
+            batchNo, qty, unit: document.getElementById('outUnit').value, roll,
+            operator: currentUser?.name || '系統', timeStr: getNowTimeString()
           });
         }
       }
-
-      if (addedCount === 0) { alert("請至少在下方表格中填寫一行的缸號及數量！ Enter at least 1 row!"); return; }
-
-      recordLog('ACTION', '批量麵料出庫', `領料單位 [${fty}] 領用人 [${receiver}] 開票批次 [${invoice}] 共出庫 ${addedCount} 組物料`);
+      if (count === 0) { alert("請至少填寫一個缸號！"); return; }
       saveToCloud();
-      alert(`成功批量出庫 ${addedCount} 個缸號的數據！ Stock Out Saved!`);
+      alert(`成功出庫 ${count} 條數據！`);
       clearOutForm();
-      onOutFtyChange();
+      updateOutFilterDropdowns();
     }
 
     function deleteOut(id) {
-      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除出庫數據！ Permission Denied!"); return; }
-
-      let matched = fabricOut.find(i => i.id === id);
-      if(matched) {
-        recordLog('ACTION', '刪除出庫記錄', `刪除了出庫記錄 批次:[${matched.invoice}] 領料單位:[${matched.fty}] 缸號:[${matched.batchNo}] 數量:${matched.qty}`);
-      }
+      if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號！"); return; }
       fabricOut = fabricOut.filter(i => i.id !== id);
       saveToCloud();
     }
@@ -3081,13 +2360,11 @@
       if(!tbody) return;
       let selectedStyle = document.getElementById('searchOutStyleSelect')?.value || '';
       let query = (document.getElementById('searchOutInput')?.value || '').toLowerCase();
-
       let filtered = fabricOut.filter(i => {
         if (currentGlobalFty !== '全部單位 All Factories' && i.fty !== currentGlobalFty) return false;
         if (selectedStyle && i.styleNo !== selectedStyle) return false;
-        return (i.styleNo + i.item + (i.batchNo||'') + (i.orderColor||'') + (i.color||'') + (i.rack||'') + i.invoice + (i.receiver||'')).toLowerCase().includes(query);
+        return (i.styleNo + i.item + i.invoice).toLowerCase().includes(query);
       });
-
       tbody.innerHTML = filtered.map(i => `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
           <td class="py-2 px-3 font-bold text-amber-600 text-xs">${i.fty}</td>
@@ -3101,13 +2378,13 @@
           <td class="py-2 px-3 font-bold text-amber-600">${i.color || '-'}</td>
           <td class="py-2 px-3 font-semibold text-amber-700">${i.rack || '-'}</td>
           <td class="py-2 px-3 font-bold text-amber-600">${i.qty}</td>
-          <td class="py-2 px-3 text-xs font-semibold">${i.unit}</td>
-          <td class="py-2 px-3 font-semibold">${i.roll}</td>
+          <td class="py-2 px-3 text-xs">${i.unit}</td>
+          <td class="py-2 px-3">${i.roll}</td>
           <td class="py-2 px-3 text-xs font-bold text-indigo-600">${i.operator}</td>
           <td class="py-2 px-3 text-xs text-slate-500">${i.timeStr || '-'}</td>
           <td class="py-2 px-3 flex items-center gap-2 no-print normal-role-only">
-            <button onclick="openEditRecord('out', '${i.id}')" class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded text-xs font-bold transition cursor-pointer" title="修改 Edit"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteOut('${i.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-500 rounded text-xs transition cursor-pointer" title="刪除 Delete"><i class="fa-solid fa-trash-can"></i></button>
+            <button onclick="openEditRecord('out', '${i.id}')" class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-xs cursor-pointer"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="deleteOut('${i.id}')" class="px-2 py-1 bg-red-50 text-red-500 rounded text-xs cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
           </td>
         </tr>
       `).join('');
@@ -3117,107 +2394,67 @@
       let select = document.getElementById('printInvoiceSelect');
       let dl = document.getElementById('printInvoiceList');
       if(!select || !dl) return;
-
       let invoices = [...new Set(fabricOut.map(i => i.invoice))].filter(Boolean);
       dl.innerHTML = invoices.map(inv => `<option value="${inv}">`).join('');
-
-      if(invoices.length > 0 && !select.value) {
-        select.value = invoices[0];
-      }
+      if(invoices.length > 0 && !select.value) select.value = invoices[0];
       renderPrintSheet();
-    }
-
-    function getRealtimeBalance(fty, styleNo, item, batchNo, orderColor, color, rack) {
-      let inTotal = 0;
-      let outTotal = 0;
-
-      fabricIn.forEach(i => {
-        if(i.fty === fty && i.styleNo === styleNo && i.item === item && (i.batchNo||'無') === (batchNo||'無')) {
-          inTotal += (i.qty || 0);
-        }
-      });
-      fabricOut.forEach(o => {
-        if(o.fty === fty && o.styleNo === styleNo && o.item === item && (o.batchNo||'無') === (batchNo||'無')) {
-          outTotal += (o.qty || 0);
-        }
-      });
-      return parseFloat((inTotal - outTotal).toFixed(1));
     }
 
     function renderPrintSheet() {
       let container = document.getElementById('triplePrintContainer');
       let select = document.getElementById('printInvoiceSelect');
       if(!container || !select) return;
-
       let selectedInvoice = select.value.trim();
       let batchItems = fabricOut.filter(i => i.invoice === selectedInvoice);
-
       if(batchItems.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-slate-400 font-semibold">請在上方選擇批次以進行列印預覽 Select Invoice to Preview</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-slate-400">請選擇批次以預覽</div>`;
         return;
       }
-
-      let dateStr = batchItems[0].date || new Date().toISOString().split('T')[0];
-      let ftyStr = batchItems[0].fty || currentGlobalFty;
+      let dateStr = batchItems[0].date || '';
+      let ftyStr = batchItems[0].fty || '';
       let receiverStr = batchItems[0].receiver || '-';
-      let operatorName = currentUser ? currentUser.name : (batchItems[0].operator || 'ZAW AUNG');
+      let operatorName = currentUser?.name || 'ZAW AUNG';
 
-      let pageSize = 10;
-      let totalPages = Math.ceil(batchItems.length / pageSize) || 1;
-
+      let pageSize = 10, totalPages = Math.ceil(batchItems.length / pageSize) || 1;
       let allPagesHtml = '';
 
       for(let p = 0; p < totalPages; p++) {
         let pageItems = batchItems.slice(p * pageSize, (p + 1) * pageSize);
-        
-        let generateTableRows = (isThirdLink) => {
-          let rowsHtml = '';
-          for(let i = 0; i < pageSize; i++) {
-            let item = pageItems[i] || {};
-            let rowNum = p * pageSize + (i + 1);
-            let balText = '';
-            if(!isThirdLink && item.styleNo) {
-              balText = getRealtimeBalance(item.fty, item.styleNo, item.item, item.batchNo, item.orderColor, item.color, item.rack);
-            }
-            rowsHtml += `
-              <tr class="border-b border-black text-[10px] h-5 text-center">
-                <td class="border-r border-black py-0.5 w-7">${item.styleNo ? rowNum : ''}</td>
-                <td class="border-r border-black font-bold text-left px-1">${item.styleNo || ''}</td>
-                <td class="border-r border-black text-left px-1">${item.item || ''}</td>
-                <td class="border-r border-black font-bold text-indigo-700 text-left px-1">${item.batchNo || ''}</td>
-                <td class="border-r border-black text-left px-1">${item.orderColor || ''}</td>
-                <td class="border-r border-black text-left px-1">${item.color || ''}</td>
-                <td class="border-r border-black font-semibold">${item.rack || ''}</td>
-                <td class="border-r border-black font-bold text-emerald-700">${item.qty || ''}</td>
-                <td class="border-r border-black">${item.unit || ''}</td>
-                <td class="border-r border-black font-bold">${item.roll || ''}</td>
-                <td class="border-r border-black">${item.fty || ''}</td>
-                <td>${balText}</td>
-              </tr>
-            `;
-          }
-          return rowsHtml;
-        };
+        let rowsHtml = '';
+        for(let i = 0; i < pageSize; i++) {
+          let item = pageItems[i] || {};
+          rowsHtml += `
+            <tr class="border-b border-black text-[10px] h-5 text-center">
+              <td class="border-r border-black py-0.5 w-7">${item.styleNo ? (p*pageSize + i + 1) : ''}</td>
+              <td class="border-r border-black font-bold text-left px-1">${item.styleNo || ''}</td>
+              <td class="border-r border-black text-left px-1">${item.item || ''}</td>
+              <td class="border-r border-black font-bold text-indigo-700 text-left px-1">${item.batchNo || ''}</td>
+              <td class="border-r border-black text-left px-1">${item.orderColor || ''}</td>
+              <td class="border-r border-black text-left px-1">${item.color || ''}</td>
+              <td class="border-r border-black font-semibold">${item.rack || ''}</td>
+              <td class="border-r border-black font-bold text-emerald-700">${item.qty || ''}</td>
+              <td class="border-r border-black">${item.unit || ''}</td>
+              <td class="border-r border-black font-bold">${item.roll || ''}</td>
+              <td class="border-r border-black">${item.fty || ''}</td>
+              <td>-</td>
+            </tr>
+          `;
+        }
 
         let linkTitles = [
-          `麵料領用表 (批次號 Invoice: ${selectedInvoice}) - 開單人存根 Issuer Copy`,
-          `麵料領用表 (批次號 Invoice: ${selectedInvoice}) - 倉庫領料人聯 Warehouse Copy`,
-          `麵料領用表 (批次號 Invoice: ${selectedInvoice}) - 領料方存根 Receiver Copy`
+          `麵料領用表 (Invoice: ${selectedInvoice}) - 開單人存根`,
+          `麵料領用表 (Invoice: ${selectedInvoice}) - 倉庫領料人聯`,
+          `麵料領用表 (Invoice: ${selectedInvoice}) - 領料方存根`
         ];
-
         let pageTripleHtml = '';
-        linkTitles.forEach((titleText, idx) => {
-          let isThird = (idx === 2);
-          let tableRows = generateTableRows(isThird);
-
+        linkTitles.forEach(titleText => {
           pageTripleHtml += `
             <div class="border border-black p-1.5 mb-1 bg-white text-[10px]">
               <div class="text-center font-bold text-xs text-red-600 mb-0.5">${titleText} (Page ${p+1}/${totalPages})</div>
               <div class="flex justify-between items-center text-[10px] mb-0.5 px-1 font-semibold">
-                <span>日期 Date: ${dateStr}</span>
-                <span>領料單位 Factory: ${ftyStr} | 領用人 Receiver: ${receiverStr} | 開單人 Issuer: ${operatorName}</span>
+                <span>日期: ${dateStr}</span>
+                <span>領料單位: ${ftyStr} | 領用人: ${receiverStr}</span>
               </div>
-              
               <table class="w-full border border-black text-center text-[10px]">
                 <thead>
                   <tr class="bg-slate-100 border-b border-black">
@@ -3235,60 +2472,37 @@
                     <th class="py-0.5">Balance</th>
                   </tr>
                 </thead>
-                <tbody>
-                  ${tableRows}
-                </tbody>
+                <tbody>${rowsHtml}</tbody>
               </table>
-
               <div class="flex justify-between text-[10px] mt-1 pt-0.5 border-t border-dashed border-black px-2">
-                <span>開單人 Issuer: <b>${operatorName}</b></span>
-                <span>倉庫領料人 Warehouse: __________</span>
-                <span>會計/管理 Manager: __________</span>
+                <span>開單人: <b>${operatorName}</b></span>
+                <span>倉庫領料人: __________</span>
+                <span>會計/管理: __________</span>
               </div>
             </div>
           `;
         });
-
         allPagesHtml += `<div class="${p > 0 ? 'page-break mt-2 pt-1 border-t-2 border-dashed border-slate-300' : ''}">${pageTripleHtml}</div>`;
       }
-
       container.innerHTML = allPagesHtml;
     }
 
     function renderLogsTable() {
       let tbody = document.getElementById('logsTableBody');
       if(!tbody) return;
-
-      let logType = document.getElementById('logTypeFilter')?.value || 'ALL';
-      let userQuery = (document.getElementById('logUserFilter')?.value || '').trim().toLowerCase();
-      let searchQuery = (document.getElementById('logSearchInput')?.value || '').trim().toLowerCase();
-
-      let filteredLogs = systemLogs.filter(log => {
-        if(logType !== 'ALL' && log.type !== logType) return false;
-        if(userQuery && !log.operator.toLowerCase().includes(userQuery)) return false;
-        if(searchQuery && !(log.action + log.detail + log.timeStr).toLowerCase().includes(searchQuery)) return false;
-        return true;
-      });
-
-      tbody.innerHTML = filteredLogs.map(log => `
-        <tr class="border-b border-slate-100 hover:bg-slate-50">
-          <td class="py-2.5 px-3 text-xs text-slate-500 font-semibold">${log.timeStr}</td>
-          <td class="py-2.5 px-3 font-bold text-indigo-600">${log.operator}</td>
-          <td class="py-2.5 px-3 font-bold">
-            ${log.type === 'LOGIN' ? '<span class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-xs"><i class="fa-solid fa-right-to-bracket mr-1"></i>登錄 Login</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs"><i class="fa-solid fa-pen-clip mr-1"></i>操作 Action</span>'}
-          </td>
-          <td class="py-2.5 px-3 font-bold text-slate-800">${log.action}</td>
-          <td class="py-2.5 px-3 text-slate-600 text-xs">${log.detail}</td>
+      tbody.innerHTML = systemLogs.map(l => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50 text-xs">
+          <td class="py-2 px-3 text-slate-500">${l.timeStr}</td>
+          <td class="py-2 px-3 font-bold text-indigo-600">${l.operator}</td>
+          <td class="py-2 px-3 font-bold text-amber-600">${l.type}</td>
+          <td class="py-2 px-3 font-bold">${l.action}</td>
+          <td class="py-2 px-3 text-slate-700">${l.detail}</td>
         </tr>
-      `).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-400 font-semibold">暫無審計日志記錄 No Logs Found</td></tr>`;
+      `).join('') || `<tr><td colspan="5" class="py-6 text-center text-slate-400">暫無日志</td></tr>`;
     }
 
     function clearSystemLogs() {
-      if(confirm("確定要徹底清空所有的歷史日志審計記錄嗎？ Clear All Logs?")) {
-        systemLogs = [];
-        saveToCloud();
-        renderLogsTable();
-      }
+      if(confirm("確定清空日志嗎？")) { systemLogs = []; saveToCloud(); renderLogsTable(); }
     }
   </script>
 </body>
