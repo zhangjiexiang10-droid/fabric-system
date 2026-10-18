@@ -24,7 +24,6 @@
       scroll-behavior: smooth;
     }
     
-    /* 自定義滾動條外觀 */
     .table-scroll-container::-webkit-scrollbar {
       width: 14px;
     }
@@ -40,7 +39,6 @@
     .table-scroll-container::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
-    /* 滾動條上下點擊微調箭頭按鈕 */
     .table-scroll-container::-webkit-scrollbar-button:single-button {
       background-color: #e2e8f0;
       display: block;
@@ -79,6 +77,15 @@
 
   <datalist id="receiverFactoryList"></datalist>
   <datalist id="globalItemList"></datalist>
+  <datalist id="globalStyleSearchList"></datalist>
+
+  <!-- 出庫頁面專屬 Datatlists -->
+  <datalist id="outFtyList"></datalist>
+  <datalist id="outReceiverList"></datalist>
+  <datalist id="outStyleList"></datalist>
+  <datalist id="outItemList"></datalist>
+  <datalist id="outOrderColorList"></datalist>
+  <datalist id="outColorList"></datalist>
 
   <!-- ==================== 登錄驗證遮罩層 ==================== -->
   <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
@@ -370,7 +377,6 @@
           <i class="fa-solid fa-cloud-arrow-up"></i> 確認批量添加該款號的多種規格 Confirm Batch Add
         </button>
 
-        <!-- 限制展現 10 條高度，右側帶滾動條及上下按鈕 -->
         <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
             <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
@@ -557,10 +563,8 @@
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
           <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-table text-emerald-600"></i> 麵料入庫流水明細 Fabric In History</h2>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <select id="searchInStyleSelect" onchange="renderInTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-indigo-600 bg-white">
-              <option value="">按款號篩選 All Styles</option>
-            </select>
-            <input id="searchInInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderInTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-48">
+            <input id="searchInStyleSelect" list="globalStyleSearchList" oninput="renderInTable()" placeholder="🔍 按款號篩選 Select Style..." class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-indigo-600 bg-white w-48" onfocus="this.select()">
+            <input id="searchInInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderInTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-40">
             <button onclick="exportTableToExcel('inTableBody', '麵料入庫流水明細.xls')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 導出 Export
             </button>
@@ -617,35 +621,36 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3 mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">領料單位 Factory</label>
-            <input id="outFty" list="globalFtyDatalist" onchange="onOutFtyChange()" type="text" placeholder="領料單位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target" onfocus="this.select()">
+            <input id="outFty" list="outFtyList" onchange="onOutFtyChange()" type="text" placeholder="領料單位" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600 fty-input-target" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">領用人 Receiver</label>
-            <input id="outReceiver" list="receiverFactoryList" type="text" placeholder="輸入或選擇領用人" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
+            <input id="outReceiver" list="outReceiverList" type="text" placeholder="輸入或選擇領用人" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">① 款號 Style</label>
             <input id="outFilterStyle" list="outStyleList" oninput="onOutFilterStyleChange()" type="text" placeholder="選擇款號" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600" onfocus="this.select()">
-            <datalist id="outStyleList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">② 類別 Item</label>
             <input id="outFilterItem" list="outItemList" oninput="onOutFilterItemChange()" type="text" placeholder="選擇類別" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-semibold" onfocus="this.select()">
-            <datalist id="outItemList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">③ 訂單顏色 Order Col</label>
             <input id="outFilterOrderColor" list="outOrderColorList" oninput="onOutFilterOrderColorChange()" type="text" placeholder="選擇訂單顏色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-700" onfocus="this.select()">
-            <datalist id="outOrderColorList"></datalist>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">④ 麵料顏色 Col</label>
             <input id="outFilterColor" list="outColorList" oninput="updateOutBatchDatalists()" type="text" placeholder="選擇麵料顏色" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-amber-600" onfocus="this.select()">
-            <datalist id="outColorList"></datalist>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">開票編號 Invoice No.</label>
-            <input id="outInvoice" type="text" placeholder="自動編號 Auto" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-500">開票編號 Invoice</label>
+              <button onclick="generateNextInvoiceNo()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-1.5 py-0.5 rounded transition cursor-pointer" title="點擊切換下一個新發票號">
+                <i class="fa-solid fa-plus-circle"></i> 開啟新發票號
+              </button>
+            </div>
+            <input id="outInvoice" type="text" placeholder="發票號 Invoice No." class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white font-bold text-indigo-600">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">出庫日期 Date</label>
@@ -697,10 +702,8 @@
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4">
           <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-table text-amber-600"></i> 麵料出庫流水明細 Fabric Out History</h2>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <select id="searchOutStyleSelect" onchange="renderOutTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-indigo-600 bg-white">
-              <option value="">按款號篩選 All Styles</option>
-            </select>
-            <input id="searchOutInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderOutTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-48">
+            <input id="searchOutStyleSelect" list="globalStyleSearchList" oninput="renderOutTable()" placeholder="🔍 按款號篩選 Select Style..." class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-indigo-600 bg-white w-48" onfocus="this.select()">
+            <input id="searchOutInput" type="text" placeholder="🔍 快速搜索 Search..." oninput="renderOutTable()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-sm w-full sm:w-40">
             <button onclick="exportTableToExcel('outTableBody', '麵料出庫流水明細.xls')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 shadow-xs cursor-pointer">
               <i class="fa-solid fa-file-excel"></i> 導出 Export
             </button>
@@ -1114,10 +1117,22 @@
 
   </div>
 
+  <!-- ==================== JavaScript 核心邏輯 ==================== -->
   <script>
-    // ================= 云端配置 =================
     const BIN_ID = '6ad3251cffd5d1605372fa4a'; 
     const API_KEY = '$2a$10$4BG8r6gdqcF63Xv19dzd/OpvCTrfmblPUWGknBtarAdc.2SkbzSZ.';
+
+    // 四大工廠簡稱映射
+    const FACTORY_PREFIX_MAP = {
+      '一廠 (JUN TAI)': 'JUNTAI',
+      '二廠 (DA MEI)': 'DAMEI',
+      '三廠 (DA LI)': 'DALI',
+      '總廠 (FU YUAN)': 'FUYUAN',
+      'JUN TAI': 'JUNTAI',
+      'DA MEI': 'DAMEI',
+      'DA LI': 'DALI',
+      'FU YUAN': 'FUYUAN'
+    };
 
     let initialDefaultUsers = [
       { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部單位 All Factories', role: 'normal' },
@@ -1137,7 +1152,7 @@
     let fabricOut = [];
     let fabricTransfers = [];
     let systemLogs = [];
-    
+
     let factoryList = [
       { id: '1', name: '一廠 (JUN TAI)', remark: '-', operator: '系統', timeStr: '2026-01-01 00:00' },
       { id: '2', name: '二廠 (DA MEI)', remark: '-', operator: '系統', timeStr: '2026-01-01 00:00' },
@@ -1160,6 +1175,40 @@
       { id: 'im10', name: '肩帶/ပခုံးကြိုး', remark: '肩帶輔料', operator: '系統', timeStr: '2026-01-01 00:00' },
       { id: 'im11', name: '汗布/TC', remark: '汗布', operator: '系統', timeStr: '2026-01-01 00:00' }
     ];
+
+    function getFactoryPrefix(ftyName) {
+      if (!ftyName) return 'OUT';
+      for (let key in FACTORY_PREFIX_MAP) {
+        if (ftyName.includes(key)) return FACTORY_PREFIX_MAP[key];
+      }
+      if (ftyName.includes('一廠')) return 'JUNTAI';
+      if (ftyName.includes('二廠')) return 'DAMEI';
+      if (ftyName.includes('三廠')) return 'DALI';
+      if (ftyName.includes('總廠')) return 'FUYUAN';
+      return ftyName.replace(/[^a-zA-Z]/g, '').toUpperCase() || 'OUT';
+    }
+
+    function generateNextInvoiceNo() {
+      let fty = document.getElementById('outFty')?.value.trim() || currentGlobalFty;
+      let prefix = getFactoryPrefix(fty);
+
+      let maxSeq = 0;
+      fabricOut.forEach(o => {
+        if (o.invoice && o.invoice.startsWith(prefix + '-')) {
+          let numPart = parseInt(o.invoice.split('-')[1]);
+          if (!isNaN(numPart) && numPart > maxSeq) {
+            maxSeq = numPart;
+          }
+        }
+      });
+
+      let nextInvoice = `${prefix}-${String(maxSeq + 1).padStart(3, '0')}`;
+      let invoiceInput = document.getElementById('outInvoice');
+      if (invoiceInput) {
+        invoiceInput.value = nextInvoice;
+      }
+      return nextInvoice;
+    }
 
     function loadLocalCache() {
       try {
@@ -1334,7 +1383,6 @@
       `).join('');
     }
 
-    // 表格鍵盤導航優化：支援上下左右及 Enter 鍵向下移動到同一列下一行
     function setupTableKeyNavigation(tbodyId, rowCount, colCount) {
       let tbody = document.getElementById(tbodyId);
       if(!tbody) return;
@@ -1453,7 +1501,6 @@
       setupTableKeyNavigation('batchOutRowsContainer', 10, 3);
     }
 
-    // 清空入庫表單按鈕邏輯
     function clearInForm() {
       document.getElementById('inStyle').value = '';
       document.getElementById('inItem').value = '';
@@ -1463,7 +1510,6 @@
       renderBatchRows('batchInRowsContainer', 'batchInNo', 'batchInRack', 'batchInRoll', 'batchInQty');
     }
 
-    // 清空出庫表單按鈕邏輯
     function clearOutForm() {
       document.getElementById('outReceiver').value = '';
       document.getElementById('outFilterStyle').value = '';
@@ -1473,8 +1519,28 @@
       renderOutSmartRows();
     }
 
+    function onOutFtyChange() {
+      generateNextInvoiceNo();
+      updateOutFilterDropdowns();
+    }
+
     function updateOutFilterDropdowns() {
       let fty = document.getElementById('outFty')?.value || '';
+      
+      let outFtyList = document.getElementById('outFtyList');
+      if(outFtyList) {
+        let ftySet = new Set(["一廠 (JUN TAI)", "二廠 (DA MEI)", "三廠 (DA LI)", "總廠 (FU YUAN)", "外發廠-A", "外發廠-B"]);
+        factoryList.forEach(f => { if(f.name) ftySet.add(f.name); });
+        outFtyList.innerHTML = [...ftySet].map(f => `<option value="${f}">`).join('');
+      }
+
+      let outReceiverList = document.getElementById('outReceiverList');
+      if(outReceiverList) {
+        let recSet = new Set(["一廠 (JUN TAI)", "二廠 (DA MEI)", "三廠 (DA LI)", "總廠 (FU YUAN)", "外發廠-A", "外發廠-B"]);
+        fabricOut.forEach(o => { if(o.receiver) recSet.add(o.receiver); });
+        outReceiverList.innerHTML = [...recSet].map(r => `<option value="${r}">`).join('');
+      }
+
       let styleSet = new Set();
       let itemSet = new Set();
       let orderColorSet = new Set();
@@ -1499,7 +1565,7 @@
 
       let map = {};
       fabricIn.forEach(i => {
-        if(i.fty === fty && i.batchNo) {
+        if((!fty || i.fty === fty) && i.batchNo) {
           if(!map[i.batchNo]) map[i.batchNo] = { styleNo: i.styleNo, item: i.item, orderColor: i.orderColor, color: i.color, rack: i.rack, qty: 0, roll: 0 };
           map[i.batchNo].qty += (i.qty || 0);
           map[i.batchNo].roll += (i.roll || 0);
@@ -1507,7 +1573,7 @@
         }
       });
       fabricOut.forEach(o => {
-        if(o.fty === fty && o.batchNo && map[o.batchNo]) {
+        if((!fty || o.fty === fty) && o.batchNo && map[o.batchNo]) {
           map[o.batchNo].qty -= (o.qty || 0);
           map[o.batchNo].roll -= (o.roll || 0);
         }
@@ -1742,7 +1808,14 @@
       document.getElementById(tabId).classList.remove('hidden');
       document.getElementById('btn_' + tabId).className = "tab-btn px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm transition flex items-center gap-2 cursor-pointer";
       
-      if(tabId === 'tabOut') updateOutFilterDropdowns();
+      if(tabId === 'tabOut') {
+        let outFtyInput = document.getElementById('outFty');
+        if(outFtyInput && !outFtyInput.value) {
+          outFtyInput.value = currentGlobalFty !== '全部單位 All Factories' ? currentGlobalFty : '二廠 (DA MEI)';
+        }
+        generateNextInvoiceNo();
+        updateOutFilterDropdowns();
+      }
       if(tabId === 'tabBalance') { updateBalanceFilterDropdowns(); renderBalanceSheet(); }
       if(tabId === 'tabSummary') { renderSummarySheet(); }
       if(tabId === 'tabTransfer') { updateTransferStyleList(); renderTransferTable(); }
@@ -1818,31 +1891,20 @@
         ...fabricOut.map(o => o.styleNo)
       ])].filter(Boolean);
 
-      let inSelect = document.getElementById('searchInStyleSelect');
-      let outSelect = document.getElementById('searchOutStyleSelect');
-
-      if(inSelect) {
-        let currVal = inSelect.value;
-        inSelect.innerHTML = `<option value="">按款號篩選 All Styles</option>` + styles.map(s => `<option value="${s}">${s}</option>`).join('');
-        inSelect.value = currVal;
-      }
-
-      if(outSelect) {
-        let currVal = outSelect.value;
-        outSelect.innerHTML = `<option value="">按款號篩選 All Styles</option>` + styles.map(s => `<option value="${s}">${s}</option>`).join('');
-        outSelect.value = currVal;
+      let globalDl = document.getElementById('globalStyleSearchList');
+      if(globalDl) {
+        globalDl.innerHTML = styles.map(s => `<option value="${s}">`).join('');
       }
     }
 
-    // 嚴格按“先出庫 ➔ 再入庫 ➔ 最後輔助規格”邏輯進行按款號一鍵批量刪除
     function deleteByStyle(pageSource) {
       if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法刪除數據！ Permission Denied!"); return; }
 
-      let styleSelectId = pageSource === 'in' ? 'searchInStyleSelect' : 'searchOutStyleSelect';
-      let selectedStyle = document.getElementById(styleSelectId)?.value || '';
+      let styleInputId = pageSource === 'in' ? 'searchInStyleSelect' : 'searchOutStyleSelect';
+      let selectedStyle = document.getElementById(styleInputId)?.value.trim() || '';
 
       if(!selectedStyle) {
-        alert("請先在下拉菜單中選擇需要批量清理的【款號 Style No】！ Select a Style first!");
+        alert("請先在輸入框中選擇或輸入需要批量清理的【款號 Style No】！ Enter or select a Style first!");
         return;
       }
 
@@ -1853,11 +1915,8 @@
       let msg = `⚠️ 【高風險操作警告】\n\n确定要一鍵刪除款號 【${selectedStyle}】 的所有歷史記錄嗎？\n\n系統將自動按照嚴密邏輯依序清理：\n 1. 先刪除【出庫流水】 (${countOut} 條)\n 2. 再刪除【入庫流水】 (${countIn} 條)\n 3. 最後刪除【輔助規格】 (${countAux} 條)\n\n建议先導出 Excel 備份！此操作不可撤銷！`;
 
       if(confirm(msg)) {
-        // 第一步：先刪除出庫
         fabricOut = fabricOut.filter(o => o.styleNo !== selectedStyle);
-        // 第二步：再刪除入庫
         fabricIn = fabricIn.filter(i => i.styleNo !== selectedStyle);
-        // 第三步：最後刪除輔助規格
         fabricAux = fabricAux.filter(a => a.styleNo !== selectedStyle);
 
         recordLog('ACTION', '按款號一鍵批量刪除', `按合規順序(出庫->入庫->規格)一鍵清理款號 [${selectedStyle}]，共刪除出庫 ${countOut} 條、入庫 ${countIn} 條、規格 ${countAux} 條`);
@@ -2976,7 +3035,7 @@
     function renderInTable() {
       let tbody = document.getElementById('inTableBody');
       if(!tbody) return;
-      let selectedStyle = document.getElementById('searchInStyleSelect')?.value || '';
+      let selectedStyle = document.getElementById('searchInStyleSelect')?.value.trim() || '';
       let query = (document.getElementById('searchInInput')?.value || '').toLowerCase();
       
       let filtered = fabricIn.filter(i => {
@@ -3079,7 +3138,7 @@
     function renderOutTable() {
       let tbody = document.getElementById('outTableBody');
       if(!tbody) return;
-      let selectedStyle = document.getElementById('searchOutStyleSelect')?.value || '';
+      let selectedStyle = document.getElementById('searchOutStyleSelect')?.value.trim() || '';
       let query = (document.getElementById('searchOutInput')?.value || '').toLowerCase();
 
       let filtered = fabricOut.filter(i => {
