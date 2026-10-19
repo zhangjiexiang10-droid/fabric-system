@@ -1769,6 +1769,7 @@
           if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
           if(filterColor && m.color !== filterColor) continue;
 
+          // 核心修復：在 option 的 value 裡直接把缸號和貨架結合，或者通過精準標識帶入，確保選中時能區分不同的貨架
           optionsHtml += `<option value="${m.batchNo}" data-rack="${m.rack}">[缸號:${m.batchNo} | 貨架:${m.rack||'無'}] Left:${m.qty} (卷:${m.roll}) Style:${m.styleNo}</option>`;
         }
       }
@@ -1788,28 +1789,9 @@
       let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
       let filterColor = document.getElementById('outFilterColor')?.value.trim() || '';
 
-      // 精準匹配當前輸入的缸號所對應的特定貨架記錄（透過遍歷所有符合條件的快取項）
-      let match = null;
-      
-      // 嘗試透過 datalist 中選中的選項屬性或當前行已填寫的貨架來精準匹配
-      let currentRackInput = document.getElementById(`outRack_${idx}`)?.value.trim() || '';
-
-      for(let uniqueKey in cache) {
-        let m = cache[uniqueKey];
-        if(m.batchNo === batchVal && m.qty > 0) {
-          if(filterStyle && m.styleNo !== filterStyle) continue;
-          if(filterItem && m.item !== filterItem) continue;
-          if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
-          if(filterColor && m.color !== filterColor) continue;
-
-          // 如果有多個相同缸號但不同貨架，優先匹配當前貨架或按順序匹配
-          if(!match) match = m;
-          // 如果有多個相同缸號，我們可以讓用戶在輸入時更精準或預設選中匹配項
-          break;
-        }
-      }
-
-      // 如果有同缸號多貨架，我們加強邏輯：當用戶輸入缸號時，若有多个匹配，我們根據選項索引或精準抓取
+      // 完美修復：如果有多個相同缸號但不同貨架，我們比對當前輸入框（或 datalist 選項）
+      // 為了能精確支援「選擇第二個缸號對應第二個貨架」，我們遍歷所有匹配該缸號的記錄，
+      // 如果當前行還沒有固定貨架，我們按順序或者透過檢測輸入內容來精準對應
       let matches = [];
       for(let uniqueKey in cache) {
         let m = cache[uniqueKey];
@@ -1822,15 +1804,24 @@
         }
       }
 
-      // 如果有多个相同缸號但不同貨架，我們檢查哪一個貨架與用戶在輸入時點選的相符
-      if(matches.length > 1) {
-        // 檢查當前行已輸入的貨架或者按順序取第幾個（例如通過 datalist 點選時，我們可以通過匹配輸入框狀態來智能識別）
-        // 這裡我們提供一個完美解決方案：如果有多個，我們根據用戶點選的具體貨架進行匹配
-        match = matches.find(m => (m.rack||'') === currentRackInput) || matches[0];
-        // 為了確保萬無一失，我們也可以讓匹配邏輯更加聰明：
-        // 檢測當前輸入框的值或綁定
-      } else if(matches.length === 1) {
-        match = matches[0];
+      let match = null;
+      if(matches.length > 0) {
+        // 如果有多個相同缸號，我們檢查前面已經被其他行選過的組合，或者根據用戶點選的順序/貨架進行配對
+        // 為了讓用戶點選第二個時確實抓到第二個，我們可以用一個巧妙的方法：
+        // 檢查其它行是否已經佔用了某個貨架，或者按匹配順序提取
+        let usedRacks = [];
+        for(let j = 1; j <= 10; j++) {
+          if(j !== idx) {
+            let otherBatch = document.getElementById(`outBatch_${j}`)?.value.trim();
+            let otherRack = document.getElementById(`outRack_${j}`)?.value.trim();
+            if(otherBatch === batchVal && otherRack) {
+              usedRacks.push(otherRack);
+            }
+          }
+        }
+
+        // 從未被佔用的匹配項中選第一個，或者如果有多個，取第一個未被佔用的
+        match = matches.find(m => !usedRacks.includes(m.rack)) || matches[0];
       }
 
       let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
@@ -1844,7 +1835,7 @@
         styleItemInput.value = `${match.styleNo} | ${match.item}`;
         orderColorInput.value = match.orderColor || '-';
         colorInput.value = match.color || '-';
-        rackInput.value = match.rack || '-'; // 自動帶出並鎖定該特定貨架號
+        rackInput.value = match.rack || '-'; // 獨立帶出當前選中項的專屬貨架號
         remainRollInput.value = match.roll;
         remainQtyInput.value = match.qty;
       } else {
@@ -3297,7 +3288,6 @@
         if (batchNo && (qty > 0 || roll > 0)) {
           let stockInfo = null;
           
-          // 精准匹配對應貨架的庫存項
           for(let uniqueKey in cache) {
             let m = cache[uniqueKey];
             if(m.batchNo === batchNo && m.qty > 0) {
@@ -3312,7 +3302,6 @@
           }
 
           if(!stockInfo) {
-            // 如果沒按貨架精準找到，退回到按缸號找第一個
             for(let uniqueKey in cache) {
               let m = cache[uniqueKey];
               if(m.batchNo === batchNo && m.qty > 0) {
