@@ -1655,16 +1655,36 @@
       let map = {};
       fabricIn.forEach(i => {
         if(i.fty === fty && i.batchNo) {
-          if(!map[i.batchNo]) map[i.batchNo] = { styleNo: i.styleNo, item: i.item, orderColor: i.orderColor, color: i.color, rack: i.rack, qty: 0, roll: 0 };
-          map[i.batchNo].qty += (i.qty || 0);
-          map[i.batchNo].roll += (i.roll || 0);
+          let batchKey = i.batchNo;
+          let rackKey = i.rack || '無貨架';
+          let uniqueKey = batchKey + '___' + rackKey;
+
+          if(!map[uniqueKey]) {
+            map[uniqueKey] = { 
+              batchNo: batchKey, 
+              rack: i.rack || '', 
+              styleNo: i.styleNo, 
+              item: i.item, 
+              orderColor: i.orderColor, 
+              color: i.color, 
+              qty: 0, 
+              roll: 0 
+            };
+          }
+          map[uniqueKey].qty += (i.qty || 0);
+          map[uniqueKey].roll += (i.roll || 0);
           if(i.styleNo) styleSet.add(i.styleNo);
         }
       });
       fabricOut.forEach(o => {
-        if(o.fty === fty && o.batchNo && map[o.batchNo]) {
-          map[o.batchNo].qty -= (o.qty || 0);
-          map[o.batchNo].roll -= (o.roll || 0);
+        if(o.fty === fty && o.batchNo) {
+          let batchKey = o.batchNo;
+          let rackKey = o.rack || '無貨架';
+          let uniqueKey = batchKey + '___' + rackKey;
+          if(map[uniqueKey]) {
+            map[uniqueKey].qty -= (o.qty || 0);
+            map[uniqueKey].roll -= (o.roll || 0);
+          }
         }
       });
 
@@ -1682,8 +1702,8 @@
           if(a.item) activeItems.add(a.item);
         }
       });
-      for(let b in map) {
-        let m = map[b];
+      for(let uniqueKey in map) {
+        let m = map[uniqueKey];
         if(m.qty > 0) {
           if(!filterStyle || m.styleNo === filterStyle) {
             if(m.item) activeItems.add(m.item);
@@ -1741,15 +1761,15 @@
       let cache = window.stockBatchCache || {};
 
       let optionsHtml = '';
-      for(let batchNo in cache) {
-        let m = cache[batchNo];
+      for(let uniqueKey in cache) {
+        let m = cache[uniqueKey];
         if(m.qty > 0) {
           if(filterStyle && m.styleNo !== filterStyle) continue;
           if(filterItem && m.item !== filterItem) continue;
           if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
           if(filterColor && m.color !== filterColor) continue;
 
-          optionsHtml += `<option value="${batchNo}">[Left:${m.qty}] Style:${m.styleNo} Item:${m.item} OrderCol:${m.orderColor||'-'} FabricCol:${m.color||'-'} Rack:${m.rack||'-'}</option>`;
+          optionsHtml += `<option value="${m.batchNo}" data-rack="${m.rack}">[缸號:${m.batchNo} | 貨架:${m.rack||'無'}] Left:${m.qty} (卷:${m.roll}) Style:${m.styleNo}</option>`;
         }
       }
 
@@ -1762,7 +1782,19 @@
     function onOutBatchInput(idx) {
       let batchVal = document.getElementById(`outBatch_${idx}`).value.trim();
       let cache = window.stockBatchCache || {};
-      let match = cache[batchVal];
+      
+      let match = null;
+      for(let uniqueKey in cache) {
+        let m = cache[uniqueKey];
+        if(m.batchNo === batchVal && m.qty > 0) {
+          let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
+          let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+          if(filterStyle && m.styleNo !== filterStyle) continue;
+          if(filterItem && m.item !== filterItem) continue;
+          match = m;
+          break;
+        }
+      }
 
       let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
       let orderColorInput = document.getElementById(`outOrderColor_${idx}`);
@@ -3225,7 +3257,19 @@
         let qty = parseFloat(document.getElementById(`outQty_${i}`)?.value) || 0;
 
         if (batchNo && (qty > 0 || roll > 0)) {
-          let stockInfo = cache[batchNo];
+          let stockInfo = null;
+          for(let uniqueKey in cache) {
+            let m = cache[uniqueKey];
+            if(m.batchNo === batchNo && m.qty > 0) {
+              let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
+              let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+              if(filterStyle && m.styleNo !== filterStyle) continue;
+              if(filterItem && m.item !== filterItem) continue;
+              stockInfo = m;
+              break;
+            }
+          }
+
           if(!stockInfo) {
             alert(`[防呆攔截] 錯誤：當前領料單位 [${fty}] 中不存在缸號 [${batchNo}] 的入庫記錄！ No Stock Record!`);
             return;
