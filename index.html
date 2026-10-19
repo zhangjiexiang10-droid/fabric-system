@@ -1142,7 +1142,7 @@
                 <th class="py-2.5 px-3 w-36">刪除時間 Delete Time</th>
                 <th class="py-2.5 px-3 w-28 font-bold text-indigo-600">數據類型 Category</th>
                 <th class="py-2.5 px-3">款號 / 名稱 / 詳情 Style / Title / Detail</th>
-                <th class="py-2.5 px-3 w-28">操作人 Operator</th>
+                <th class="py-2.5 px-3 w-28">操作者 Operator</th>
                 <th class="py-2.5 px-3 w-32 text-center no-print">操作 Action</th>
               </tr>
             </thead>
@@ -1228,7 +1228,7 @@
       }
     }
 
-    // 強化版：從雲端拉取最新數據並與本地進行無損智慧合併 (防覆蓋)
+    // 強化版：從雲端拉取最新數據並完全覆蓋本地，確保各設備數據絕對一致
     async function fetchLatestDataFromCloud() {
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -1246,37 +1246,22 @@
           if (cloudRecord.trashBin) trashBin = cloudRecord.trashBin;
           if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
 
-          // 智慧雙向合併 fabricIn (按 ID 去重，本地優先保留)
-          if (Array.isArray(cloudRecord.fabricIn)) {
-            let mapIn = {};
-            cloudRecord.fabricIn.forEach(i => { if(i && i.id) mapIn[i.id] = i; });
-            fabricIn.forEach(i => { if(i && i.id) mapIn[i.id] = i; });
-            fabricIn = Object.values(mapIn);
-          }
+          // 核心修復：直接強制採用雲端的最新流水，不再使用舊本地數據覆蓋雲端
+          if (Array.isArray(cloudRecord.fabricIn)) fabricIn = cloudRecord.fabricIn;
+          if (Array.isArray(cloudRecord.fabricOut)) fabricOut = cloudRecord.fabricOut;
+          if (Array.isArray(cloudRecord.fabricAux)) fabricAux = cloudRecord.fabricAux;
+          if (Array.isArray(cloudRecord.fabricTransfers)) fabricTransfers = cloudRecord.fabricTransfers;
 
-          // 智慧雙向合併 fabricOut
-          if (Array.isArray(cloudRecord.fabricOut)) {
-            let mapOut = {};
-            cloudRecord.fabricOut.forEach(o => { if(o && o.id) mapOut[o.id] = o; });
-            fabricOut.forEach(o => { if(o && o.id) mapOut[o.id] = o; });
-            fabricOut = Object.values(mapOut);
-          }
-
-          // 智慧雙向合併 fabricAux
-          if (Array.isArray(cloudRecord.fabricAux)) {
-            let mapAux = {};
-            cloudRecord.fabricAux.forEach(a => { if(a) mapAux[a.id || (a.styleNo + '_' + a.item)] = a; });
-            fabricAux.forEach(a => { if(a) mapAux[a.id || (a.styleNo + '_' + a.item)] = a; });
-            fabricAux = Object.values(mapAux);
-          }
-
-          // 智慧雙向合併 fabricTransfers
-          if (Array.isArray(cloudRecord.fabricTransfers)) {
-            let mapTrans = {};
-            cloudRecord.fabricTransfers.forEach(t => { if(t && t.id) mapTrans[t.id] = t; });
-            fabricTransfers.forEach(t => { if(t && t.id) mapTrans[t.id] = t; });
-            fabricTransfers = Object.values(mapTrans);
-          }
+          // 同步更新到本地 LocalStorage
+          localStorage.setItem('wh_aux', JSON.stringify(fabricAux));
+          localStorage.setItem('wh_in', JSON.stringify(fabricIn));
+          localStorage.setItem('wh_out', JSON.stringify(fabricOut));
+          localStorage.setItem('wh_trans', JSON.stringify(fabricTransfers));
+          localStorage.setItem('wh_fty_list', JSON.stringify(factoryList));
+          localStorage.setItem('wh_item_master_list', JSON.stringify(itemMasterList));
+          localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
+          localStorage.setItem('wh_logs', JSON.stringify(systemLogs));
+          localStorage.setItem('wh_trash_bin', JSON.stringify(trashBin));
 
           autoScanAndRepairAux();
           renderLoginHints();
@@ -1287,9 +1272,8 @@
       }
     }
 
-    // 強化版：保存至雲端前「先抓取雲端最新數據合併」再推回，徹底解決多人協同覆蓋問題！
+    // 保存至雲端
     async function saveToCloud() {
-      // 1. 更新本地快取
       localStorage.setItem('wh_aux', JSON.stringify(fabricAux));
       localStorage.setItem('wh_in', JSON.stringify(fabricIn));
       localStorage.setItem('wh_out', JSON.stringify(fabricOut));
@@ -1302,31 +1286,6 @@
       renderLoginHints();
 
       try {
-        // 2. 提交前先 GET 雲端最新數據進行安全無損合併
-        let getRes = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-          method: 'GET',
-          headers: { 'X-Master-Key': API_KEY, 'X-Bin-Meta': 'false' }
-        });
-
-        if (getRes.ok) {
-          let cloudData = await getRes.json();
-          let cloudRecord = cloudData.record || cloudData;
-
-          if (Array.isArray(cloudRecord.fabricIn)) {
-            let mapIn = {};
-            cloudRecord.fabricIn.forEach(i => { if(i && i.id) mapIn[i.id] = i; });
-            fabricIn.forEach(i => { if(i && i.id) mapIn[i.id] = i; });
-            fabricIn = Object.values(mapIn);
-          }
-          if (Array.isArray(cloudRecord.fabricOut)) {
-            let mapOut = {};
-            cloudRecord.fabricOut.forEach(o => { if(o && o.id) mapOut[o.id] = o; });
-            fabricOut.forEach(o => { if(o && o.id) mapOut[o.id] = o; });
-            fabricOut = Object.values(mapOut);
-          }
-        }
-
-        // 3. 將合併後的最新完整數據 PUT 推送回雲端
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
@@ -1468,6 +1427,7 @@
       autoScanAndRepairAux();
       renderLoginHints();
 
+      // 每次打開網頁自動從雲端拉取最新數據
       await fetchLatestDataFromCloud();
 
       let saved = sessionStorage.getItem('wh_user');
@@ -2018,13 +1978,15 @@
       if(tabId === 'tabBin' && isMaster) renderTrashTable();
     }
 
+    // 點擊同步按鈕：強制從雲端拉取最新數據
     async function manualSync() {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
-      await saveToCloud(); // 先推送本地最新數據
-      await fetchLatestDataFromCloud(); // 再拉取最新數據合併
+      
+      await fetchLatestDataFromCloud(); // 強制從雲端覆蓋並刷新
+      
       if(icon) icon.classList.remove('fa-spin');
-      alert("✅ 已成功完成數據同步！ Data Synced Successfully!");
+      alert("✅ 已成功從雲端同步最新數據！ Data Synced Successfully!");
     }
 
     function renderAll() {
