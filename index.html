@@ -1769,8 +1769,9 @@
           if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
           if(filterColor && m.color !== filterColor) continue;
 
-          // 核心修復：在 option 的 value 裡直接把缸號和貨架結合，或者通過精準標識帶入，確保選中時能區分不同的貨架
-          optionsHtml += `<option value="${m.batchNo}" data-rack="${m.rack}">[缸號:${m.batchNo} | 貨架:${m.rack||'無'}] Left:${m.qty} (卷:${m.roll}) Style:${m.styleNo}</option>`;
+          // 核心完美修復：將 value 設為包含貨架或組合標識，使 HTML 點選第二個時確實對應其專屬貨架
+          let optionValue = `${m.batchNo} (${m.rack||'無貨架'})`;
+          optionsHtml += `<option value="${optionValue}" data-batch="${m.batchNo}" data-rack="${m.rack}">[缸號:${m.batchNo} | 貨架:${m.rack||'無'}] Left:${m.qty} (卷:${m.roll}) Style:${m.styleNo}</option>`;
         }
       }
 
@@ -1781,47 +1782,46 @@
     }
 
     function onOutBatchInput(idx) {
-      let batchVal = document.getElementById(`outBatch_${idx}`).value.trim();
+      let rawVal = document.getElementById(`outBatch_${idx}`).value.trim();
       let cache = window.stockBatchCache || {};
       
+      // 解析出當前輸入的缸號和貨架（如果包含括號中的貨架資訊）
+      let batchVal = rawVal;
+      let targetRack = '';
+      if(rawVal.includes('(') && rawVal.includes(')')) {
+        let parts = rawVal.split('(');
+        batchVal = parts[0].trim();
+        targetRack = parts[1].replace(')', '').trim();
+      }
+
       let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
       let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
       let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
       let filterColor = document.getElementById('outFilterColor')?.value.trim() || '';
 
-      // 完美修復：如果有多個相同缸號但不同貨架，我們比對當前輸入框（或 datalist 選項）
-      // 為了能精確支援「選擇第二個缸號對應第二個貨架」，我們遍歷所有匹配該缸號的記錄，
-      // 如果當前行還沒有固定貨架，我們按順序或者透過檢測輸入內容來精準對應
-      let matches = [];
+      let match = null;
       for(let uniqueKey in cache) {
         let m = cache[uniqueKey];
         if(m.batchNo === batchVal && m.qty > 0) {
+          if(targetRack && m.rack !== targetRack) continue;
           if(filterStyle && m.styleNo !== filterStyle) continue;
           if(filterItem && m.item !== filterItem) continue;
           if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
           if(filterColor && m.color !== filterColor) continue;
-          matches.push(m);
+          match = m;
+          break;
         }
       }
 
-      let match = null;
-      if(matches.length > 0) {
-        // 如果有多個相同缸號，我們檢查前面已經被其他行選過的組合，或者根據用戶點選的順序/貨架進行配對
-        // 為了讓用戶點選第二個時確實抓到第二個，我們可以用一個巧妙的方法：
-        // 檢查其它行是否已經佔用了某個貨架，或者按匹配順序提取
-        let usedRacks = [];
-        for(let j = 1; j <= 10; j++) {
-          if(j !== idx) {
-            let otherBatch = document.getElementById(`outBatch_${j}`)?.value.trim();
-            let otherRack = document.getElementById(`outRack_${j}`)?.value.trim();
-            if(otherBatch === batchVal && otherRack) {
-              usedRacks.push(otherRack);
-            }
+      // 如果精準帶貨架沒找到，退化成按純缸號匹配第一個有庫存的
+      if(!match && batchVal) {
+        for(let uniqueKey in cache) {
+          let m = cache[uniqueKey];
+          if(m.batchNo === batchVal && m.qty > 0) {
+            match = m;
+            break;
           }
         }
-
-        // 從未被佔用的匹配項中選第一個，或者如果有多個，取第一個未被佔用的
-        match = matches.find(m => !usedRacks.includes(m.rack)) || matches[0];
       }
 
       let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
@@ -1835,7 +1835,7 @@
         styleItemInput.value = `${match.styleNo} | ${match.item}`;
         orderColorInput.value = match.orderColor || '-';
         colorInput.value = match.color || '-';
-        rackInput.value = match.rack || '-'; // 獨立帶出當前選中項的專屬貨架號
+        rackInput.value = match.rack || '-';
         remainRollInput.value = match.roll;
         remainQtyInput.value = match.qty;
       } else {
@@ -3280,10 +3280,16 @@
       let cache = window.stockBatchCache || {};
 
       for(let i = 1; i <= 10; i++) {
-        let batchNo = (document.getElementById(`outBatch_${i}`)?.value || '').trim();
+        let rawVal = (document.getElementById(`outBatch_${i}`)?.value || '').trim();
         let roll = parseInt(document.getElementById(`outRoll_${i}`)?.value) || 0;
         let qty = parseFloat(document.getElementById(`outQty_${i}`)?.value) || 0;
         let currentRack = document.getElementById(`outRack_${i}`)?.value.trim() || '';
+
+        let batchNo = rawVal;
+        if(rawVal.includes('(') && rawVal.includes(')')) {
+          let parts = rawVal.split('(');
+          batchNo = parts[0].trim();
+        }
 
         if (batchNo && (qty > 0 || roll > 0)) {
           let stockInfo = null;
@@ -3326,7 +3332,7 @@
             fty, receiver, invoice, date,
             styleNo: stockInfo.styleNo,
             item: stockInfo.item,
-            batchNo: batchNo,
+            batchNo: stockInfo.batchNo,
             orderColor: stockInfo.orderColor,
             color: stockInfo.color,
             rack: stockInfo.rack,
