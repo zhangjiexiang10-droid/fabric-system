@@ -1220,7 +1220,7 @@
         if(localTrans && localTrans.length > 0) fabricTransfers = localTrans;
         if(localFty && localFty.length > 0) factoryList = localFty;
         if(localItems && localItems.length > 0) itemMasterList = localItems;
-        if(localUsers && Array.isArray(localUsers)) warehouseUsers = localUsers;
+        if(localUsers && Array.isArray(localUsers) && localUsers.length > 0) warehouseUsers = localUsers;
         if(localLogs && Array.isArray(localLogs)) systemLogs = localLogs;
         if(localBin && Array.isArray(localBin)) trashBin = localBin;
       } catch(e) {
@@ -1239,14 +1239,31 @@
           let data = await res.json();
           let cloudRecord = data.record || data;
           
-          // 智慧雙向合併：確保本地剛輸入或刪除的新數據不會被雲端舊數據直接覆蓋
-          if (cloudRecord.warehouseUsers) warehouseUsers = cloudRecord.warehouseUsers;
+          // 智能按 Name 增量/更新合併用戶，防止直接覆蓋掉本地剛修改的權限
+          if (cloudRecord.warehouseUsers && Array.isArray(cloudRecord.warehouseUsers)) {
+            cloudRecord.warehouseUsers.forEach(cUser => {
+              let localUser = warehouseUsers.find(u => u.name === cUser.name);
+              if (!localUser) {
+                warehouseUsers.push({
+                  name: cUser.name,
+                  pass: cUser.pass || '1234',
+                  fty: cUser.fty || '全部單位 All Factories',
+                  role: cUser.role || 'normal'
+                });
+              }
+            });
+            // 确保最高管理者存在
+            if (!warehouseUsers.some(u => u.name.includes('ZAW AUNG'))) {
+              warehouseUsers.unshift({ name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部單位 All Factories', role: 'normal' });
+            }
+          }
+
           if (cloudRecord.factoryList) factoryList = cloudRecord.factoryList;
           if (cloudRecord.itemMasterList) itemMasterList = cloudRecord.itemMasterList;
           if (cloudRecord.trashBin) trashBin = cloudRecord.trashBin;
           if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
 
-          // 合併 fabricIn (以 id 去重，保留本地與雲端所有不重複項)
+          // 合併 fabricIn
           if (cloudRecord.fabricIn) {
             let mapIn = {};
             fabricIn.forEach(i => mapIn[i.id] = i);
@@ -1419,10 +1436,11 @@
 
       let saved = sessionStorage.getItem('wh_user');
       if (saved) {
+        let matched = warehouseUsers.find(u => u.name === saved);
         currentUser = { 
           name: saved, 
-          fty: sessionStorage.getItem('wh_fty') || '全部單位 All Factories',
-          role: sessionStorage.getItem('wh_role') || 'normal'
+          fty: matched ? matched.fty : (sessionStorage.getItem('wh_fty') || '全部單位 All Factories'),
+          role: matched ? matched.role : (sessionStorage.getItem('wh_role') || 'normal')
         };
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('currentUserNameDisplay').innerText = currentUser.name;
@@ -2913,7 +2931,7 @@
     }
 
     function saveEditUser() {
-      let name = document.getElementById('editUserNameHidden').value;
+      let name = document.getElementById('editUserNameHidden').value.trim();
       let newPass = document.getElementById('editUserPassInput').value.trim();
       let newFty = document.getElementById('editUserFtyInput').value.trim();
       let newRole = document.getElementById('editUserRoleSelect').value;
@@ -2924,20 +2942,37 @@
         u.pass = newPass;
         u.fty = newFty || '全部單位 All Factories';
         u.role = newRole || 'normal';
+        
+        // 如果修改的是當前登錄用戶，同步更新當前 session
+        if (currentUser && currentUser.name === name) {
+          currentUser.fty = u.fty;
+          currentUser.role = u.role;
+          sessionStorage.setItem('wh_fty', u.fty);
+          sessionStorage.setItem('wh_role', u.role);
+        }
+
         recordLog('ACTION', '修改人員權限', `更新人員 [${name}] 權限與密碼：${newRole==='readonly'?'僅查看':'完整'} 授權單位:${newFty}`);
+        
+        // 立即同步更新本地 localStorage 緩存
+        localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
+
         saveToCloud();
         alert(`操作員 [${name}] 的密碼與權限已被成功更新！ User Updated!`);
         closeEditUserModal();
         renderUserTable();
+      } else {
+        alert("未找到該操作員，請重試！");
       }
     }
 
     function deleteUser(name) {
-      if(name.includes('最高管理者')) { alert("最高管理者賬號不可刪除！ Admin cannot be deleted!"); return; }
+      if(name.includes('最高管理者') || name.includes('ZAW AUNG')) { alert("最高管理者賬號不可刪除！ Admin cannot be deleted!"); return; }
       if(confirm(`確定要刪除人員 ${name} 嗎？ Delete User?`)) {
         let uObj = warehouseUsers.find(u => u.name === name);
         if(uObj) moveToTrash('user', `操作員姓名: ${uObj.name}`, uObj);
         warehouseUsers = warehouseUsers.filter(u => u.name !== name);
+        
+        localStorage.setItem('wh_users', JSON.stringify(warehouseUsers));
         recordLog('ACTION', '刪除人員賬號', `刪除了操作人員賬號 [${name}]`);
         saveToCloud();
       }
@@ -2946,20 +2981,23 @@
     function renderUserTable() {
       let tbody = document.getElementById('userTableBody');
       if(!tbody) return;
-      tbody.innerHTML = warehouseUsers.map(u => `
-        <tr class="border-b border-slate-100 hover:bg-slate-50">
-          <td class="py-2.5 px-3 font-bold text-indigo-600">${u.name}</td>
-          <td class="py-2.5 px-3 font-semibold text-slate-600"><code class="bg-slate-100 px-2 py-1 rounded">${u.pass}</code></td>
-          <td class="py-2.5 px-3 font-bold">${u.role === 'readonly' ? '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs">🔒 僅查看 Read Only</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs">✏️ 完整權限 Full Access</span>'}</td>
-          <td class="py-2.5 px-3 font-bold text-emerald-600">${u.fty || '全部單位 All Factories'}</td>
-          <td class="py-2.5 px-3 flex items-center gap-3 no-print">
-            <button onclick="openEditModal('${u.name}')" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-              <i class="fa-solid fa-pen-to-square"></i> 修改 Edit
-            </button>
-            ${u.name.includes('最高管理者') ? '' : `<button onclick="deleteUser('${u.name}')" class="text-slate-300 hover:text-red-500 text-sm cursor-pointer" title="刪除 Delete"><i class="fa-solid fa-trash-can"></i></button>`}
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = warehouseUsers.map(u => {
+        let safeName = encodeURIComponent(u.name);
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50">
+            <td class="py-2.5 px-3 font-bold text-indigo-600">${u.name}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-600"><code class="bg-slate-100 px-2 py-1 rounded">${u.pass}</code></td>
+            <td class="py-2.5 px-3 font-bold">${u.role === 'readonly' ? '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs">🔒 僅查看 Read Only</span>' : '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs">✏️ 完整權限 Full Access</span>'}</td>
+            <td class="py-2.5 px-3 font-bold text-emerald-600">${u.fty || '全部單位 All Factories'}</td>
+            <td class="py-2.5 px-3 flex items-center gap-3 no-print">
+              <button onclick="openEditModal(decodeURIComponent('${safeName}'))" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                <i class="fa-solid fa-pen-to-square"></i> 修改 Edit
+              </button>
+              ${u.name.includes('最高管理者') || u.name.includes('ZAW AUNG') ? '' : `<button onclick="deleteUser(decodeURIComponent('${safeName}'))" class="text-slate-300 hover:text-red-500 text-sm cursor-pointer" title="刪除 Delete"><i class="fa-solid fa-trash-can"></i></button>`}
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function submitBatchAuxItems() {
