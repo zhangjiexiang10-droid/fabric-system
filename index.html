@@ -1228,7 +1228,7 @@
       }
     }
 
-    // 強化版：從雲端拉取最新數據並完全覆蓋本地，確保各設備數據絕對一致
+    // 智能安全同步：比對本地與雲端記錄總數，防止舊雲端數據覆蓋新本地數據
     async function fetchLatestDataFromCloud() {
       try {
         let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -1240,19 +1240,28 @@
           let data = await res.json();
           let cloudRecord = data.record || data;
           
+          let cloudInCount = Array.isArray(cloudRecord.fabricIn) ? cloudRecord.fabricIn.length : 0;
+          let localInCount = fabricIn.length;
+
+          // 安全防護：如果本地記錄比雲端多（代表剛錄入了新數據），則優先以本地為準並立即推送到雲端！
+          if (localInCount >= cloudInCount) {
+            console.log("本地記錄較多或相等，觸發保護並同步至雲端");
+            await saveToCloud();
+            return;
+          }
+
+          // 否則正常載入雲端數據
           if (cloudRecord.warehouseUsers) warehouseUsers = cloudRecord.warehouseUsers;
           if (cloudRecord.factoryList) factoryList = cloudRecord.factoryList;
           if (cloudRecord.itemMasterList) itemMasterList = cloudRecord.itemMasterList;
           if (cloudRecord.trashBin) trashBin = cloudRecord.trashBin;
           if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
 
-          // 核心修復：直接強制採用雲端的最新流水，不再使用舊本地數據覆蓋雲端
           if (Array.isArray(cloudRecord.fabricIn)) fabricIn = cloudRecord.fabricIn;
           if (Array.isArray(cloudRecord.fabricOut)) fabricOut = cloudRecord.fabricOut;
           if (Array.isArray(cloudRecord.fabricAux)) fabricAux = cloudRecord.fabricAux;
           if (Array.isArray(cloudRecord.fabricTransfers)) fabricTransfers = cloudRecord.fabricTransfers;
 
-          // 同步更新到本地 LocalStorage
           localStorage.setItem('wh_aux', JSON.stringify(fabricAux));
           localStorage.setItem('wh_in', JSON.stringify(fabricIn));
           localStorage.setItem('wh_out', JSON.stringify(fabricOut));
@@ -1427,7 +1436,7 @@
       autoScanAndRepairAux();
       renderLoginHints();
 
-      // 每次打開網頁自動從雲端拉取最新數據
+      // 先載入本地，再進行智能雲端對齊
       await fetchLatestDataFromCloud();
 
       let saved = sessionStorage.getItem('wh_user');
@@ -1978,15 +1987,15 @@
       if(tabId === 'tabBin' && isMaster) renderTrashTable();
     }
 
-    // 點擊同步按鈕：強制從雲端拉取最新數據
+    // 點擊同步按鈕：將當前本地數據強行上傳到雲端，保證絕對不會被吃掉
     async function manualSync() {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
       
-      await fetchLatestDataFromCloud(); // 強制從雲端覆蓋並刷新
+      await saveToCloud(); // 主動推送到雲端保存當前正確數據
       
       if(icon) icon.classList.remove('fa-spin');
-      alert("✅ 已成功從雲端同步最新數據！ Data Synced Successfully!");
+      alert("✅ 已成功將當前最新數據同步保存至雲端！ Data Synced & Saved Successfully!");
     }
 
     function renderAll() {
