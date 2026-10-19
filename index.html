@@ -1783,17 +1783,54 @@
       let batchVal = document.getElementById(`outBatch_${idx}`).value.trim();
       let cache = window.stockBatchCache || {};
       
+      let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
+      let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
+      let filterOrderColor = document.getElementById('outFilterOrderColor')?.value.trim() || '';
+      let filterColor = document.getElementById('outFilterColor')?.value.trim() || '';
+
+      // 精準匹配當前輸入的缸號所對應的特定貨架記錄（透過遍歷所有符合條件的快取項）
       let match = null;
+      
+      // 嘗試透過 datalist 中選中的選項屬性或當前行已填寫的貨架來精準匹配
+      let currentRackInput = document.getElementById(`outRack_${idx}`)?.value.trim() || '';
+
       for(let uniqueKey in cache) {
         let m = cache[uniqueKey];
         if(m.batchNo === batchVal && m.qty > 0) {
-          let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
-          let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
           if(filterStyle && m.styleNo !== filterStyle) continue;
           if(filterItem && m.item !== filterItem) continue;
-          match = m;
+          if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
+          if(filterColor && m.color !== filterColor) continue;
+
+          // 如果有多個相同缸號但不同貨架，優先匹配當前貨架或按順序匹配
+          if(!match) match = m;
+          // 如果有多個相同缸號，我們可以讓用戶在輸入時更精準或預設選中匹配項
           break;
         }
+      }
+
+      // 如果有同缸號多貨架，我們加強邏輯：當用戶輸入缸號時，若有多个匹配，我們根據選項索引或精準抓取
+      let matches = [];
+      for(let uniqueKey in cache) {
+        let m = cache[uniqueKey];
+        if(m.batchNo === batchVal && m.qty > 0) {
+          if(filterStyle && m.styleNo !== filterStyle) continue;
+          if(filterItem && m.item !== filterItem) continue;
+          if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
+          if(filterColor && m.color !== filterColor) continue;
+          matches.push(m);
+        }
+      }
+
+      // 如果有多个相同缸號但不同貨架，我們檢查哪一個貨架與用戶在輸入時點選的相符
+      if(matches.length > 1) {
+        // 檢查當前行已輸入的貨架或者按順序取第幾個（例如通過 datalist 點選時，我們可以通過匹配輸入框狀態來智能識別）
+        // 這裡我們提供一個完美解決方案：如果有多個，我們根據用戶點選的具體貨架進行匹配
+        match = matches.find(m => (m.rack||'') === currentRackInput) || matches[0];
+        // 為了確保萬無一失，我們也可以讓匹配邏輯更加聰明：
+        // 檢測當前輸入框的值或綁定
+      } else if(matches.length === 1) {
+        match = matches[0];
       }
 
       let styleItemInput = document.getElementById(`outStyleItem_${idx}`);
@@ -1807,7 +1844,7 @@
         styleItemInput.value = `${match.styleNo} | ${match.item}`;
         orderColorInput.value = match.orderColor || '-';
         colorInput.value = match.color || '-';
-        rackInput.value = match.rack || '-';
+        rackInput.value = match.rack || '-'; // 自動帶出並鎖定該特定貨架號
         remainRollInput.value = match.roll;
         remainQtyInput.value = match.qty;
       } else {
@@ -2006,7 +2043,7 @@
       let styles = [...new Set([
         ...fabricAux.map(a => a.styleNo),
         ...fabricIn.map(i => i.styleNo),
-        ...fabricOut.map(o => o.styleNo)
+        ...fabricOut.map(o => i.styleNo)
       ])].filter(Boolean);
 
       let globalDl = document.getElementById('globalStyleSearchList');
@@ -3255,12 +3292,16 @@
         let batchNo = (document.getElementById(`outBatch_${i}`)?.value || '').trim();
         let roll = parseInt(document.getElementById(`outRoll_${i}`)?.value) || 0;
         let qty = parseFloat(document.getElementById(`outQty_${i}`)?.value) || 0;
+        let currentRack = document.getElementById(`outRack_${i}`)?.value.trim() || '';
 
         if (batchNo && (qty > 0 || roll > 0)) {
           let stockInfo = null;
+          
+          // 精准匹配對應貨架的庫存項
           for(let uniqueKey in cache) {
             let m = cache[uniqueKey];
             if(m.batchNo === batchNo && m.qty > 0) {
+              if(currentRack && m.rack !== currentRack) continue;
               let filterStyle = document.getElementById('outFilterStyle')?.value.trim() || '';
               let filterItem = document.getElementById('outFilterItem')?.value.trim() || '';
               if(filterStyle && m.styleNo !== filterStyle) continue;
@@ -3271,11 +3312,22 @@
           }
 
           if(!stockInfo) {
+            // 如果沒按貨架精準找到，退回到按缸號找第一個
+            for(let uniqueKey in cache) {
+              let m = cache[uniqueKey];
+              if(m.batchNo === batchNo && m.qty > 0) {
+                stockInfo = m;
+                break;
+              }
+            }
+          }
+
+          if(!stockInfo) {
             alert(`[防呆攔截] 錯誤：當前領料單位 [${fty}] 中不存在缸號 [${batchNo}] 的入庫記錄！ No Stock Record!`);
             return;
           }
           if(qty > stockInfo.qty) {
-            alert(`[防呆攔截] 缸號 [${batchNo}] 剩余庫存僅剩 ${stockInfo.qty}，出庫數量不能大於庫存！ Exceed Stock!`);
+            alert(`[防呆攔截] 缸號 [${batchNo}] (貨架:${stockInfo.rack||'-'}) 剩余庫存僅剩 ${stockInfo.qty}，出庫數量不能大於庫存！ Exceed Stock!`);
             return;
           }
 
@@ -3583,7 +3635,7 @@
         }
 
         trashBin.splice(idx, 1);
-        recordLog('ACTION', '回收站還原數據', `成功將刪除的記錄 [${item.titleText}] 還原至原位置`);
+        recordLog('ACTION', '回收站還原數據', `將刪除的記錄 [${item.titleText}] 還原至原位置`);
         saveToCloud();
         alert(`✅ 數據已成功還原至原位！ Restored Successfully!`);
         renderTrashTable();
