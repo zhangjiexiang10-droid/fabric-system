@@ -470,16 +470,13 @@
     let fabricAux = [];
     let fabricIn = [];
     let fabricOut = [];
+    // 只保留最高管理者 ZAW AUNG
     let warehouseUsers = [
-      { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部單位 All Factories', role: 'normal' },
-      { name: 'KO KO NAING', pass: '1714', fty: '全部單位 All Factories', role: 'normal' },
-      { name: 'MYO THAT PAING', pass: '1864', fty: '二廠 (DA MEI)', role: 'normal' },
-      { name: 'MYAT MIN', pass: '1234', fty: '一廠 (JUN TAI)', role: 'normal' }
+      { name: '最高管理者 (ZAW AUNG)', pass: '199779', fty: '全部單位 All Factories', role: 'normal' }
     ];
     let currentUser = null;
     let currentGlobalFty = '全部單位 All Factories';
 
-    // 1. 強效從雲端拉取並雙向去重合併 (包含用戶名單 users)
     async function syncWithCloud(isManualNotice = false) {
       showLoading(true, "正在與雲端同步最新數據與權限...");
       try {
@@ -509,7 +506,6 @@
       }
     }
 
-    // 2. 寫入前的「先抓取最新 + 增量合併 + 再提交」黃金鎖定 (包含 users)
     async function pushToCloudWithMerge() {
       showLoading(true, "正在安全寫入雲端數據庫...");
       try {
