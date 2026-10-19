@@ -17,14 +17,11 @@
       body { font-size: 9px; }
     }
 
-    /* 限制 10 行可視高度及帶箭頭的自定義滾動條樣式 */
     .table-scroll-container {
       max-height: 420px;
       overflow-y: scroll;
       scroll-behavior: smooth;
     }
-    
-    /* 自定義滾動條外觀 */
     .table-scroll-container::-webkit-scrollbar {
       width: 14px;
     }
@@ -378,7 +375,6 @@
           <i class="fa-solid fa-cloud-arrow-up"></i> 確認批量添加該款號的多種規格 Confirm Batch Add
         </button>
 
-        <!-- 限制展現 10 條高度，右側帶滾動條及上下按鈕 -->
         <div class="table-scroll-container rounded-xl border border-slate-200">
           <table class="w-full text-left border-collapse text-sm">
             <thead class="sticky top-0 bg-slate-100 z-10 shadow-xs">
@@ -1177,33 +1173,8 @@
     let isAllFtySummary = false;
 
     let fabricAux = [];
-    let trashBin = []; // 回收站記錄數組
-    
-    let fabricIn = [
-      { id: "restored_0_297", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-46", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 297.9, unit: "M", roll: 5, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "restored_1_272", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-45", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 272.9, unit: "M", roll: 5, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "restored_2_463", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-44", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 463.5, unit: "M", roll: 8, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "restored_3_946", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-43", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 946.5, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "restored_4_451", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-42", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 451.7, unit: "M", roll: 8, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:40" },
-      { id: "restored_5_853", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-41", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 853.3, unit: "M", roll: 15, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_6_959", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-40", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 959.4, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_7_561", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-39", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 561.7, unit: "M", roll: 10, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_8_930", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-38", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 930.5, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_9_568", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-37", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 568.5, unit: "M", roll: 10, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_10_450", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-36", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 450.0, unit: "M", roll: 8, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_11_540", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-35", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 540.0, unit: "M", roll: 10, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_12_920", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-34", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 920.0, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_13_460", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-33", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 460.0, unit: "M", roll: 8, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_14_940", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-32", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 940.0, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_15_850", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-31", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 850.0, unit: "M", roll: 15, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_16_451", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-30", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 451.7, unit: "M", roll: 8, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_17_561", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-29", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 561.7, unit: "M", roll: 10, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_18_930", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-28", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 930.5, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_19_568", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-27", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 568.5, unit: "M", roll: 10, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_20_959", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-26", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 959.4, unit: "M", roll: 16, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" },
-      { id: "restored_21_853", fty: "二廠 (DA MEI)", date: "2026-10-17", styleNo: "100.0076", item: "大身麵料/Body Shell", batchNo: "ZA-25", orderColor: "Aruba Blue 蓝色", color: "BLUE", rack: "SEWING A-1", qty: 853.3, unit: "M", roll: 15, come: "CHINA", operator: "KO KO NAING", timeStr: "2026-10-17 17:37" }
-    ];
-
+    let trashBin = [];
+    let fabricIn = [];
     let fabricOut = [];
     let fabricTransfers = [];
     let systemLogs = [];
@@ -1267,15 +1238,45 @@
         if (res.ok) {
           let data = await res.json();
           let cloudRecord = data.record || data;
+          
+          // 智慧雙向合併：確保本地剛輸入或刪除的新數據不會被雲端舊數據直接覆蓋
           if (cloudRecord.warehouseUsers) warehouseUsers = cloudRecord.warehouseUsers;
-          if (cloudRecord.fabricAux) fabricAux = cloudRecord.fabricAux;
-          if (cloudRecord.fabricIn && cloudRecord.fabricIn.length > 0) fabricIn = cloudRecord.fabricIn;
-          if (cloudRecord.fabricOut) fabricOut = cloudRecord.fabricOut;
-          if (cloudRecord.fabricTransfers) fabricTransfers = cloudRecord.fabricTransfers;
           if (cloudRecord.factoryList) factoryList = cloudRecord.factoryList;
           if (cloudRecord.itemMasterList) itemMasterList = cloudRecord.itemMasterList;
-          if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
           if (cloudRecord.trashBin) trashBin = cloudRecord.trashBin;
+          if (cloudRecord.systemLogs) systemLogs = cloudRecord.systemLogs;
+
+          // 合併 fabricIn (以 id 去重，保留本地與雲端所有不重複項)
+          if (cloudRecord.fabricIn) {
+            let mapIn = {};
+            fabricIn.forEach(i => mapIn[i.id] = i);
+            cloudRecord.fabricIn.forEach(i => mapIn[i.id] = i);
+            fabricIn = Object.values(mapIn);
+          }
+
+          // 合併 fabricOut
+          if (cloudRecord.fabricOut) {
+            let mapOut = {};
+            fabricOut.forEach(o => mapOut[o.id] = o);
+            cloudRecord.fabricOut.forEach(o => mapOut[o.id] = o);
+            fabricOut = Object.values(mapOut);
+          }
+
+          // 合併 fabricAux
+          if (cloudRecord.fabricAux) {
+            let mapAux = {};
+            fabricAux.forEach(a => mapAux[a.id || (a.styleNo + a.item)] = a);
+            cloudRecord.fabricAux.forEach(a => mapAux[a.id || (a.styleNo + a.item)] = a);
+            fabricAux = Object.values(mapAux);
+          }
+
+          // 合併 fabricTransfers
+          if (cloudRecord.fabricTransfers) {
+            let mapTrans = {};
+            fabricTransfers.forEach(t => mapTrans[t.id] = t);
+            cloudRecord.fabricTransfers.forEach(t => mapTrans[t.id] = t);
+            fabricTransfers = Object.values(mapTrans);
+          }
 
           autoScanAndRepairAux();
           renderLoginHints();
@@ -1769,7 +1770,6 @@
           if(filterOrderColor && m.orderColor !== filterOrderColor) continue;
           if(filterColor && m.color !== filterColor) continue;
 
-          // 核心完美修復：將 value 設為包含貨架或組合標識，使 HTML 點選第二個時確實對應其專屬貨架
           let optionValue = `${m.batchNo} (${m.rack||'無貨架'})`;
           optionsHtml += `<option value="${optionValue}" data-batch="${m.batchNo}" data-rack="${m.rack}">[缸號:${m.batchNo} | 貨架:${m.rack||'無'}] Left:${m.qty} (卷:${m.roll}) Style:${m.styleNo}</option>`;
         }
@@ -1785,7 +1785,6 @@
       let rawVal = document.getElementById(`outBatch_${idx}`).value.trim();
       let cache = window.stockBatchCache || {};
       
-      // 解析出當前輸入的缸號和貨架（如果包含括號中的貨架資訊）
       let batchVal = rawVal;
       let targetRack = '';
       if(rawVal.includes('(') && rawVal.includes(')')) {
@@ -1813,7 +1812,6 @@
         }
       }
 
-      // 如果精準帶貨架沒找到，退化成按純缸號匹配第一個有庫存的
       if(!match && batchVal) {
         for(let uniqueKey in cache) {
           let m = cache[uniqueKey];
@@ -1970,9 +1968,10 @@
     async function manualSync() {
       const icon = document.getElementById('syncIcon');
       if(icon) icon.classList.add('fa-spin');
+      await saveToCloud(); // 先把本地最新資料推送上去，防止被雲端舊數據蓋掉
       await fetchLatestDataFromCloud();
       if(icon) icon.classList.remove('fa-spin');
-      alert("✅ 已成功從雲端同步最新數據！ Cloud Data Synced!");
+      alert("✅ 已成功完成數據同步！ Data Synced Successfully!");
     }
 
     async function saveToCloud() {
@@ -2034,7 +2033,7 @@
       let styles = [...new Set([
         ...fabricAux.map(a => a.styleNo),
         ...fabricIn.map(i => i.styleNo),
-        ...fabricOut.map(o => i.styleNo)
+        ...fabricOut.map(o => o.styleNo)
       ])].filter(Boolean);
 
       let globalDl = document.getElementById('globalStyleSearchList');
@@ -3138,27 +3137,6 @@
       updateReceiverFactoryDatalist();
     }
 
-    function autoScanAndRepairAux() {
-      let added = 0;
-      fabricIn.forEach(i => {
-        if (!i.styleNo) return;
-        let exists = fabricAux.some(a => a.styleNo === i.styleNo && (a.item === i.item || !i.item) && (a.orderColor === (i.orderColor||'') || !i.orderColor) && (a.color === (i.color||'') || !i.color));
-        if (!exists) {
-          fabricAux.push({
-            id: 'auto_' + (i.id || Date.now()) + '_' + Math.random().toString(36).substr(2, 4),
-            styleNo: i.styleNo,
-            item: i.item || '大身麵料',
-            orderColor: i.orderColor || '',
-            color: i.color || '',
-            operator: '系統自動同步',
-            timeStr: i.timeStr || getNowTimeString()
-          });
-          added++;
-        }
-      });
-      return added;
-    }
-
     function submitBatchInStock() {
       if(currentUser && currentUser.role === 'readonly') { alert("您是“僅查看”賬號，無法錄入入庫！ Permission Denied!"); return; }
 
@@ -3190,7 +3168,7 @@
         if (batchNo && (qty > 0 || roll > 0)) {
           addedCount++;
           let newInItem = {
-            id: Date.now().toString() + '_' + i,
+            id: Date.now().toString() + '_' + i + '_' + Math.random().toString(36).substr(2, 4),
             fty, date, styleNo, item, batchNo, orderColor, color, rack, qty, unit, roll, come, operator, timeStr
           };
           fabricIn.unshift(newInItem);
@@ -3328,7 +3306,7 @@
 
           addedCount++;
           fabricOut.unshift({
-            id: Date.now().toString() + '_' + i,
+            id: Date.now().toString() + '_' + i + '_' + Math.random().toString(36).substr(2, 4),
             fty, receiver, invoice, date,
             styleNo: stockInfo.styleNo,
             item: stockInfo.item,
